@@ -8,13 +8,6 @@ from functools import partial
 import numpy as np
 import torch
 
-sys.path.append(os.pardir)
-print(sys.path)
-
-# from Conferences.HGB.HGB_github.baseline.Model.main import load_pretrained_data
-# from Conferences.HGB.HGB_github.baseline.Model.utility.helper import *
-# from Conferences.HGB.HGB_github.baseline.Model.utility.loader_kgat import KGAT_loader
-# from Conferences.HGB.HGB_github.baseline.Model.utility.parser import parse_args
 from Conferences.HGB.HGB_github.baseline.Model.utility.helper import *
 from Conferences.HGB.HGB_github.baseline.Model.utility.loader_kgat import KGAT_loader
 from time import time
