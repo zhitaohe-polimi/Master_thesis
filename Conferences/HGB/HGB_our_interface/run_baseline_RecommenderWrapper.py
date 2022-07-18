@@ -7,6 +7,8 @@ from functools import partial
 import numpy as np
 import torch
 
+print(sys.path)
+
 # from Conferences.HGB.HGB_github.baseline.Model.main import load_pretrained_data
 # from Conferences.HGB.HGB_github.baseline.Model.utility.helper import *
 # from Conferences.HGB.HGB_github.baseline.Model.utility.loader_kgat import KGAT_loader
@@ -44,8 +46,6 @@ def load_pretrained_data(args):
 def read_data_split_and_search(args):
     torch.manual_seed(2021)
     np.random.seed(2019)
-
-    print(sys.path)
 
     ALGORITHM_NAME = "baseline"
     # CONFERENCE_NAME = "HGB"
