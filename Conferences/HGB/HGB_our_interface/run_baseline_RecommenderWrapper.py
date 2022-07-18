@@ -151,7 +151,7 @@ def read_data_split_and_search(args):
                                              }
 
             recommender_instance = baseline_RecommenderWrapper(URM_train_original)
-            recommender_instance.fit(**baseline_hyperparameters,**earlystopping_hyperparameters)
+            recommender_instance.fit(**baseline_hyperparameters, **earlystopping_hyperparameters)
 
         except Exception as e:
 
