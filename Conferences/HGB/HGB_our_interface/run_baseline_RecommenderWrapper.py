@@ -1,5 +1,6 @@
 import argparse
 import multiprocessing
+import sys
 import traceback
 from functools import partial
 
@@ -43,6 +44,8 @@ def load_pretrained_data(args):
 def read_data_split_and_search(args):
     torch.manual_seed(2021)
     np.random.seed(2019)
+
+    print(sys.path)
 
     ALGORITHM_NAME = "baseline"
     # CONFERENCE_NAME = "HGB"
