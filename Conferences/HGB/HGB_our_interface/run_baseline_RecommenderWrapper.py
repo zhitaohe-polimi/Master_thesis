@@ -1,5 +1,6 @@
 import argparse
 import multiprocessing
+import os
 import sys
 import traceback
 from functools import partial
@@ -7,6 +8,7 @@ from functools import partial
 import numpy as np
 import torch
 
+sys.path.append(os.pardir)
 print(sys.path)
 
 # from Conferences.HGB.HGB_github.baseline.Model.main import load_pretrained_data
