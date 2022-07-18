@@ -86,8 +86,6 @@ def read_data_split_and_search(args):
             "model_type": args.model_type,
             "adj_type": args.adj_type,
             "pretrain_data": pretrain_data,
-            # "args":args,
-            # "config":config,
             "temp_file_folder": result_folder_path,
         }
 
