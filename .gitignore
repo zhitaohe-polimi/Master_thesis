@@ -131,3 +131,8 @@ Conferences/IJCAI/ConvNCF_github/Data/yelp.train.rating
 Conferences/IJCAI/ConvNCF_github/Data/gowalla.test.negative
 Conferences/IJCAI/ConvNCF_github/Data/gowalla.test.rating
 Conferences/IJCAI/ConvNCF_github/Data/gowalla.train.rating
+Conferences/HGB/HGB_our_interface/result_experiments/KGAT/movie-lens_2/_best_model.zip
+Conferences/HGB/HGB_our_interface/result_experiments/KGAT/movie-lens_2/_best_model_session.data-00000-of-00001
+Conferences/HGB/HGB_our_interface/result_experiments/KGAT/movie-lens_2/_best_model_session.index
+Conferences/HGB/HGB_our_interface/result_experiments/KGAT/movie-lens_2/_best_model_session.meta
+Conferences/HGB/HGB_our_interface/result_experiments/KGAT/movie-lens_2/checkpoint
