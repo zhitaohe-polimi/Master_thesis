@@ -9,7 +9,7 @@ import numpy as np
 import torch
 
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# sys.path.append(BASE_DIR)
+sys.path.append('/home')
 
 from Conferences.HGB.HGB_github.baseline.Model.utility.helper import *
 from Conferences.HGB.HGB_github.baseline.Model.utility.loader_kgat import KGAT_loader
