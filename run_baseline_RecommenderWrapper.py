@@ -182,28 +182,32 @@ def read_data_split_and_search(args):
 
 
         n_cases = 200
-        n_random_starts = 15
 
         runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
                                                            URM_train=URM_train,
                                                            URM_train_last_test=URM_train_original,
                                                            metric_to_optimize=metric_to_optimize,
+                                                           cutoff_to_optimize=cutoff_to_optimize,
+                                                           n_cases=n_cases,
+                                                           n_random_starts=int(n_cases/3),
                                                            evaluator_validation_earlystopping=evaluator_validation,
                                                            evaluator_validation=evaluator_validation,
+                                                           evaluate_on_test='yes',
                                                            evaluator_test=evaluator_test,
-                                                           output_folder_path=result_folder_path,
+                                                           output_folder_path=model_folder_path,
                                                            resume_from_saved=True,
-                                                           parallelizeKNN=False,
-                                                           allow_weighting=True,
-                                                           n_cases=n_cases,
-                                                           n_random_starts=n_random_starts)
+                                                           similarity_type_list=None,  # all
+                                                           parallelizeKNN=False)
 
-        for recommender_class in recommender_class_list:
-            try:
-                runParameterSearch_Collaborative_partial(recommender_class)
-            except Exception as e:
-                print("On recommender {} Exception {}".format(recommender_class, str(e)))
-                traceback.print_exc()
+        pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
+        pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
+
+        # for recommender_class in recommender_class_list:
+        #     try:
+        #         runParameterSearch_Collaborative_partial(recommender_class)
+        #     except Exception as e:
+        #         print("On recommender {} Exception {}".format(recommender_class, str(e)))
+        #         traceback.print_exc()
 
 
 if __name__ == "__main__":
