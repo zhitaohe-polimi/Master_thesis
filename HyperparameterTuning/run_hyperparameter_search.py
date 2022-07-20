@@ -69,8 +69,6 @@ from HyperparameterTuning.SearchSingleCase import SearchSingleCase
 from HyperparameterTuning.SearchAbstractClass import SearchInputRecommenderArgs
 
 ######################################################################
-from Recommenders.SLIM.SLIMElasticNetRecommender import MultiThreadSLIM_SLIMElasticNetRecommender, \
-    SLIMElasticNetRecommender
 
 
 def runHyperparameterSearch_FeatureWeighting(recommender_class, URM_train, W_train, ICM_object, ICM_name, n_cases = None,
