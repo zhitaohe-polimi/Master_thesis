@@ -40,8 +40,8 @@ class myGAT(nn.Module):
             user = user_embed.shape[0]
             item = item_embed.shape[0]
             self.ret_num = user + item
-            # self.ini = torch.FloatTensor(np.concatenate([user_embed, item_embed], axis=0)).cuda()
-            self.ini = torch.FloatTensor(np.concatenate([user_embed, item_embed], axis=0))
+            self.ini = torch.FloatTensor(np.concatenate([user_embed, item_embed], axis=0)).cuda()
+            # self.ini = torch.FloatTensor(np.concatenate([user_embed, item_embed], axis=0))
         # input projection (no residual)
         self.gat_layers.append(myGATConv(edge_dim, num_etypes,
                                          in_dim, num_hidden, heads[0],
@@ -60,8 +60,8 @@ class myGAT(nn.Module):
                                          num_hidden * heads[-2],
                                          num_classes, heads[-1],
                                          feat_drop, attn_drop, negative_slope, residual, None, bias=True, alpha=alpha))
-        # self.epsilon = torch.FloatTensor([1e-12]).cuda()
-        self.epsilon = torch.FloatTensor([1e-12])
+        self.epsilon = torch.FloatTensor([1e-12]).cuda()
+        # self.epsilon = torch.FloatTensor([1e-12])
 
     def forward(self, g, e_feat):
         all_embed = []
