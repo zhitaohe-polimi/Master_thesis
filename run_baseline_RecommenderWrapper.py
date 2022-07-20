@@ -173,13 +173,9 @@ def read_data_split_and_search(args):
             # EASE_R_Recommender,
             ItemKNNCFRecommender,
             UserKNNCFRecommender,
-            # UserKNNCBFRecommender,
-            # ItemKNNCBFRecommender,
+            UserKNNCBFRecommender,
+            ItemKNNCBFRecommender,
         ]
-
-        KNN_similarity_to_report_list = ["cosine", "dice", "jaccard", "asymmetric", "tversky"]
-
-
 
         n_cases = 1000
 
@@ -189,7 +185,7 @@ def read_data_split_and_search(args):
                                                            metric_to_optimize=metric_to_optimize,
                                                            cutoff_to_optimize=cutoff_to_optimize,
                                                            n_cases=n_cases,
-                                                           n_random_starts=int(n_cases/3),
+                                                           n_random_starts=int(n_cases / 3),
                                                            evaluator_validation_earlystopping=evaluator_validation,
                                                            evaluator_validation=evaluator_validation,
                                                            evaluate_on_test='best',
