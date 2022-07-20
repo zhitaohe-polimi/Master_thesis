@@ -326,7 +326,8 @@ def runHyperparameterSearch_Hybrid(recommender_class, URM_train, ICM_object, ICM
             return
 
 
-        elif recommender_class in [LightFMItemHybridRecommender, LightFMUserHybridRecommender]:
+        elif recommender_class in [ItemKNN_CFCBF_Hybrid_Recommender, UserKNN_CFCBF_Hybrid_Recommender]:
+            # LightFMItemHybridRecommender, LightFMUserHybridRecommender
 
                 hyperparameters_range_dictionary = {
                     "epochs": Categorical([300]),
@@ -1017,25 +1018,25 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         ##########################################################################################################
 
-        if recommender_class is LightFMCFRecommender:
-
-            hyperparameters_range_dictionary = {
-                "epochs": Categorical([300]),
-                "n_components": Integer(1, 200),
-                "loss": Categorical(['bpr', 'warp', 'warp-kos']),
-                "sgd_mode": Categorical(['adagrad', 'adadelta']),
-                "learning_rate": Real(low = 1e-6, high = 1e-1, prior = 'log-uniform'),
-                "item_alpha": Real(low = 1e-5, high = 1e-2, prior = 'log-uniform'),
-                "user_alpha": Real(low = 1e-5, high = 1e-2, prior = 'log-uniform'),
-            }
-
-            recommender_input_args = SearchInputRecommenderArgs(
-                CONSTRUCTOR_POSITIONAL_ARGS = [URM_train],
-                CONSTRUCTOR_KEYWORD_ARGS = {},
-                FIT_POSITIONAL_ARGS = [],
-                FIT_KEYWORD_ARGS = {},
-                EARLYSTOPPING_KEYWORD_ARGS = earlystopping_keywargs,
-            )
+        # if recommender_class is LightFMCFRecommender:
+        #
+        #     hyperparameters_range_dictionary = {
+        #         "epochs": Categorical([300]),
+        #         "n_components": Integer(1, 200),
+        #         "loss": Categorical(['bpr', 'warp', 'warp-kos']),
+        #         "sgd_mode": Categorical(['adagrad', 'adadelta']),
+        #         "learning_rate": Real(low = 1e-6, high = 1e-1, prior = 'log-uniform'),
+        #         "item_alpha": Real(low = 1e-5, high = 1e-2, prior = 'log-uniform'),
+        #         "user_alpha": Real(low = 1e-5, high = 1e-2, prior = 'log-uniform'),
+        #     }
+        #
+        #     recommender_input_args = SearchInputRecommenderArgs(
+        #         CONSTRUCTOR_POSITIONAL_ARGS = [URM_train],
+        #         CONSTRUCTOR_KEYWORD_ARGS = {},
+        #         FIT_POSITIONAL_ARGS = [],
+        #         FIT_KEYWORD_ARGS = {},
+        #         EARLYSTOPPING_KEYWORD_ARGS = earlystopping_keywargs,
+        #     )
 
         #########################################################################################################
 
