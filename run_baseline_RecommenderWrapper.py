@@ -193,17 +193,10 @@ def read_data_split_and_search(args):
                                                            output_folder_path=model_folder_path,
                                                            resume_from_saved=True,
                                                            similarity_type_list=None,  # all
-                                                           parallelizeKNN=True)
+                                                           parallelizeKNN=False)
 
         pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
         pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
-
-        # for recommender_class in recommender_class_list:
-        #     try:
-        #         runParameterSearch_Collaborative_partial(recommender_class)
-        #     except Exception as e:
-        #         print("On recommender {} Exception {}".format(recommender_class, str(e)))
-        #         traceback.print_exc()
 
 
 if __name__ == "__main__":
