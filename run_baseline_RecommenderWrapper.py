@@ -181,34 +181,31 @@ def read_data_split_and_search(args):
 
         KNN_similarity_to_report_list = ["cosine", "dice", "jaccard", "asymmetric", "tversky"]
 
-        n_processes=3
 
-        max_total_time = 14 * 24 * 60 * 60  # 14 days
 
         n_cases = 200
+        n_random_starts = 15
 
-        model_cases_list = _get_model_list_for_dataset(recommender_class_list, KNN_similarity_to_report_list,
-                                                       dataset.ICM_DICT,
-                                                       dataset.UCM_DICT)
+        runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
+                                                           URM_train=URM_train,
+                                                           URM_train_last_test=URM_train_original,
+                                                           metric_to_optimize=metric_to_optimize,
+                                                           evaluator_validation_earlystopping=evaluator_validation,
+                                                           evaluator_validation=evaluator_validation,
+                                                           evaluator_test=evaluator_test,
+                                                           output_folder_path=result_folder_path,
+                                                           resume_from_saved=True,
+                                                           parallelizeKNN=False,
+                                                           allow_weighting=True,
+                                                           n_cases=n_cases,
+                                                           n_random_starts=n_random_starts)
 
-        _optimize_single_model_partial = partial(_optimize_single_model,
-                                                 URM_train=URM_train,
-                                                 URM_train_last_test=URM_train_original,
-                                                 n_cases=n_cases,
-                                                 n_random_starts=int(n_cases / 3),
-                                                 resume_from_saved=True,
-                                                 save_model="best",
-                                                 evaluate_on_test="best",
-                                                 evaluator_validation=evaluator_validation,
-                                                 evaluator_test=evaluator_test,
-                                                 max_total_time=max_total_time,
-                                                 evaluator_validation_earlystopping=evaluator_validation_earlystopping,
-                                                 metric_to_optimize=metric_to_optimize,
-                                                 cutoff_to_optimize=cutoff_to_optimize,
-                                                 model_folder_path=model_folder_path)
-
-        pool = multiprocessing.Pool(processes=n_processes, maxtasksperchild=1)
-        resultList = pool.map(_optimize_single_model_partial, model_cases_list, chunksize=1)
+        for recommender_class in recommender_class_list:
+            try:
+                runParameterSearch_Collaborative_partial(recommender_class)
+            except Exception as e:
+                print("On recommender {} Exception {}".format(recommender_class, str(e)))
+                traceback.print_exc()
 
         pool.close()
         pool.join()
