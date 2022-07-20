@@ -958,21 +958,21 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         ##########################################################################################################
 
-        if recommender_class is SLIMElasticNetRecommender or recommender_class is MultiThreadSLIM_SLIMElasticNetRecommender:
-
-            hyperparameters_range_dictionary = {
-                "topK": Integer(5, 1000),
-                "l1_ratio": Real(low = 1e-5, high = 1.0, prior = 'log-uniform'),
-                "alpha": Real(low = 1e-3, high = 1.0, prior = 'uniform'),
-            }
-
-            recommender_input_args = SearchInputRecommenderArgs(
-                CONSTRUCTOR_POSITIONAL_ARGS = [URM_train],
-                CONSTRUCTOR_KEYWORD_ARGS = {},
-                FIT_POSITIONAL_ARGS = [],
-                FIT_KEYWORD_ARGS = {},
-                EARLYSTOPPING_KEYWORD_ARGS = {},
-            )
+        # if recommender_class is SLIMElasticNetRecommender or recommender_class is MultiThreadSLIM_SLIMElasticNetRecommender:
+        #
+        #     hyperparameters_range_dictionary = {
+        #         "topK": Integer(5, 1000),
+        #         "l1_ratio": Real(low = 1e-5, high = 1.0, prior = 'log-uniform'),
+        #         "alpha": Real(low = 1e-3, high = 1.0, prior = 'uniform'),
+        #     }
+        #
+        #     recommender_input_args = SearchInputRecommenderArgs(
+        #         CONSTRUCTOR_POSITIONAL_ARGS = [URM_train],
+        #         CONSTRUCTOR_KEYWORD_ARGS = {},
+        #         FIT_POSITIONAL_ARGS = [],
+        #         FIT_KEYWORD_ARGS = {},
+        #         EARLYSTOPPING_KEYWORD_ARGS = {},
+        #     )
 
 
         #########################################################################################################
