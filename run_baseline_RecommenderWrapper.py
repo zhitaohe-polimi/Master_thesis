@@ -19,6 +19,8 @@ from Conferences.HGB.HGB_our_interface.DatasetProvided.MultiDatasetsReader impor
 from Conferences.HGB.HGB_our_interface.baseline_RecommenderWrapper import baseline_RecommenderWrapper
 from Evaluation.Evaluator import EvaluatorHoldout
 # from HyperparameterTuning.get_model_list_for_dataset import _get_model_list_for_dataset, _optimize_single_model
+from HyperparameterTuning.HyperparameterSearchEngine import _optimize_single_model
+from HyperparameterTuning.get_model_list_for_dataset import _get_model_list_for_dataset
 from HyperparameterTuning.run_hyperparameter_search import runHyperparameterSearch_Collaborative
 from Recommenders.EASE_R.EASE_R_Recommender import EASE_R_Recommender
 from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
@@ -172,22 +174,24 @@ def read_data_split_and_search(args):
             # MatrixFactorization_FunkSVD_Cython,
             # EASE_R_Recommender,
             ItemKNNCFRecommender,
-            # UserKNNCFRecommender,
+            UserKNNCFRecommender,
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
         ]
 
         KNN_similarity_to_report_list = ["cosine", "dice", "jaccard", "asymmetric", "tversky"]
 
+        n_processes=3
+
         max_total_time = 14 * 24 * 60 * 60  # 14 days
 
         n_cases = 200
 
-        # model_cases_list = _get_model_list_for_dataset(recommender_class_list, KNN_similarity_to_report_list,
-        #                                                dataset.ICM_DICT,
-        #                                                dataset.UCM_DICT)
+        model_cases_list = _get_model_list_for_dataset(recommender_class_list, KNN_similarity_to_report_list,
+                                                       dataset.ICM_DICT,
+                                                       dataset.UCM_DICT)
 
-        _optimize_single_model_partial = partial(runHyperparameterSearch_Collaborative,
+        _optimize_single_model_partial = partial(_optimize_single_model,
                                                  URM_train=URM_train,
                                                  URM_train_last_test=URM_train_original,
                                                  n_cases=n_cases,
@@ -201,14 +205,10 @@ def read_data_split_and_search(args):
                                                  evaluator_validation_earlystopping=evaluator_validation_earlystopping,
                                                  metric_to_optimize=metric_to_optimize,
                                                  cutoff_to_optimize=cutoff_to_optimize,
-                                                 similarity_type_list=KNN_similarity_to_report_list,
                                                  model_folder_path=model_folder_path)
 
-        # pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
-        # resultList = pool.map(_optimize_single_model_partial, model_cases_list, chunksize=1)
-
-        pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
-        pool.map(_optimize_single_model_partial, recommender_class_list)
+        pool = multiprocessing.Pool(processes=n_processes, maxtasksperchild=1)
+        resultList = pool.map(_optimize_single_model_partial, model_cases_list, chunksize=1)
 
         pool.close()
         pool.join()
@@ -298,8 +298,8 @@ if __name__ == "__main__":
     parser.add_argument('--weight_decay', type=float, default=1e-5)
     parser.add_argument('--alpha', type=float, default=0.)
 
-    parser.add_argument('--flag_algo_article_default', type=bool, default=True)
-    parser.add_argument('--flag_baselines_tune', type=bool, default=False)
+    parser.add_argument('--flag_algo_article_default', type=bool, default=False)
+    parser.add_argument('--flag_baselines_tune', type=bool, default=True)
 
     input_flags = parser.parse_args()
     print(input_flags)
