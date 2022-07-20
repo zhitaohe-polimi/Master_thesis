@@ -71,7 +71,7 @@ def read_data_split_and_search(args):
 
     metric_to_optimize = 'NDCG'  # 'RECALL'
     cutoff_to_optimize = 20
-    cutoff_list = [5, 10, 20, 30, 40, 50, 100]
+    cutoff_list = [20]
 
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list=cutoff_list)
     evaluator_validation_earlystopping = EvaluatorHoldout(URM_validation, cutoff_list=[cutoff_to_optimize])
@@ -188,7 +188,7 @@ def read_data_split_and_search(args):
                                                            URM_train=URM_train,
                                                            URM_train_last_test=URM_train_original,
                                                            metric_to_optimize=metric_to_optimize,
-                                                           evaluator_validation_earlystopping=evaluator_validation_earlystopping,
+                                                           evaluator_validation_earlystopping=evaluator_validation,
                                                            evaluator_validation=evaluator_validation,
                                                            evaluator_test=evaluator_test,
                                                            output_folder_path=result_folder_path,
