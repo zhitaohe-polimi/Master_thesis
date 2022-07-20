@@ -192,7 +192,7 @@ def read_data_split_and_search(args):
                                                            n_random_starts=int(n_cases/3),
                                                            evaluator_validation_earlystopping=evaluator_validation,
                                                            evaluator_validation=evaluator_validation,
-                                                           evaluate_on_test='yes',
+                                                           evaluate_on_test='best',
                                                            evaluator_test=evaluator_test,
                                                            output_folder_path=model_folder_path,
                                                            resume_from_saved=True,
