@@ -188,7 +188,7 @@ def read_data_split_and_search(args):
                                                            URM_train=URM_train,
                                                            URM_train_last_test=URM_train_original,
                                                            metric_to_optimize=metric_to_optimize,
-                                                           evaluator_validation_earlystopping=evaluator_validation,
+                                                           evaluator_validation_earlystopping=evaluator_validation_earlystopping,
                                                            evaluator_validation=evaluator_validation,
                                                            evaluator_test=evaluator_test,
                                                            output_folder_path=result_folder_path,
