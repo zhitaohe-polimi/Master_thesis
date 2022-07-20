@@ -181,7 +181,7 @@ def read_data_split_and_search(args):
 
 
 
-        n_cases = 200
+        n_cases = 1000
 
         runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
                                                            URM_train=URM_train,
@@ -197,7 +197,7 @@ def read_data_split_and_search(args):
                                                            output_folder_path=model_folder_path,
                                                            resume_from_saved=True,
                                                            similarity_type_list=None,  # all
-                                                           parallelizeKNN=False)
+                                                           parallelizeKNN=True)
 
         pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
         pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
