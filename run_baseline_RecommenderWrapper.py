@@ -205,9 +205,6 @@ def read_data_split_and_search(args):
                 print("On recommender {} Exception {}".format(recommender_class, str(e)))
                 traceback.print_exc()
 
-        pool.close()
-        pool.join()
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run KGAT.")
