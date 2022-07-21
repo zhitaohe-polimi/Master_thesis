@@ -25,6 +25,7 @@ from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
+from Utils.ResultFolderLoader import ResultFolderLoader
 from Utils.assertions_on_data_for_experiments import assert_implicit_data, assert_disjoint_matrices
 
 
@@ -177,7 +178,7 @@ def read_data_split_and_search(args):
             # ItemKNNCBFRecommender,
         ]
 
-        n_cases = 1000
+        n_cases = 300
 
         runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
                                                            URM_train=URM_train,
@@ -197,6 +198,35 @@ def read_data_split_and_search(args):
 
         pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
         pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
+
+    # if args.flag_print_results:
+    #     KNN_similarity_to_report_list = ["cosine", "dice", "jaccard", "asymmetric", "tversky"]
+    #
+    #     n_test_users = np.sum(np.ediff1d(URM_test.indptr)>=1)
+    #
+    #     result_loader = ResultFolderLoader(model_folder_path,
+    #                                        base_algorithm_list = None,
+    #                                        other_algorithm_list = None,
+    #                                        KNN_similarity_list = KNN_similarity_to_report_list,
+    #                                        ICM_names_list = dataset.ICM_DICT.keys(),
+    #                                        UCM_names_list = dataset.UCM_DICT.keys(),
+    #                                        )
+    #
+    #     result_loader.generate_latex_results(result_folder_path + "{}_latex_results.txt".format("accuracy_metrics"),
+    #                                        metrics_list = ['RECALL', 'PRECISION', 'MAP', 'NDCG'],
+    #                                        cutoffs_list = [cutoff_to_optimize],
+    #                                        table_title = None,
+    #                                        highlight_best = True)
+    #
+    #     result_loader.generate_latex_results(result_folder_path + "{}_latex_results.txt".format("beyond_accuracy_metrics"),
+    #                                        metrics_list = ["NOVELTY", "DIVERSITY_MEAN_INTER_LIST", "COVERAGE_ITEM", "DIVERSITY_GINI", "SHANNON_ENTROPY"],
+    #                                        cutoffs_list = cutoff_list,
+    #                                        table_title = None,
+    #                                        highlight_best = True)
+    #
+    #     result_loader.generate_latex_time_statistics(result_folder_path + "{}_latex_results.txt".format("time"),
+    #                                        n_evaluation_users=n_test_users,
+    #                                        table_title = None)
 
 
 if __name__ == "__main__":
@@ -285,6 +315,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--flag_algo_article_default', type=bool, default=False)
     parser.add_argument('--flag_baselines_tune', type=bool, default=True)
+    parser.add_argument('--flag_print_results', type=bool, default=True)
 
     input_flags = parser.parse_args()
     print(input_flags)

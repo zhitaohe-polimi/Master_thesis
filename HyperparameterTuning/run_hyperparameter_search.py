@@ -681,7 +681,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
         if recommender_class in [ItemKNNCFRecommender, UserKNNCFRecommender]:
 
             if similarity_type_list is None:
-                similarity_type_list = ['cosine', 'jaccard', "asymmetric", "dice", "tversky"]
+                similarity_type_list = [ 'jaccard', "asymmetric", "dice", "tversky"]  #'cosine',
 
             recommender_input_args = SearchInputRecommenderArgs(
                 CONSTRUCTOR_POSITIONAL_ARGS = [URM_train],
