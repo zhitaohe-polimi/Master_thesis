@@ -25,7 +25,7 @@ from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
-from Utils.ResultFolderLoader import ResultFolderLoader
+# from Utils.ResultFolderLoader import ResultFolderLoader
 from Utils.assertions_on_data_for_experiments import assert_implicit_data, assert_disjoint_matrices
 
 
