@@ -171,7 +171,7 @@ def read_data_split_and_search(args):
             # MatrixFactorization_BPR_Cython,
             # IALSRecommender,
             # MatrixFactorization_FunkSVD_Cython,
-            EASE_R_Recommender,
+            # EASE_R_Recommender,
             ItemKNNCFRecommender,
             UserKNNCFRecommender,
             # UserKNNCBFRecommender,
