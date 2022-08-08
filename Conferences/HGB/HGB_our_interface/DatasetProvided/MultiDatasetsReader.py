@@ -40,9 +40,9 @@ class MultiDatasetsReader(object):
         test_file = path + '/test.txt'
 
         try:
-            print("MovielensReader: Pre-splitted data found")
+            print("MultiDatasetsReader: Pre-splitted data found")
 
-            print("MovielensReader: loading URM")
+            print("MultiDatasetsReader: loading URM")
 
             # TODO Replace this with the code required to load the data, as written in the original source code
             # TODO Then transform whatever data structure it originally had into a sparse matrix
@@ -90,7 +90,7 @@ class MultiDatasetsReader(object):
 
             dataIO.save_data(pre_splitted_filename, data_dict_to_save=data_dict_to_save)
 
-            print("MovielensReader: loading complete")
+            print("MultiDatasetsReader: loading complete")
 
         except Exception as e:
             print(e)
