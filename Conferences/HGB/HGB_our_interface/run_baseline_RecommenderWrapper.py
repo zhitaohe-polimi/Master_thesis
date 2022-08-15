@@ -25,6 +25,7 @@ from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
+from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
 # from Utils.ResultFolderLoader import ResultFolderLoader
 from Utils.assertions_on_data_for_experiments import assert_implicit_data, assert_disjoint_matrices
 
@@ -50,8 +51,9 @@ def read_data_split_and_search(args):
     # CONFERENCE_NAME = "HGB"
     dataset_name = args.dataset
 
+    metric_to_optimize = 'NDCG'  # 'RECALL'
     result_folder_path = "result_experiments/{}/{}/".format(ALGORITHM_NAME, dataset_name)
-    model_folder_path = result_folder_path + "models/"
+    model_folder_path = result_folder_path + "models_%s/" % metric_to_optimize
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
 
@@ -70,7 +72,6 @@ def read_data_split_and_search(args):
     # Ensure IMPLICIT data and disjoint test-train split
     # assert_disjoint_matrices([URM_train, URM_validation, URM_test])
 
-    metric_to_optimize = 'NDCG'  # 'RECALL'
     cutoff_to_optimize = 20
     cutoff_list = [20]
 
@@ -174,6 +175,7 @@ def read_data_split_and_search(args):
             # EASE_R_Recommender,
             ItemKNNCFRecommender,
             UserKNNCFRecommender,
+            PureSVDRecommender,
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
         ]
@@ -313,8 +315,8 @@ if __name__ == "__main__":
     parser.add_argument('--weight_decay', type=float, default=1e-5)
     parser.add_argument('--alpha', type=float, default=0.)
 
-    parser.add_argument('--flag_algo_article_default', type=bool, default=False)
-    parser.add_argument('--flag_baselines_tune', type=bool, default=True)
+    parser.add_argument('--flag_algo_article_default', type=bool, default=True)
+    parser.add_argument('--flag_baselines_tune', type=bool, default=False)
     parser.add_argument('--flag_print_results', type=bool, default=True)
 
     input_flags = parser.parse_args()

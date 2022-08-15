@@ -219,7 +219,7 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
             edge2type[(i, i)] = len(data_generator.lap_list)
 
         adjM = sum(data_generator.lap_list)
-        print(len(adjM.nonzero()[0]))
+        # print(len(adjM.nonzero()[0]))
         g = dgl.DGLGraph(adjM)
         g = dgl.remove_self_loop(g)
         g = dgl.add_self_loop(g)

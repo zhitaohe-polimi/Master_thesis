@@ -42,6 +42,12 @@ class myGAT(nn.Module):
             self.ret_num = user + item
             self.ini = torch.FloatTensor(np.concatenate([user_embed, item_embed], axis=0)).cuda()
             # self.ini = torch.FloatTensor(np.concatenate([user_embed, item_embed], axis=0))
+
+        # modified by @Zhitao He
+        else:
+            self.ret_num = None
+            self.ini = None
+
         # input projection (no residual)
         self.gat_layers.append(myGATConv(edge_dim, num_etypes,
                                          in_dim, num_hidden, heads[0],
@@ -79,4 +85,8 @@ class myGAT(nn.Module):
         logits = logits.mean(1)
         all_embed.append(logits / (torch.max(torch.norm(logits, dim=1, keepdim=True), self.epsilon)))
         all_embed = torch.cat(all_embed, 1)
-        return torch.cat([all_embed[:self.ret_num], self.ini], 1)
+
+        if self.ret_num is None and self.ini is None:
+            return all_embed
+        else:
+            return torch.cat([all_embed[:self.ret_num], self.ini], 1)
