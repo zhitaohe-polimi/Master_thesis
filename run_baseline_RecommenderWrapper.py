@@ -26,6 +26,7 @@ from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
 from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
+from Conferences.HGB.HGB_our_interface.customized_PureSVDRecommender import customized_PureSVDRecommender
 # from Utils.ResultFolderLoader import ResultFolderLoader
 from Utils.assertions_on_data_for_experiments import assert_implicit_data, assert_disjoint_matrices
 
@@ -173,9 +174,10 @@ def read_data_split_and_search(args):
             # IALSRecommender,
             # MatrixFactorization_FunkSVD_Cython,
             # EASE_R_Recommender,
-            ItemKNNCFRecommender,
-            UserKNNCFRecommender,
-            PureSVDRecommender,
+            #ItemKNNCFRecommender,
+            #UserKNNCFRecommender,
+            #PureSVDRecommender,
+            customized_PureSVDRecommender,
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
         ]
