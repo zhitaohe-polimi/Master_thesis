@@ -36,12 +36,12 @@ class customized_PureSVDRecommender(BaseMatrixFactorizationRecommender):
         start_time = time.time()
         self._print("Computing SVD decomposition...")
 
-        # U, Sigma, QT = randomized_svd(self.URM_train,
-        #                               n_components=num_factors,
-        #                               #n_iter=5,
-        #                               random_state = random_seed)
-        #
-        # U_s = U * sps.diags(Sigma)
+        U, Sigma, QT = randomized_svd(self.URM_train,
+                                      n_components=num_factors,
+                                      #n_iter=5,
+                                      random_state = random_seed)
+
+        U_s = U * sps.diags(Sigma)
 
         proj_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
         dataset = 'movie-lens'
