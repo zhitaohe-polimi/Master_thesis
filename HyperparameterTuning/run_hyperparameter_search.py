@@ -14,7 +14,7 @@ from functools import partial
 ##########                  PURE COLLABORATIVE              ##########
 ##########                                                  ##########
 ######################################################################
-from HGB.HGB_our_interface.customized_PureSVDRecommender import customized_PureSVDRecommender
+from Conferences.HGB.HGB_our_interface.customized_PureSVDRecommender import customized_PureSVDRecommender
 from Recommenders.NonPersonalizedRecommender import TopPop, Random, GlobalEffects
 
 # KNN
