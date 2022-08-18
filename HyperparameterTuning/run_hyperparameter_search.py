@@ -14,6 +14,7 @@ from functools import partial
 ##########                  PURE COLLABORATIVE              ##########
 ##########                                                  ##########
 ######################################################################
+from HGB.HGB_our_interface.customized_PureSVDRecommender import customized_PureSVDRecommender
 from Recommenders.NonPersonalizedRecommender import TopPop, Random, GlobalEffects
 
 # KNN
@@ -888,6 +889,21 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 FIT_POSITIONAL_ARGS = [],
                 FIT_KEYWORD_ARGS = {},
                 EARLYSTOPPING_KEYWORD_ARGS = {},
+            )
+
+        ##########################################################################################################
+
+        if recommender_class is customized_PureSVDRecommender:
+            hyperparameters_range_dictionary = {
+                "num_factors": Integer(1, 350),
+            }
+
+            recommender_input_args = SearchInputRecommenderArgs(
+                CONSTRUCTOR_POSITIONAL_ARGS=[URM_train],
+                CONSTRUCTOR_KEYWORD_ARGS={},
+                FIT_POSITIONAL_ARGS=[],
+                FIT_KEYWORD_ARGS={},
+                EARLYSTOPPING_KEYWORD_ARGS={},
             )
 
 

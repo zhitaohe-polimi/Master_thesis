@@ -14,7 +14,6 @@ import numpy as np
 import time
 
 
-
 class customized_PureSVDRecommender(BaseMatrixFactorizationRecommender):
     """ PureSVDRecommender
     Formulation with user latent factors and item latent factors
@@ -29,11 +28,10 @@ class customized_PureSVDRecommender(BaseMatrixFactorizationRecommender):
 
     RECOMMENDER_NAME = "customized_PureSVDRecommender"
 
-    def __init__(self, URM_train, verbose = True):
-        super(customized_PureSVDRecommender, self).__init__(URM_train, verbose = verbose)
+    def __init__(self, URM_train, verbose=True):
+        super(customized_PureSVDRecommender, self).__init__(URM_train, verbose=verbose)
 
-
-    def fit(self, num_factors=100, random_seed = None, pretrain = None):
+    def fit(self, num_factors=100, random_seed=None):
 
         start_time = time.time()
         self._print("Computing SVD decomposition...")
@@ -45,21 +43,24 @@ class customized_PureSVDRecommender(BaseMatrixFactorizationRecommender):
         #
         # U_s = U * sps.diags(Sigma)
 
-        self.USER_factors = pretrain['user_embed']     # U_s
-        self.ITEM_factors = pretrain['item_embed']     #QT.T
+        proj_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
+        dataset = 'movie-lens'
+        pre_model = 'mf'
+        pretrain_path = '%spretrain/%s/%s.npz' % (proj_path, dataset, pre_model)
+        try:
+            pretrain_data = np.load(pretrain_path)
+            print('load the pretrained bprmf model parameters.')
+        except Exception:
+            pretrain_data = None
 
-        new_time_value, new_time_unit = seconds_to_biggest_unit(time.time()-start_time)
-        self._print("Computing SVD decomposition... done in {:.2f} {}".format( new_time_value, new_time_unit))
+        self.USER_factors = pretrain_data['user_embed']  # U_s
+        self.ITEM_factors = pretrain_data['item_embed']  # QT.T
+
+        new_time_value, new_time_unit = seconds_to_biggest_unit(time.time() - start_time)
+        self._print("Computing SVD decomposition... done in {:.2f} {}".format(new_time_value, new_time_unit))
 
 
-
-
-
-
-
-def compute_W_sparse_from_item_latent_factors(ITEM_factors, topK = 100):
-
-
+def compute_W_sparse_from_item_latent_factors(ITEM_factors, topK=100):
     n_items, n_factors = ITEM_factors.shape
 
     block_size = 100
@@ -71,7 +72,6 @@ def compute_W_sparse_from_item_latent_factors(ITEM_factors, topK = 100):
     rows = []
     cols = []
 
-
     # Compute all similarities for each item using vectorization
     while start_item < n_items:
 
@@ -79,9 +79,7 @@ def compute_W_sparse_from_item_latent_factors(ITEM_factors, topK = 100):
 
         this_block_weight = np.dot(ITEM_factors[start_item:end_item, :], ITEM_factors.T)
 
-
         for col_index_in_block in range(this_block_weight.shape[0]):
-
             this_column_weights = this_block_weight[col_index_in_block, :]
             item_original_index = start_item + col_index_in_block
 
@@ -90,7 +88,7 @@ def compute_W_sparse_from_item_latent_factors(ITEM_factors, topK = 100):
             # - Partition the data to extract the set of relevant items
             # - Sort only the relevant items
             # - Get the original item index
-            relevant_items_partition = (-this_column_weights).argpartition(topK-1)[0:topK]
+            relevant_items_partition = (-this_column_weights).argpartition(topK - 1)[0:topK]
             relevant_items_partition_sorting = np.argsort(-this_column_weights[relevant_items_partition])
             top_k_idx = relevant_items_partition[relevant_items_partition_sorting]
 
@@ -101,8 +99,6 @@ def compute_W_sparse_from_item_latent_factors(ITEM_factors, topK = 100):
             values.extend(this_column_weights[top_k_idx][notZerosMask])
             rows.extend(top_k_idx[notZerosMask])
             cols.extend(np.ones(numNotZeros) * item_original_index)
-
-
 
         start_item += block_size
 
