@@ -86,6 +86,7 @@ class myGAT(nn.Module):
         all_embed.append(logits / (torch.max(torch.norm(logits, dim=1, keepdim=True), self.epsilon)))
         all_embed = torch.cat(all_embed, 1)
 
+        # modified by @Zhitao He
         if self.ret_num is None and self.ini is None:
             return all_embed
         else:

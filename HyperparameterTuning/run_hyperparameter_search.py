@@ -587,7 +587,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                                           evaluator_validation = None, evaluator_test = None, evaluator_validation_earlystopping = None,
                                           metric_to_optimize = None, cutoff_to_optimize = None,
                                           output_folder_path ="result_experiments/", parallelizeKNN = True,
-                                          allow_weighting = True, allow_bias_URM=False, allow_dropout_MF = False, similarity_type_list = None):
+                                          allow_weighting = True, allow_bias_URM=False, allow_dropout_MF = False, similarity_type_list = None, dataset= None):
     """
     This function performs the hyperparameter optimization for a collaborative recommender
 
