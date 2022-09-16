@@ -31,20 +31,20 @@ class customized_PureSVDRecommender(BaseMatrixFactorizationRecommender):
     def __init__(self, URM_train, verbose=True):
         super(customized_PureSVDRecommender, self).__init__(URM_train, verbose=verbose)
 
-    def fit(self, num_factors=100, random_seed=None):
-
+    def fit(self, num_factors=100, random_seed=None, dataset="movie-lens"):
         start_time = time.time()
         self._print("Computing SVD decomposition...")
 
         U, Sigma, QT = randomized_svd(self.URM_train,
                                       n_components=num_factors,
-                                      #n_iter=5,
-                                      random_state = random_seed)
+                                      # n_iter=5,
+                                      random_state=random_seed)
 
         U_s = U * sps.diags(Sigma)
+        print("1: ", U.shape, QT.shape, U_s.shape, QT.T.shape)
 
         proj_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
-        dataset = 'movie-lens'
+        # dataset = 'movie-lens'
         pre_model = 'mf'
         pretrain_path = '%spretrain/%s/%s.npz' % (proj_path, dataset, pre_model)
         try:
@@ -55,6 +55,7 @@ class customized_PureSVDRecommender(BaseMatrixFactorizationRecommender):
 
         self.USER_factors = pretrain_data['user_embed']  # U_s
         self.ITEM_factors = pretrain_data['item_embed']  # QT.T
+        print("2: ", self.USER_factors.shape, self.ITEM_factors.shape)
 
         new_time_value, new_time_unit = seconds_to_biggest_unit(time.time() - start_time)
         self._print("Computing SVD decomposition... done in {:.2f} {}".format(new_time_value, new_time_unit))
