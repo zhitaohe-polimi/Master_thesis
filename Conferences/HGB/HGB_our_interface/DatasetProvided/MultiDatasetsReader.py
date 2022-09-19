@@ -14,6 +14,7 @@ import scipy.io
 import scipy.sparse as sps
 import h5py, os
 import numpy as np
+import pandas as pd
 
 from Recommenders.DataIO import DataIO
 from Recommenders.Recommender_utils import reshapeSparse
@@ -58,7 +59,13 @@ class MultiDatasetsReader(object):
             n_rows = max(URM_test.shape[0], URM_train.shape[0])
             n_cols = max(URM_test.shape[1], URM_train.shape[1])
 
-            print(n_rows, n_cols)
+            print(
+                "The percentage of training set: %.1f, test set: %.1f" % (URM_train.nnz / (URM_train.nnz + URM_test.nnz)
+                                                                          ,
+                                                                          URM_test.nnz / (URM_train.nnz + URM_test.nnz))
+                )
+            print("#interactions: %d" % (URM_train.nnz + URM_test.nnz))
+            print("Maximum number of row: %d, column: %d" % (n_rows, n_cols))
 
             newShape = (n_rows, n_cols)
 
