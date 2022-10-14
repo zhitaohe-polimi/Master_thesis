@@ -25,6 +25,8 @@ from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
+from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_FunkSVD_Cython
+from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
 from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
 from Conferences.HGB.HGB_our_interface.customized_PureSVDRecommender import customized_PureSVDRecommender
 # from Utils.ResultFolderLoader import ResultFolderLoader
@@ -172,12 +174,12 @@ def read_data_split_and_search(args):
         recommender_class_list = [
             # MatrixFactorization_BPR_Cython,
             # IALSRecommender,
-            # MatrixFactorization_FunkSVD_Cython,
+            MatrixFactorization_FunkSVD_Cython,
             # EASE_R_Recommender,
             #ItemKNNCFRecommender,
             #UserKNNCFRecommender,
-            #PureSVDRecommender,
-            customized_PureSVDRecommender,
+            # PureSVDRecommender,
+            # customized_PureSVDRecommender,
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
         ]
