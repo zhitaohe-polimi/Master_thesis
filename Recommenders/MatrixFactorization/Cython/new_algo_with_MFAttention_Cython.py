@@ -117,3 +117,28 @@ class new_algo_with_MFAttetion_Cython(BaseMatrixFactorizationRecommender, Increm
 
     def _run_epoch(self, num_epoch):
        self.cythonEpoch.epochIteration_Cython()
+
+
+class new_MatrixFactorization_FunkSVD_Cython(new_algo_with_MFAttetion_Cython):
+    """
+    Subclas allowing only for FunkSVD model
+
+    Reference: http://sifter.org/~simon/journal/20061211.html
+
+    Factorizes the rating matrix R into the dot product of two matrices U and V of latent factors.
+    U represent the user latent factors, V the item latent factors.
+    The model is learned by solving the following regularized Least-squares objective function with Stochastic Gradient Descent
+    \operatornamewithlimits{argmin} \limits_{U,V}\frac{1}{2}||R - UV^T||^2_2 + \frac{\lambda}{2}(||U||^2_F + ||V||^2_F)
+    Latent factors are initialized from a Normal distribution with given mean and std.
+
+    """
+
+    RECOMMENDER_NAME = "new_MatrixFactorization_FunkSVD_Cython_Recommender"
+
+    def __init__(self, *pos_args, **key_args):
+        super(new_MatrixFactorization_FunkSVD_Cython, self).__init__(*pos_args, algorithm_name="FUNK_SVD", **key_args)
+
+
+    def fit(self, **key_args):
+
+        super(new_MatrixFactorization_FunkSVD_Cython, self).fit(**key_args)
