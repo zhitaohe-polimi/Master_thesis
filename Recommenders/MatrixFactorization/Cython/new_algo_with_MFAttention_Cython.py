@@ -53,7 +53,7 @@ class new_algo_with_MFAttetion_Cython(BaseMatrixFactorizationRecommender, Increm
         self.negative_interactions_quota = negative_interactions_quota
 
         # Import compiled module
-        from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython_Epoch_modified import MatrixFactorization_Cython_Epoch
+        from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython_Epoch import MatrixFactorization_Cython_Epoch
 
 
         if self.algorithm_name in ["FUNK_SVD"]:
