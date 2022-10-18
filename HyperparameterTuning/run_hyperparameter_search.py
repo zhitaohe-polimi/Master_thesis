@@ -35,6 +35,7 @@ from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
 from Recommenders.MatrixFactorization.NMFRecommender import NMFRecommender
 from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_BPR_Cython,\
     MatrixFactorization_FunkSVD_Cython, MatrixFactorization_AsySVD_Cython
+from Recommenders.MatrixFactorization.Cython import new_algo_with_MFAttention_Cython
 
 from Recommenders.Neural.MultVAERecommender import MultVAERecommender_OptimizerMask as MultVAERecommender
 # from Recommenders.FactorizationMachines.LightFMRecommender import LightFMCFRecommender
@@ -779,7 +780,8 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         ##########################################################################################################
 
-        if recommender_class is MatrixFactorization_FunkSVD_Cython:
+        #if recommender_class is MatrixFactorization_FunkSVD_Cython:
+        if recommender_class is MatrixFactorization_FunkSVD_Cython or recommender_class is new_algo_with_MFAttention_Cython:
 
             hyperparameters_range_dictionary = {
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam"]),
