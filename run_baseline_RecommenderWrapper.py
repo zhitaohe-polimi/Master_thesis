@@ -25,6 +25,7 @@ from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
+from Recommenders.MatrixFactorization.Cython import new_algo_with_MFAttention_Cython
 from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_FunkSVD_Cython
 from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
 from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
@@ -182,6 +183,7 @@ def read_data_split_and_search(args):
             # customized_PureSVDRecommender,
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
+            new_algo_with_MFAttention_Cython,
         ]
 
         n_cases = 300

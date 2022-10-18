@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on 07/09/17
+
+@author: Maurizio Ferrari Dacrema
+"""
+
+
+from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
+from Recommenders.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
+from Recommenders.Recommender_utils import check_matrix
+
+import sys
+import numpy as np
+
+
+class new_algo_with_MFAttetion_Cython(BaseMatrixFactorizationRecommender, Incremental_Training_Early_Stopping):
+
+    RECOMMENDER_NAME = "MatrixFactorization_Cython_Recommender"
+
+
+    def __init__(self, URM_train, verbose = True, algorithm_name = "FUNK_SVD"):
+        super(new_algo_with_MFAttetion_Cython, self).__init__(URM_train, verbose = verbose)
+
+        self.n_users, self.n_items = self.URM_train.shape
+        self.normalize = False
+        self.algorithm_name = algorithm_name
+
+
+
+    def fit(self, epochs=300, batch_size = 1000,
+            num_factors=10, positive_threshold_BPR = None,
+            learning_rate = 0.001,
+            use_bias = True,
+            use_embeddings = True,
+            sgd_mode='sgd',
+            negative_interactions_quota = 0.0,
+            dropout_quota = None,
+            init_mean = 0.0, init_std_dev = 0.1,
+            user_reg = 0.0, item_reg = 0.0, bias_reg = 0.0, positive_reg = 0.0, negative_reg = 0.0,
+            random_seed = None,
+            **earlystopping_kwargs):
+
+
+        self.num_factors = num_factors
+        self.use_bias = use_bias
+        self.sgd_mode = sgd_mode
+        self.positive_threshold_BPR = positive_threshold_BPR
+        self.learning_rate = learning_rate
+
+        assert negative_interactions_quota >= 0.0 and negative_interactions_quota < 1.0, "{}: negative_interactions_quota must be a float value >=0 and < 1.0, provided was '{}'".format(self.RECOMMENDER_NAME, negative_interactions_quota)
+        self.negative_interactions_quota = negative_interactions_quota
+
+        # Import compiled module
+        from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython_Epoch_modified import MatrixFactorization_Cython_Epoch
+
+
+        if self.algorithm_name in ["FUNK_SVD"]:
+
+            self.cythonEpoch = MatrixFactorization_Cython_Epoch(self.URM_train,
+                                                                algorithm_name = self.algorithm_name,
+                                                                n_factors = self.num_factors,
+                                                                learning_rate = learning_rate,
+                                                                sgd_mode = sgd_mode,
+                                                                user_reg = user_reg,
+                                                                item_reg = item_reg,
+                                                                bias_reg = bias_reg,
+                                                                batch_size = batch_size,
+                                                                use_bias = use_bias,
+                                                                use_embeddings = use_embeddings,
+                                                                init_mean = init_mean,
+                                                                negative_interactions_quota = negative_interactions_quota,
+                                                                dropout_quota = dropout_quota,
+                                                                init_std_dev = init_std_dev,
+                                                                verbose = self.verbose,
+                                                                random_seed = random_seed)
+
+        self._prepare_model_for_validation()
+        self._update_best_model()
+
+        self._train_with_early_stopping(epochs,
+                                        algorithm_name = self.algorithm_name,
+                                        **earlystopping_kwargs)
+
+
+        self.USER_factors = self.USER_factors_best
+        self.ITEM_factors = self.ITEM_factors_best
+
+        if self.use_bias:
+            self.USER_bias = self.USER_bias_best
+            self.ITEM_bias = self.ITEM_bias_best
+            self.GLOBAL_bias = self.GLOBAL_bias_best
+
+        sys.stdout.flush()
+
+
+
+    def _prepare_model_for_validation(self):
+        self.USER_factors = self.cythonEpoch.get_USER_factors()
+        self.ITEM_factors = self.cythonEpoch.get_ITEM_factors()
+
+        if self.use_bias:
+            self.USER_bias = self.cythonEpoch.get_USER_bias()
+            self.ITEM_bias = self.cythonEpoch.get_ITEM_bias()
+            self.GLOBAL_bias = self.cythonEpoch.get_GLOBAL_bias()
+
+    def _update_best_model(self):
+        self.USER_factors_best = self.USER_factors.copy()
+        self.ITEM_factors_best = self.ITEM_factors.copy()
+
+        if self.use_bias:
+            self.USER_bias_best = self.USER_bias.copy()
+            self.ITEM_bias_best = self.ITEM_bias.copy()
+            self.GLOBAL_bias_best = self.GLOBAL_bias
+
+
+    def _run_epoch(self, num_epoch):
+       self.cythonEpoch.epochIteration_Cython()
