@@ -71,7 +71,7 @@ cdef class MatrixFactorization_Cython_Epoch:
 
 
     # Mini-batch sample data
-    cdef double[:,:] USER_factors_minibatch_accumulator, ITEM_factors_minibatch_accumulator
+    cdef double[:,:] USER_factors_minibatch_accumulator, ITEM_factors_minibatch_accumulator, USER_factors_minibatch_accumulator_user, ITEM_factors_minibatch_accumulator_user, USER_factors_minibatch_accumulator_item, ITEM_factors_minibatch_accumulator_item
     cdef double[:] USER_bias_minibatch_accumulator, ITEM_bias_minibatch_accumulator, GLOBAL_bias_minibatch_accumulator
 
     cdef long[:] mini_batch_sampled_items, mini_batch_sampled_users
