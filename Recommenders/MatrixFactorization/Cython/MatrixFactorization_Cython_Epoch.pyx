@@ -134,7 +134,6 @@ cdef class MatrixFactorization_Cython_Epoch:
         self.similarity_matrix_user = np.dot(URM_train_array, URM_train_array.T)
         self.similarity_matrix_item = np.dot(URM_train_array.T, URM_train_array)
 
-
         self.n_factors = n_factors
         self.n_factors_user = n_factors_user
         self.n_factors_item = n_factors_item
@@ -446,6 +445,8 @@ cdef class MatrixFactorization_Cython_Epoch:
                         if self.factors_dropout_mask[factor_index]:
                             prediction += self.USER_factors[sample.user, factor_index] * self.ITEM_factors[sample.item, factor_index]
 
+                    print("1",self.similarity_matrix_user[sample.user])
+                    print("2",item_scores_for_user[:, sample.item])
                     prediction += self.similarity_matrix_user[sample.user]*item_scores_for_user[:, sample.item]\
                                   +self.similarity_matrix_item[sample.item]*item_scores_for_item.T[:, sample.user]
 
