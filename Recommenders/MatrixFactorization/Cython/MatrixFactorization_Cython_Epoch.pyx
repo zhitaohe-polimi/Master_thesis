@@ -111,8 +111,6 @@ cdef class MatrixFactorization_Cython_Epoch:
                  init_mean = 0.0, init_std_dev = 0.1,
                  sgd_mode='sgd', gamma=0.995, beta_1=0.9, beta_2=0.999):
 
-        print(n_factors_user)
-
         super(MatrixFactorization_Cython_Epoch, self).__init__()
 
 
@@ -132,8 +130,9 @@ cdef class MatrixFactorization_Cython_Epoch:
         self.n_users, self.n_items = URM_train.shape
 
         #compute similarity between users or items
-        self.similarity_matrix_user = np.dot(URM_train, URM_train.T)
-        self.similarity_matrix_item = np.dot(URM_train.T, URM_train)
+        URM_train_array=URM_train.toarray()
+        self.similarity_matrix_user = np.dot(URM_train_array, URM_train_array.T)
+        self.similarity_matrix_item = np.dot(URM_train_array.T, URM_train_array)
 
 
         self.n_factors = n_factors
