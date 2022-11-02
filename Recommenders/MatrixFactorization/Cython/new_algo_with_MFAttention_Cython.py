@@ -51,7 +51,7 @@ class new_algo_with_MFAttetion_Cython(BaseMatrixFactorizationRecommender, Increm
 
         self.num_factors = num_factors
         self.num_factors_user = num_factors_user
-        self.num_factors_user = num_factors_user
+        self.num_factors_item = num_factors_item
         self.use_bias = use_bias
         self.sgd_mode = sgd_mode
         self.positive_threshold_BPR = positive_threshold_BPR
