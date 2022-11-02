@@ -50,10 +50,10 @@ cdef struct MSE_sample:
 @cython.overflowcheck(False)
 cdef class MatrixFactorization_Cython_Epoch:
 
-    cdef int n_users, n_items, n_factors, print_step_seconds
+    cdef int n_users, n_items, n_factors, n_factors_user, n_factors_item,print_step_seconds
     cdef algorithm_name
 
-    cdef double learning_rate, learning_rate_user, learning_rate_item, user_reg, item_reg, positive_reg, negative_reg, bias_reg
+    cdef double learning_rate, learning_rate_user, learning_rate_item, user_reg, item_reg, user_reg_u, item_reg_u, user_reg_i, item_reg_i, positive_reg, negative_reg, bias_reg
     cdef double init_mean, init_std_dev, MSE_negative_interactions_quota, MSE_sample_negative_interactions_flag
 
     cdef int batch_size
