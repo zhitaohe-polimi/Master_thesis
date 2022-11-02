@@ -131,6 +131,7 @@ cdef class MatrixFactorization_Cython_Epoch:
 
         #compute similarity between users or items
         URM_train_array=URM_train.toarray()
+        print(URM_train_array)
         self.similarity_matrix_user = np.dot(URM_train_array, URM_train_array.T)
         self.similarity_matrix_item = np.dot(URM_train_array.T, URM_train_array)
 
