@@ -97,7 +97,7 @@ cdef class MatrixFactorization_Cython_Epoch:
     ALGORITHM_NAME_VALUES = ["FUNK_SVD", "ASY_SVD", "MF_BPR"]
 
 
-    def __init__(self, URM_train, n_factors = 1, n_factors_user=1, n_factors_item=1,
+    def __init__(self, URM_train, n_factors = 1, n_factors_user = 1, n_factors_item = 1,
                  algorithm_name = None,
                  batch_size = 1,
                  negative_interactions_quota = 0.5,
@@ -109,6 +109,8 @@ cdef class MatrixFactorization_Cython_Epoch:
                  verbose = False, print_step_seconds = 300, random_seed = None,
                  init_mean = 0.0, init_std_dev = 0.1,
                  sgd_mode='sgd', gamma=0.995, beta_1=0.9, beta_2=0.999):
+
+        print(n_factors_user)
 
         super(MatrixFactorization_Cython_Epoch, self).__init__()
 
