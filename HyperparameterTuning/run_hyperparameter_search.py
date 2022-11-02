@@ -781,7 +781,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
         ##########################################################################################################
 
         #if recommender_class is MatrixFactorization_FunkSVD_Cython:
-        if recommender_class is MatrixFactorization_FunkSVD_Cython or recommender_class is new_MatrixFactorization_FunkSVD_Cython:
+        if recommender_class is MatrixFactorization_FunkSVD_Cython:
 
             hyperparameters_range_dictionary = {
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam"]),
@@ -804,6 +804,40 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 FIT_POSITIONAL_ARGS = [],
                 FIT_KEYWORD_ARGS = {},
                 EARLYSTOPPING_KEYWORD_ARGS = earlystopping_keywargs,
+            )
+
+        ##########################################################################################################
+
+        if recommender_class is new_MatrixFactorization_FunkSVD_Cython:
+            hyperparameters_range_dictionary = {
+                "sgd_mode": Categorical(["sgd", "adagrad", "adam"]),
+                "epochs": Categorical([500]),
+                "use_bias": Categorical([True, False]),
+                "batch_size": Categorical([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]),
+                "num_factors": Integer(1, 200),
+                "num_factors_user": Integer(1, 200),
+                "num_factors_item": Integer(1, 200),
+                "item_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
+                "user_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
+                "item_reg_u": Real(low=1e-5, high=1e-2, prior='log-uniform'),
+                "user_reg_u": Real(low=1e-5, high=1e-2, prior='log-uniform'),
+                "item_reg_i": Real(low=1e-5, high=1e-2, prior='log-uniform'),
+                "user_reg_i": Real(low=1e-5, high=1e-2, prior='log-uniform'),
+                "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
+                "learning_rate_user": Real(low=1e-4, high=1e-1, prior='log-uniform'),
+                "learning_rate_item": Real(low=1e-4, high=1e-1, prior='log-uniform'),
+                "negative_interactions_quota": Real(low=0.0, high=0.5, prior='uniform'),
+            }
+
+            if allow_dropout_MF:
+                hyperparameters_range_dictionary["dropout_quota"] = Real(low=0.01, high=0.7, prior='uniform')
+
+            recommender_input_args = SearchInputRecommenderArgs(
+                CONSTRUCTOR_POSITIONAL_ARGS=[URM_train],
+                CONSTRUCTOR_KEYWORD_ARGS={},
+                FIT_POSITIONAL_ARGS=[],
+                FIT_KEYWORD_ARGS={},
+                EARLYSTOPPING_KEYWORD_ARGS=earlystopping_keywargs,
             )
 
         ##########################################################################################################

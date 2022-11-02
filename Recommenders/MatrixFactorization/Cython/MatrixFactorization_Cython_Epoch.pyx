@@ -53,7 +53,7 @@ cdef class MatrixFactorization_Cython_Epoch:
     cdef int n_users, n_items, n_factors, print_step_seconds
     cdef algorithm_name
 
-    cdef double learning_rate, user_reg, item_reg, positive_reg, negative_reg, bias_reg
+    cdef double learning_rate, learning_rate_user, learning_rate_item, user_reg, item_reg, positive_reg, negative_reg, bias_reg
     cdef double init_mean, init_std_dev, MSE_negative_interactions_quota, MSE_sample_negative_interactions_flag
 
     cdef int batch_size
@@ -65,7 +65,7 @@ cdef class MatrixFactorization_Cython_Epoch:
 
     cdef double[:,:] USER_factors, ITEM_factors
     cdef double[:] USER_bias, ITEM_bias, GLOBAL_bias
-    cdef int[:] factors_dropout_mask
+    cdef int[:] factors_dropout_mask,factors_dropout_mask_user,factors_dropout_mask_item
     cdef int dropout_flag
     cdef double dropout_quota
 
@@ -82,11 +82,11 @@ cdef class MatrixFactorization_Cython_Epoch:
 
     cdef int useAdaGrad, useRmsprop, useAdam, verbose, use_bias, use_embeddings
 
-    cdef double [:,:] sgd_cache_I, sgd_cache_U, sgd_cache_bias_I, sgd_cache_bias_U, sgd_cache_bias_GLOBAL
+    cdef double [:,:] sgd_cache_I, sgd_cache_U, sgd_cache_I_user, sgd_cache_U_user, sgd_cache_I_item, sgd_cache_U_item, sgd_cache_bias_I, sgd_cache_bias_U, sgd_cache_bias_GLOBAL
     cdef double gamma
 
-    cdef double [:,:] sgd_cache_I_momentum_1, sgd_cache_I_momentum_2
-    cdef double [:,:] sgd_cache_U_momentum_1, sgd_cache_U_momentum_2
+    cdef double [:,:] sgd_cache_I_momentum_1, sgd_cache_I_momentum_2, sgd_cache_I_momentum_1_user, sgd_cache_I_momentum_2_user, sgd_cache_I_momentum_1_item, sgd_cache_I_momentum_2_item
+    cdef double [:,:] sgd_cache_U_momentum_1, sgd_cache_U_momentum_2, sgd_cache_U_momentum_1_user, sgd_cache_U_momentum_2_user, sgd_cache_U_momentum_1_item, sgd_cache_U_momentum_2_item
     cdef double [:,:] sgd_cache_bias_I_momentum_1, sgd_cache_bias_I_momentum_2
     cdef double [:,:] sgd_cache_bias_U_momentum_1, sgd_cache_bias_U_momentum_2
     cdef double [:,:] sgd_cache_bias_GLOBAL_momentum_1, sgd_cache_bias_GLOBAL_momentum_2
@@ -97,12 +97,15 @@ cdef class MatrixFactorization_Cython_Epoch:
     ALGORITHM_NAME_VALUES = ["FUNK_SVD", "ASY_SVD", "MF_BPR"]
 
 
-    def __init__(self, URM_train, n_factors = 1, algorithm_name = None,
+    def __init__(self, URM_train, n_factors = 1, n_factors_user=1, n_factors_item=1,
+                 algorithm_name = None,
                  batch_size = 1,
                  negative_interactions_quota = 0.5,
                  dropout_quota = None,
-                 learning_rate = 1e-3, use_bias = False, use_embeddings = True,
+                 learning_rate = 1e-3, learning_rate_user = 1e-3, learning_rate_item = 1e-3,
+                 use_bias = False, use_embeddings = True,
                  user_reg = 0.0, item_reg = 0.0, bias_reg = 0.0, positive_reg = 0.0, negative_reg = 0.0,
+                 user_reg_u = 0.0, item_reg_u = 0.0, user_reg_i = 0.0, item_reg_i=0.0,
                  verbose = False, print_step_seconds = 300, random_seed = None,
                  init_mean = 0.0, init_std_dev = 0.1,
                  sgd_mode='sgd', gamma=0.995, beta_1=0.9, beta_2=0.999):
@@ -123,6 +126,7 @@ cdef class MatrixFactorization_Cython_Epoch:
         URM_train = URM_train.sorted_indices()
 
 
+        #compute similarity between users or items
         self.Similarity_matrix_user=np.dot(URM_train,URM_train.T)
         self.Similarity_matrix_item=np.dot(URM_train.T,URM_train)
 
@@ -132,11 +136,19 @@ cdef class MatrixFactorization_Cython_Epoch:
 
 
         self.n_factors = n_factors
+        self.n_factors_user = n_factors_user
+        self.n_factors_item = n_factors_item
         self.verbose = verbose
         self.algorithm_name = algorithm_name
         self.learning_rate = learning_rate
+        self.learning_rate_user = learning_rate_user
+        self.learning_rate_item = learning_rate_item
         self.user_reg = user_reg
         self.item_reg = item_reg
+        self.user_reg_u = user_reg_u
+        self.item_reg_u = item_reg_u
+        self.user_reg_i = user_reg_i
+        self.item_reg_i = item_reg_i
         self.positive_reg = positive_reg
         self.negative_reg = negative_reg
         self.bias_reg = bias_reg
@@ -162,6 +174,8 @@ cdef class MatrixFactorization_Cython_Epoch:
 
 
         self.factors_dropout_mask = np.ones(self.n_factors, dtype=np.int32)
+        self.factors_dropout_mask_user = np.ones(self.n_factors_user, dtype=np.int32)
+        self.factors_dropout_mask_item = np.ones(self.n_factors_item, dtype=np.int32)
 
         if dropout_quota is None:
             self.dropout_flag = False
@@ -207,9 +221,29 @@ cdef class MatrixFactorization_Cython_Epoch:
 
             self.USER_factors_minibatch_accumulator = np.zeros((n_user_factors, self.n_factors), dtype=np.float64)
             self.ITEM_factors_minibatch_accumulator = np.zeros((n_item_factors, self.n_factors), dtype=np.float64)
+
+            #W and H for User attention
+            self.USER_factors_user = np.random.normal(self.init_mean, self.init_std_dev,
+                                                 (n_user_factors, self.n_factors_user)).astype(np.float64)
+            self.ITEM_factors_user = np.random.normal(self.init_mean, self.init_std_dev,
+                                                 (n_item_factors, self.n_factors_user)).astype(np.float64)
+
+            self.USER_factors_minibatch_accumulator_user = np.zeros((n_user_factors, self.n_factors_user), dtype=np.float64)
+            self.ITEM_factors_minibatch_accumulator_user = np.zeros((n_item_factors, self.n_factors_user), dtype=np.float64)
+
+            #W and H for item attention
+            self.USER_factors_item = np.random.normal(self.init_mean, self.init_std_dev,
+                                                 (n_user_factors, self.n_factors_item)).astype(np.float64)
+            self.ITEM_factors_item = np.random.normal(self.init_mean, self.init_std_dev,
+                                                 (n_item_factors, self.n_factors_item)).astype(np.float64)
+
+            self.USER_factors_minibatch_accumulator_item = np.zeros((n_user_factors, self.n_factors_item), dtype=np.float64)
+            self.ITEM_factors_minibatch_accumulator_item = np.zeros((n_item_factors, self.n_factors_item), dtype=np.float64)
         else:
-            self.USER_factors = np.zeros((n_user_factors, self.n_factors)).astype(np.float64)
-            self.ITEM_factors = np.zeros((n_item_factors, self.n_factors)).astype(np.float64)
+            self.USER_factors = np.zeros((n_user_factors, self.n_factors_item)).astype(np.float64)
+            self.ITEM_factors = np.zeros((n_item_factors, self.n_factors_item)).astype(np.float64)
+
+            #user_embeddings is always set as True
 
 
 
@@ -258,6 +292,12 @@ cdef class MatrixFactorization_Cython_Epoch:
             self.sgd_cache_I = None
             self.sgd_cache_U = None
 
+            self.sgd_cache_I_user = None
+            self.sgd_cache_U_user = None
+
+            self.sgd_cache_I_item = None
+            self.sgd_cache_U_item = None
+
             self.sgd_cache_bias_I = None
             self.sgd_cache_bias_U = None
             self.sgd_cache_bias_GLOBAL = None
@@ -265,8 +305,20 @@ cdef class MatrixFactorization_Cython_Epoch:
             self.sgd_cache_I_momentum_1 = None
             self.sgd_cache_I_momentum_2 = None
 
+            self.sgd_cache_I_momentum_1_user = None
+            self.sgd_cache_I_momentum_2_user = None
+
+            self.sgd_cache_I_momentum_1_item = None
+            self.sgd_cache_I_momentum_2_item = None
+
             self.sgd_cache_U_momentum_1 = None
             self.sgd_cache_U_momentum_2 = None
+
+            self.sgd_cache_U_momentum_1_user = None
+            self.sgd_cache_U_momentum_2_user = None
+
+            self.sgd_cache_U_momentum_1_item = None
+            self.sgd_cache_U_momentum_2_item = None
 
             self.sgd_cache_bias_I_momentum_1 = None
             self.sgd_cache_bias_I_momentum_2 = None
@@ -283,6 +335,12 @@ cdef class MatrixFactorization_Cython_Epoch:
             self.sgd_cache_I = np.zeros((self.ITEM_factors.shape[0], self.n_factors), dtype=np.float64)
             self.sgd_cache_U = np.zeros((self.USER_factors.shape[0], self.n_factors), dtype=np.float64)
 
+            self.sgd_cache_I_user = np.zeros((self.ITEM_factors_user.shape[0], self.n_factors_user), dtype=np.float64)
+            self.sgd_cache_U_user = np.zeros((self.USER_factors_user.shape[0], self.n_factors_user), dtype=np.float64)
+
+            self.sgd_cache_I_item = np.zeros((self.ITEM_factors_item.shape[0], self.n_factors_item), dtype=np.float64)
+            self.sgd_cache_U_item = np.zeros((self.USER_factors_item.shape[0], self.n_factors_item), dtype=np.float64)
+
             self.sgd_cache_bias_I = np.zeros((self.n_items, 1), dtype=np.float64)
             self.sgd_cache_bias_U = np.zeros((self.n_users, 1), dtype=np.float64)
             self.sgd_cache_bias_GLOBAL = np.zeros((1, 1), dtype=np.float64)
@@ -291,8 +349,20 @@ cdef class MatrixFactorization_Cython_Epoch:
             self.sgd_cache_I_momentum_1 = np.zeros((self.ITEM_factors.shape[0], self.n_factors), dtype=np.float64)
             self.sgd_cache_I_momentum_2 = np.zeros((self.ITEM_factors.shape[0], self.n_factors), dtype=np.float64)
 
+            self.sgd_cache_I_momentum_1_user = np.zeros((self.ITEM_factors_user.shape[0], self.n_factors_user), dtype=np.float64)
+            self.sgd_cache_I_momentum_2_user = np.zeros((self.ITEM_factors_user.shape[0], self.n_factors_user), dtype=np.float64)
+
+            self.sgd_cache_I_momentum_1_item = np.zeros((self.ITEM_factors_item.shape[0], self.n_factors_item), dtype=np.float64)
+            self.sgd_cache_I_momentum_2_item = np.zeros((self.ITEM_factors_item.shape[0], self.n_factors_item), dtype=np.float64)
+
             self.sgd_cache_U_momentum_1 = np.zeros((self.USER_factors.shape[0], self.n_factors), dtype=np.float64)
             self.sgd_cache_U_momentum_2 = np.zeros((self.USER_factors.shape[0], self.n_factors), dtype=np.float64)
+
+            self.sgd_cache_U_momentum_1_user = np.zeros((self.USER_factors_user.shape[0], self.n_factors_user), dtype=np.float64)
+            self.sgd_cache_U_momentum_2_user = np.zeros((self.USER_factors_user.shape[0], self.n_factors_user), dtype=np.float64)
+
+            self.sgd_cache_U_momentum_1_item = np.zeros((self.USER_factors_item.shape[0], self.n_factors_item), dtype=np.float64)
+            self.sgd_cache_U_momentum_2_item = np.zeros((self.USER_factors_item.shape[0], self.n_factors_item), dtype=np.float64)
 
             self.sgd_cache_bias_I_momentum_1 = np.zeros((self.n_items, 1), dtype=np.float64)
             self.sgd_cache_bias_I_momentum_2 = np.zeros((self.n_items, 1), dtype=np.float64)
@@ -309,12 +379,6 @@ cdef class MatrixFactorization_Cython_Epoch:
 
         if self.algorithm_is_funk_svd:
             self.epochIteration_Cython_FUNK_SVD_SGD()
-
-        # elif self.algorithm_is_asy_svd:
-        #     self.epochIteration_Cython_ASY_SVD_SGD()
-        #
-        # elif self.algorithm_is_BPR:
-        #     self.epochIteration_Cython_BPR_SGD()
 
 
 
@@ -339,10 +403,24 @@ cdef class MatrixFactorization_Cython_Epoch:
             for factor_index in range(self.n_factors):
                 self.factors_dropout_mask[factor_index] = rand() > self.dropout_quota
 
+            for factor_index in range(self.n_factors_user):
+                self.factors_dropout_mask_user[factor_index] = rand() > self.dropout_quota
+
+            for factor_index in range(self.n_factors_item):
+                self.factors_dropout_mask_item[factor_index] = rand() > self.dropout_quota
+
             if self.n_factors == 1:
                 self.factors_dropout_mask[0] = True
 
-        item_scores = np.dot(self.USER_factors, self.ITEM_factors.T)
+            if self.n_factors_user == 1:
+                self.factors_dropout_mask_user[0] = True
+
+            if self.n_factors_item == 1:
+                self.factors_dropout_mask_item[0] = True
+
+        #item_scores = np.dot(self.USER_factors, self.ITEM_factors.T)
+        item_scores_for_user = np.dot(self.USER_factors_user, self.ITEM_factors_user.T)
+        item_scores_for_item = np.dot(self.USER_factors_item, self.ITEM_factors_item.T)
 
         for n_current_batch in range(n_total_batch):
 
@@ -366,9 +444,10 @@ cdef class MatrixFactorization_Cython_Epoch:
                     # item_scores=np.dot(self.USER_factors,self.ITEM_factors.T)
                     for factor_index in range(self.n_factors):
                         if self.factors_dropout_mask[factor_index]:
-                            prediction += self.USER_factors[sample.user, factor_index] * self.ITEM_factors[sample.item, factor_index]\
-                                          +self.Similarity_matrix_user[sample.user]*item_scores[:,sample.item]\
-                                          +self.Similarity_matrix_item[sample.item]*item_scores.T[:sample.user]
+                            prediction += self.USER_factors[sample.user, factor_index] * self.ITEM_factors[sample.item, factor_index]
+
+                    prediction += self.Similarity_matrix_user[sample.user]*item_scores_for_user[:, sample.item]\
+                                  +self.Similarity_matrix_item[sample.item]*item_scores_for_item.T[:, sample.user]
 
 
                 # Compute gradients
@@ -400,6 +479,43 @@ cdef class MatrixFactorization_Cython_Epoch:
                             # Store the gradient in the temporary accumulator
                             self.ITEM_factors_minibatch_accumulator[sample.item, factor_index] += local_gradient_item
                             self.USER_factors_minibatch_accumulator[sample.user, factor_index] += local_gradient_user
+
+                    for factor_index in range(self.n_factors_user):
+                        if self.factors_dropout_mask_user[factor_index]:
+
+                            # Copy original value to avoid messing up the updates
+                            H_i = self.ITEM_factors_user[sample.item, factor_index]
+                            W_u = self.USER_factors_user[sample.user, factor_index]
+
+                            #A=self.Similarity_matrix_user[sample.user]
+                            A=1
+
+                            # Compute gradients                                  需要改
+                            local_gradient_item_u = prediction_error * W_u * A - self.item_reg_u * H_i
+                            local_gradient_user_u = prediction_error * H_i * A - self.user_reg_u * W_u
+
+                            # Store the gradient in the temporary accumulator
+                            self.ITEM_factors_minibatch_accumulator_user[sample.item, factor_index] += local_gradient_item_u
+                            self.USER_factors_minibatch_accumulator_user[sample.user, factor_index] += local_gradient_user_u
+
+                    for factor_index in range(self.n_factors_item):
+                        if self.factors_dropout_mask_item[factor_index]:
+
+                            # Copy original value to avoid messing up the updates
+                            H_i = self.ITEM_factors_item[sample.item, factor_index]
+                            W_u = self.USER_factors_item[sample.user, factor_index]
+
+                            #B = self.Similarity_matrix_item[sample.item]
+                            B=1
+
+                            # Compute gradients                                  需要改
+                            local_gradient_item_i = prediction_error * W_u * B - self.item_reg_i * H_i
+                            local_gradient_user_i = prediction_error * H_i * B - self.user_reg_i * W_u
+
+                            # Store the gradient in the temporary accumulator
+                            self.ITEM_factors_minibatch_accumulator_item[sample.item, factor_index] += local_gradient_item_i
+                            self.USER_factors_minibatch_accumulator_item[sample.user, factor_index] += local_gradient_user_i
+
 
 
             self._apply_minibatch_updates_to_latent_factors()
@@ -436,311 +552,6 @@ cdef class MatrixFactorization_Cython_Epoch:
 
                     sys.stdout.flush()
                     sys.stderr.flush()
-
-
-
-
-
-    # def epochIteration_Cython_ASY_SVD_SGD(self):
-    #
-    #
-    #     assert self.batch_size == 1, "Batch size other than 1 not supported for ASY_SVD"
-    #
-    #     # Get number of available interactions
-    #     cdef long n_total_batch = int(len(self.URM_train_data) / self.batch_size) + 1
-    #
-    #     cdef MSE_sample sample
-    #     cdef long n_current_batch, n_sample_in_batch, processed_samples_last_print = 0, print_block_size = 500
-    #     cdef double prediction, prediction_error
-    #     cdef double local_gradient_item, local_gradient_user, local_gradient_bias_item, local_gradient_bias_user, local_gradient_bias_global
-    #
-    #     cdef double[:] user_factors_accumulated = np.zeros(self.n_factors, dtype=np.float64)
-    #     cdef long start_pos_seen_items, end_pos_seen_items, item_id, factor_index, item_index, user_index
-    #
-    #     cdef double H_i, W_u, cumulative_loss = 0.0, denominator
-    #
-    #
-    #     cdef long start_time_epoch = time.time()
-    #     cdef long last_print_time = start_time_epoch
-    #
-    #
-    #     for n_current_batch in range(n_total_batch):
-    #
-    #
-    #         prediction_error = 0.0
-    #
-    #         # Iterate over samples in batch
-    #         for n_sample_in_batch in range(self.batch_size):
-    #
-    #             # Uniform user sampling with replacement
-    #             sample = self.sampleMSE_Cython()
-    #
-    #             self.mini_batch_sampled_items[n_sample_in_batch] = sample.item
-    #             self.mini_batch_sampled_users[n_sample_in_batch] = sample.user
-    #
-    #
-    #             for factor_index in range(self.n_factors):
-    #                 user_factors_accumulated[factor_index] = 0.0
-    #
-    #
-    #             # Accumulate latent factors of rated items
-    #             start_pos_seen_items = self.URM_train_indptr[sample.user]
-    #             end_pos_seen_items = self.URM_train_indptr[sample.user+1]
-    #
-    #             for item_index in range(start_pos_seen_items, end_pos_seen_items):
-    #                 item_id = self.URM_train_indices[item_index]
-    #
-    #                 for factor_index in range(self.n_factors):
-    #                     user_factors_accumulated[factor_index] += self.USER_factors[item_id, factor_index]
-    #
-    #
-    #             denominator = sqrt(self.profile_length[sample.user])
-    #
-    #
-    #             for factor_index in range(self.n_factors):
-    #                 user_factors_accumulated[factor_index] /= denominator
-    #
-    #             # Compute prediction
-    #             if self.use_bias:
-    #                 prediction = self.GLOBAL_bias[0] + self.USER_bias[sample.user] + self.ITEM_bias[sample.item]
-    #             else:
-    #                 prediction = 0.0
-    #
-    #             if self.use_embeddings:
-    #                 for factor_index in range(self.n_factors):
-    #                     prediction += user_factors_accumulated[factor_index] * self.ITEM_factors[sample.item, factor_index]
-    #
-    #
-    #
-    #             prediction_error += sample.rating - prediction
-    #
-    #
-    #         prediction_error /= self.batch_size
-    #         cumulative_loss += prediction_error**2
-    #
-    #
-    #
-    #         if self.use_bias:
-    #
-    #             # Compute gradients
-    #             local_gradient_bias_global = prediction_error - self.bias_reg * self.GLOBAL_bias[0]
-    #
-    #             # Compute adaptive gradients
-    #             local_gradient_bias_global = self.adaptive_gradient(local_gradient_bias_global, 0, 0, self.sgd_cache_bias_GLOBAL, self.sgd_cache_bias_GLOBAL_momentum_1, self.sgd_cache_bias_GLOBAL_momentum_2)
-    #
-    #             # Apply updates to bias and latent factors
-    #             self.GLOBAL_bias[0] += self.learning_rate * local_gradient_bias_global
-    #
-    #
-    #
-    #         # Iterate over samples in batch
-    #         for n_sample_in_batch in range(self.batch_size):
-    #
-    #             sample.item = self.mini_batch_sampled_items[n_sample_in_batch]
-    #             sample.user = self.mini_batch_sampled_users[n_sample_in_batch]
-    #
-    #             if self.use_bias:
-    #
-    #                 # Compute gradients
-    #                 local_gradient_bias_item = prediction_error - self.bias_reg * self.ITEM_bias[sample.item]
-    #                 local_gradient_bias_user = prediction_error - self.bias_reg * self.USER_bias[sample.user]
-    #
-    #                 # Compute adaptive gradients
-    #                 local_gradient_bias_item = self.adaptive_gradient(local_gradient_bias_item, sample.item, 0, self.sgd_cache_bias_I, self.sgd_cache_bias_I_momentum_1, self.sgd_cache_bias_I_momentum_2)
-    #                 local_gradient_bias_user = self.adaptive_gradient(local_gradient_bias_user, sample.user, 0, self.sgd_cache_bias_U, self.sgd_cache_bias_U_momentum_1, self.sgd_cache_bias_U_momentum_2)
-    #
-    #                 # Apply updates to bias
-    #                 self.ITEM_bias[sample.item] += self.learning_rate * local_gradient_bias_item
-    #                 self.USER_bias[sample.user] += self.learning_rate * local_gradient_bias_user
-    #
-    #             if self.use_embeddings:
-    #                 # Update USER factors, therefore all item factors for seen items
-    #                 for item_index in range(start_pos_seen_items, end_pos_seen_items):
-    #                     item_id = self.URM_train_indices[item_index]
-    #
-    #                     for factor_index in range(self.n_factors):
-    #
-    #                         H_i = self.ITEM_factors[sample.item, factor_index]
-    #                         W_u = self.USER_factors[item_id, factor_index]
-    #
-    #                         # Compute gradients USER
-    #                         # Both matrices will have the size |I|x|F|
-    #                         local_gradient_user = prediction_error * H_i - self.user_reg * W_u
-    #
-    #                         # Compute adaptive gradients USER
-    #                         # I need to update NOT sample.item but item_id
-    #                         local_gradient_user = self.adaptive_gradient(local_gradient_user, item_id, factor_index, self.sgd_cache_U, self.sgd_cache_U_momentum_1, self.sgd_cache_U_momentum_2)
-    #
-    #                         # Apply update to latent factors
-    #                         self.USER_factors[item_id, factor_index] += self.learning_rate * local_gradient_user
-    #
-    #
-    #                 # Update ITEM factors
-    #                 for factor_index in range(self.n_factors):
-    #
-    #                     # Copy original value to avoid messing up the updates
-    #                     H_i = self.ITEM_factors[sample.item, factor_index]
-    #                     W_u = user_factors_accumulated[factor_index]
-    #
-    #                     # Compute gradients ITEM
-    #                     # Both matrices will have the size |I|x|F|
-    #                     local_gradient_item = prediction_error * W_u - self.item_reg * H_i
-    #
-    #                     # Compute adaptive gradients ITEM
-    #                     local_gradient_item = self.adaptive_gradient(local_gradient_item, sample.item, factor_index, self.sgd_cache_I, self.sgd_cache_I_momentum_1, self.sgd_cache_I_momentum_2)
-    #
-    #                     # Apply update to latent factors
-    #                     self.ITEM_factors[sample.item, factor_index] += self.learning_rate * local_gradient_item
-    #
-    #
-    #
-    #         # Exponentiation of beta at the end of each sample
-    #         if self.useAdam:
-    #
-    #             self.beta_1_power_t *= self.beta_1
-    #             self.beta_2_power_t *= self.beta_2
-    #
-    #         processed_samples_last_print += 1
-    #
-    #         if self.verbose and (processed_samples_last_print >= print_block_size or n_current_batch == n_total_batch-1):
-    #
-    #             # Set block size to the number of items necessary in order to print every 300 seconds
-    #             current_time = time.time()
-    #             samples_per_sec = n_current_batch/(current_time - start_time_epoch)
-    #             print_block_size = math.ceil(samples_per_sec * self.print_step_seconds)
-    #
-    #             if current_time - last_print_time > self.print_step_seconds or n_current_batch == n_total_batch-1:
-    #                 new_time_value, new_time_unit = seconds_to_biggest_unit(time.time() - start_time_epoch)
-    #
-    #                 print("{}: Processed {} ({:4.1f}%) in {:.2f} {}. MSE loss {:.2E}. Sample per second: {:.0f}".format(
-    #                     self.algorithm_name,
-    #                     (n_current_batch+1)*self.batch_size,
-    #                     100.0* (n_current_batch+1)/n_total_batch,
-    #                     new_time_value, new_time_unit,
-    #                     cumulative_loss/((n_current_batch+1)*self.batch_size),
-    #                     float((n_current_batch+1)*self.batch_size) / (time.time() - start_time_epoch)))
-    #
-    #                 last_print_time = current_time
-    #                 processed_samples_last_print = 0
-    #
-    #                 sys.stdout.flush()
-    #                 sys.stderr.flush()
-    #
-    #
-    #
-    #
-    # def epochIteration_Cython_BPR_SGD(self):
-    #
-    #     # Get number of available interactions
-    #     cdef long n_total_batch = int(self.n_users / self.batch_size) + 1
-    #
-    #
-    #     cdef BPR_sample sample
-    #     cdef long u, i, j
-    #     cdef long factor_index, n_current_batch, n_sample_in_batch, processed_samples_last_print = 0, print_block_size = 500
-    #     cdef double x_uij, sigmoid_user, sigmoid_item, local_gradient_i, local_gradient_j, local_gradient_u
-    #
-    #     cdef double H_i, H_j, W_u, cumulative_loss = 0.0
-    #
-    #
-    #     cdef long start_time_epoch = time.time()
-    #     cdef long last_print_time = start_time_epoch
-    #
-    #     # Renew dropout mask
-    #     if self.dropout_flag:
-    #         for factor_index in range(self.n_factors):
-    #             self.factors_dropout_mask[factor_index] = rand() > self.dropout_quota
-    #
-    #         if self.n_factors == 1:
-    #             self.factors_dropout_mask[0] = True
-    #
-    #
-    #     for n_current_batch in range(n_total_batch):
-    #
-    #         self._clear_minibatch_data_structures()
-    #
-    #         # Iterate over samples in batch
-    #         for n_sample_in_batch in range(self.batch_size):
-    #
-    #             # Uniform user sampling with replacement
-    #             sample = self.sampleBPR_Cython()
-    #
-    #             self._add_BPR_sample_in_minibatch(sample)
-    #
-    #             u = sample.user
-    #             i = sample.pos_item
-    #             j = sample.neg_item
-    #
-    #             x_uij = 0.0
-    #
-    #             for factor_index in range(self.n_factors):
-    #                 if self.factors_dropout_mask[factor_index]:
-    #                     x_uij += self.USER_factors[u,factor_index] * (self.ITEM_factors[i,factor_index] - self.ITEM_factors[j,factor_index])
-    #
-    #             # Use gradient of log(sigm(-x_uij))
-    #             sigmoid_item = 1 / (1 + exp(x_uij))
-    #             sigmoid_user = sigmoid_item
-    #
-    #             cumulative_loss += x_uij**2
-    #
-    #
-    #             for factor_index in range(self.n_factors):
-    #                 if self.factors_dropout_mask[factor_index]:
-    #
-    #                     # Copy original value to avoid messing up the updates
-    #                     H_i = self.ITEM_factors[i, factor_index]
-    #                     H_j = self.ITEM_factors[j, factor_index]
-    #                     W_u = self.USER_factors[u, factor_index]
-    #
-    #                     # Compute gradients
-    #                     local_gradient_i = sigmoid_item * ( W_u ) - self.positive_reg * H_i
-    #                     local_gradient_j = sigmoid_item * (-W_u ) - self.negative_reg * H_j
-    #                     local_gradient_u = sigmoid_user * ( H_i - H_j ) - self.user_reg * W_u
-    #
-    #                     self.USER_factors_minibatch_accumulator[u, factor_index] += local_gradient_u
-    #                     self.ITEM_factors_minibatch_accumulator[i, factor_index] += local_gradient_i
-    #                     self.ITEM_factors_minibatch_accumulator[j, factor_index] += local_gradient_j
-    #
-    #
-    #         self._apply_minibatch_updates_to_latent_factors()
-    #
-    #
-    #         # Exponentiation of beta at the end of each sample
-    #         if self.useAdam:
-    #
-    #             self.beta_1_power_t *= self.beta_1
-    #             self.beta_2_power_t *= self.beta_2
-    #
-    #         processed_samples_last_print += 1
-    #
-    #         if self.verbose and (processed_samples_last_print >= print_block_size or n_current_batch == n_total_batch-1):
-    #
-    #             # Set block size to the number of items necessary in order to print every 300 seconds
-    #             current_time = time.time()
-    #             samples_per_sec = n_current_batch/(current_time - start_time_epoch)
-    #             print_block_size = math.ceil(samples_per_sec * self.print_step_seconds)
-    #
-    #             if current_time - last_print_time > self.print_step_seconds or n_current_batch == n_total_batch-1:
-    #                 new_time_value, new_time_unit = seconds_to_biggest_unit(time.time() - start_time_epoch)
-    #
-    #                 print("{}: Processed {} ({:4.1f}%) in {:.2f} {}. MSE loss {:.2E}. Sample per second: {:.0f}".format(
-    #                     self.algorithm_name,
-    #                     (n_current_batch+1)*self.batch_size,
-    #                     100.0* (n_current_batch+1)/n_total_batch,
-    #                     new_time_value, new_time_unit,
-    #                     cumulative_loss/((n_current_batch+1)*self.batch_size),
-    #                     float((n_current_batch+1)*self.batch_size) / (time.time() - start_time_epoch)))
-    #
-    #                 last_print_time = current_time
-    #                 processed_samples_last_print = 0
-    #
-    #                 sys.stdout.flush()
-    #                 sys.stderr.flush()
-
-
-
-
-
 
 
 
@@ -810,26 +621,6 @@ cdef class MatrixFactorization_Cython_Epoch:
             self.mini_batch_sampled_users_counter += 1
 
 
-
-    # cdef void _add_BPR_sample_in_minibatch(self, BPR_sample sample):
-    #
-    #     if not self.mini_batch_sampled_items_flag[sample.pos_item]:
-    #         self.mini_batch_sampled_items_flag[sample.pos_item] = True
-    #         self.mini_batch_sampled_items[self.mini_batch_sampled_items_counter] = sample.pos_item
-    #         self.mini_batch_sampled_items_counter += 1
-    #
-    #     if not self.mini_batch_sampled_items_flag[sample.neg_item]:
-    #         self.mini_batch_sampled_items_flag[sample.neg_item] = True
-    #         self.mini_batch_sampled_items[self.mini_batch_sampled_items_counter] = sample.neg_item
-    #         self.mini_batch_sampled_items_counter += 1
-    #
-    #     if not self.mini_batch_sampled_users_flag[sample.user]:
-    #         self.mini_batch_sampled_users_flag[sample.user] = True
-    #         self.mini_batch_sampled_users[self.mini_batch_sampled_users_counter] = sample.user
-    #         self.mini_batch_sampled_users_counter += 1
-
-
-
     cdef void _apply_minibatch_updates_to_latent_factors(self):
 
         cdef double local_gradient_item, local_gradient_user, local_gradient_bias_item, local_gradient_bias_user, local_gradient_bias_global
@@ -869,6 +660,22 @@ cdef class MatrixFactorization_Cython_Epoch:
                         self.ITEM_factors[sampled_item, factor_index] += self.learning_rate * local_gradient_item
                         self.ITEM_factors_minibatch_accumulator[sampled_item, factor_index] = 0.0
 
+                for factor_index in range(self.n_factors_user):
+                    if self.factors_dropout_mask_user[factor_index]:
+                        local_gradient_item = self.ITEM_factors_minibatch_accumulator_user[sampled_item, factor_index] / self.batch_size
+                        local_gradient_item = self.adaptive_gradient(local_gradient_item, sampled_item, factor_index, self.sgd_cache_I_user, self.sgd_cache_I_momentum_1_user, self.sgd_cache_I_momentum_2_user)
+
+                        self.ITEM_factors_user[sampled_item, factor_index] += self.learning_rate_user * local_gradient_item
+                        self.ITEM_factors_minibatch_accumulator_user[sampled_item, factor_index] = 0.0
+
+                for factor_index in range(self.n_factors_item):
+                    if self.factors_dropout_mask[factor_index]:
+                        local_gradient_item = self.ITEM_factors_minibatch_accumulator_item[sampled_item, factor_index] / self.batch_size
+                        local_gradient_item = self.adaptive_gradient(local_gradient_item, sampled_item, factor_index, self.sgd_cache_I_item, self.sgd_cache_I_momentum_1_item, self.sgd_cache_I_momentum_2_item)
+
+                        self.ITEM_factors_item[sampled_item, factor_index] += self.learning_rate_item * local_gradient_item
+                        self.ITEM_factors_minibatch_accumulator_item[sampled_item, factor_index] = 0.0
+
 
 
 
@@ -893,6 +700,24 @@ cdef class MatrixFactorization_Cython_Epoch:
 
                         self.USER_factors[sampled_user, factor_index] += self.learning_rate * local_gradient_user
                         self.USER_factors_minibatch_accumulator[sampled_user, factor_index] = 0.0
+
+                for factor_index in range(self.n_factors_user):
+
+                    if self.factors_dropout_mask_user[factor_index]:
+                        local_gradient_user = self.USER_factors_minibatch_accumulator_user[sampled_user, factor_index] / self.batch_size
+                        local_gradient_user = self.adaptive_gradient(local_gradient_user, sampled_user, factor_index, self.sgd_cache_U_user, self.sgd_cache_U_momentum_1_user, self.sgd_cache_U_momentum_2_user)
+
+                        self.USER_factors_user[sampled_user, factor_index] += self.learning_rate_user * local_gradient_user
+                        self.USER_factors_minibatch_accumulator_user[sampled_user, factor_index] = 0.0
+
+                for factor_index in range(self.n_factors_item):
+
+                    if self.factors_dropout_mask_item[factor_index]:
+                        local_gradient_user = self.USER_factors_minibatch_accumulator_item[sampled_user, factor_index] / self.batch_size
+                        local_gradient_user = self.adaptive_gradient(local_gradient_user, sampled_user, factor_index, self.sgd_cache_U_item, self.sgd_cache_U_momentum_1_item, self.sgd_cache_U_momentum_2_item)
+
+                        self.USER_factors_item[sampled_user, factor_index] += self.learning_rate_item * local_gradient_user
+                        self.USER_factors_minibatch_accumulator_item[sampled_user, factor_index] = 0.0
 
 
 
@@ -999,52 +824,3 @@ cdef class MatrixFactorization_Cython_Epoch:
 
 
         return sample
-
-
-
-
-    # cdef BPR_sample sampleBPR_Cython(self):
-    #
-    #     cdef BPR_sample sample = BPR_sample(-1,-1,-1)
-    #     cdef long index, start_pos_seen_items, end_pos_seen_items
-    #
-    #     cdef int neg_item_selected, n_seen_items = 0
-    #
-    #
-    #     # Skip users with no interactions or with no negative items
-    #     while n_seen_items == 0 or n_seen_items == self.n_items:
-    #
-    #         sample.user = rand() % self.n_users
-    #
-    #         start_pos_seen_items = self.URM_train_indptr[sample.user]
-    #         end_pos_seen_items = self.URM_train_indptr[sample.user+1]
-    #
-    #         n_seen_items = end_pos_seen_items - start_pos_seen_items
-    #
-    #
-    #     index = rand() % n_seen_items
-    #
-    #     sample.pos_item = self.URM_train_indices[start_pos_seen_items + index]
-    #
-    #
-    #
-    #     neg_item_selected = False
-    #
-    #     # It's faster to just try again then to build a mapping of the non-seen items
-    #     # for every user
-    #     while not neg_item_selected:
-    #
-    #         sample.neg_item = rand() % self.n_items
-    #
-    #         index = 0
-    #         # Indices data is sorted, so I don't need to go to the end of the current row
-    #         while index < n_seen_items and self.URM_train_indices[start_pos_seen_items + index] < sample.neg_item:
-    #             index+=1
-    #
-    #         # If the positive item in position 'index' is == sample.neg_item, negative not selected
-    #         # If the positive item in position 'index' is > sample.neg_item or index == n_seen_items, negative selected
-    #         if index == n_seen_items or self.URM_train_indices[start_pos_seen_items + index] > sample.neg_item:
-    #             neg_item_selected = True
-    #
-    #
-    #     return sample
