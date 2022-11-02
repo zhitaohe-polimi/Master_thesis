@@ -30,8 +30,13 @@ class new_algo_with_MFAttetion_Cython(BaseMatrixFactorizationRecommender, Increm
 
 
     def fit(self, epochs=300, batch_size = 1000,
-            num_factors=10, positive_threshold_BPR = None,
+            num_factors=10,
+            num_factors_user=10,
+            num_factors_item=10,
+            positive_threshold_BPR = None,
             learning_rate = 0.001,
+            learning_rate_user = 0.001,
+            learning_rate_item = 0.001,
             use_bias = True,
             use_embeddings = True,
             sgd_mode='sgd',
@@ -39,15 +44,20 @@ class new_algo_with_MFAttetion_Cython(BaseMatrixFactorizationRecommender, Increm
             dropout_quota = None,
             init_mean = 0.0, init_std_dev = 0.1,
             user_reg = 0.0, item_reg = 0.0, bias_reg = 0.0, positive_reg = 0.0, negative_reg = 0.0,
+            user_reg_u = 0.0, item_reg_u = 0.0, user_reg_i = 0.0, item_reg_i = 0.0,
             random_seed = None,
             **earlystopping_kwargs):
 
 
         self.num_factors = num_factors
+        self.num_factors_user = num_factors_user
+        self.num_factors_user = num_factors_user
         self.use_bias = use_bias
         self.sgd_mode = sgd_mode
         self.positive_threshold_BPR = positive_threshold_BPR
         self.learning_rate = learning_rate
+        self.learning_rate_user = learning_rate_user
+        self.learning_rate_item = learning_rate_item
 
         assert negative_interactions_quota >= 0.0 and negative_interactions_quota < 1.0, "{}: negative_interactions_quota must be a float value >=0 and < 1.0, provided was '{}'".format(self.RECOMMENDER_NAME, negative_interactions_quota)
         self.negative_interactions_quota = negative_interactions_quota
@@ -61,10 +71,18 @@ class new_algo_with_MFAttetion_Cython(BaseMatrixFactorizationRecommender, Increm
             self.cythonEpoch = MatrixFactorization_Cython_Epoch(self.URM_train,
                                                                 algorithm_name = self.algorithm_name,
                                                                 n_factors = self.num_factors,
+                                                                n_factors_user = self.num_factors_user,
+                                                                n_factors_item = self.num_factors_item,
                                                                 learning_rate = learning_rate,
+                                                                learning_rate_user = learning_rate_user,
+                                                                learning_rate_item = learning_rate_item,
                                                                 sgd_mode = sgd_mode,
                                                                 user_reg = user_reg,
                                                                 item_reg = item_reg,
+                                                                user_reg_u = user_reg_u,
+                                                                item_reg_u = item_reg_u,
+                                                                user_reg_i = user_reg_i,
+                                                                item_reg_i = item_reg_i,
                                                                 bias_reg = bias_reg,
                                                                 batch_size = batch_size,
                                                                 use_bias = use_bias,
