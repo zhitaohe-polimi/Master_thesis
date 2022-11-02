@@ -90,6 +90,7 @@ cdef class MatrixFactorization_Cython_Epoch:
     cdef double [:,:] sgd_cache_bias_I_momentum_1, sgd_cache_bias_I_momentum_2
     cdef double [:,:] sgd_cache_bias_U_momentum_1, sgd_cache_bias_U_momentum_2
     cdef double [:,:] sgd_cache_bias_GLOBAL_momentum_1, sgd_cache_bias_GLOBAL_momentum_2
+    cdef double [:,:] similarity_matrix_user, similarity_matrix_item
     cdef double beta_1, beta_2, beta_1_power_t, beta_2_power_t
     cdef double momentum_1, momentum_2
 
@@ -127,14 +128,12 @@ cdef class MatrixFactorization_Cython_Epoch:
         URM_train = check_matrix(URM_train, 'csr')
         URM_train = URM_train.sorted_indices()
 
-
-        #compute similarity between users or items
-        self.Similarity_matrix_user=np.dot(URM_train,URM_train.T)
-        self.Similarity_matrix_item=np.dot(URM_train.T,URM_train)
-
-
         self.profile_length = np.ediff1d(URM_train.indptr)
         self.n_users, self.n_items = URM_train.shape
+
+        #compute similarity between users or items
+        self.similarity_matrix_user = np.dot(URM_train, URM_train.T)
+        self.similarity_matrix_item = np.dot(URM_train.T, URM_train)
 
 
         self.n_factors = n_factors
@@ -448,8 +447,8 @@ cdef class MatrixFactorization_Cython_Epoch:
                         if self.factors_dropout_mask[factor_index]:
                             prediction += self.USER_factors[sample.user, factor_index] * self.ITEM_factors[sample.item, factor_index]
 
-                    prediction += self.Similarity_matrix_user[sample.user]*item_scores_for_user[:, sample.item]\
-                                  +self.Similarity_matrix_item[sample.item]*item_scores_for_item.T[:, sample.user]
+                    prediction += self.similarity_matrix_user[sample.user]*item_scores_for_user[:, sample.item]\
+                                  +self.similarity_matrix_item[sample.item]*item_scores_for_item.T[:, sample.user]
 
 
                 # Compute gradients
