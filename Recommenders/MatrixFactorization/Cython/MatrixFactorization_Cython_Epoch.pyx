@@ -63,7 +63,7 @@ cdef class MatrixFactorization_Cython_Epoch:
     cdef int[:] URM_train_indices, URM_train_indptr, profile_length
     cdef double[:] URM_train_data
 
-    cdef double[:,:] USER_factors, ITEM_factors
+    cdef double[:,:] USER_factors, ITEM_factors, USER_factors_user, ITEM_factors_user, USER_factors_item, ITEM_factors_item
     cdef double[:] USER_bias, ITEM_bias, GLOBAL_bias
     cdef int[:] factors_dropout_mask,factors_dropout_mask_user,factors_dropout_mask_item
     cdef int dropout_flag
