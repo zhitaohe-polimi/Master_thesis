@@ -444,7 +444,7 @@ cdef class MatrixFactorization_Cython_Epoch:
                     for factor_index in range(self.n_factors):
                         if self.factors_dropout_mask[factor_index]:
                             prediction += self.USER_factors[sample.user, factor_index] * self.ITEM_factors[sample.item, factor_index]
-                    print(self.self.similarity_matrix_user[sample.user,:].shape,item_scores_for_user[:, sample.item])
+                    print(self.self.similarity_matrix_user[sample.user,:].shape,item_scores_for_user[:, sample.item].shape)
                     prediction += self.similarity_matrix_user[sample.user,:] * item_scores_for_user[:, sample.item]
                     prediction += self.similarity_matrix_item[sample.item,:] * item_scores_for_item.T[:, sample.user]
 
