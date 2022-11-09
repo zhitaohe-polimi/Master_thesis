@@ -424,9 +424,10 @@ cdef class MatrixFactorization_Cython_Epoch:
         for n_current_batch in range(n_total_batch):
 
             self._clear_minibatch_data_structures()
-
-            print(self.similarity_matrix_user.shape,item_scores_for_user.shape)
-            print(self.similarity_matrix_item.shape, item_scores_for_item.shape)
+            print("a ",self.similarity_matrix_user.shape)
+            print("b ",item_scores_for_user.shape)
+            print("c ",self.similarity_matrix_item.shape)
+            print("d ", item_scores_for_item.shape)
 
             # Iterate over samples in batch
             for n_sample_in_batch in range(self.batch_size):
