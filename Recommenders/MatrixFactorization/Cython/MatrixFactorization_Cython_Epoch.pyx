@@ -459,8 +459,8 @@ cdef class MatrixFactorization_Cython_Epoch:
                         if self.factors_dropout_mask[factor_index]:
                             prediction += self.USER_factors[sample.user, factor_index] * self.ITEM_factors[sample.item, factor_index]
 
-                    prediction += self.similarity_matrix_user[sample.user,:] * item_scores_for_user[:, sample.item]
-                    prediction += self.similarity_matrix_item[sample.item,:] * item_scores_for_item.T[:, sample.user]
+                    prediction += np.dot( self.similarity_matrix_user[sample.user,:] , item_scores_for_user[:, sample.item] )
+                    prediction += np.dot( self.similarity_matrix_item[sample.item,:] , item_scores_for_item.T[:, sample.user] )
 
 
                 # Compute gradients
