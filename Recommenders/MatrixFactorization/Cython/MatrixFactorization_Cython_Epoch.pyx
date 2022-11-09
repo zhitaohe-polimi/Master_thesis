@@ -133,10 +133,10 @@ cdef class MatrixFactorization_Cython_Epoch:
         URM_train_array=URM_train.toarray()
         print("URM shape: ",URM_train_array.shape)
         self.similarity_matrix_user = URM_train_array.dot(URM_train_array.T)
-        self.similarity_matrix_user=self.similarity_matrix_user.reshape(URM_train_array.shape[0],URM_train_array.shape[0])
+        self.similarity_matrix_user=self.similarity_matrix_user.toarray()
         print("similarity_matrix_user ",self.similarity_matrix_user.shape)
         self.similarity_matrix_item = URM_train_array.T.dot(URM_train_array)
-        self.similarity_matrix_item=self.similarity_matrix_item.reshape(URM_train_array.shape[1],URM_train_array.shape[1])
+        self.similarity_matrix_item=self.similarity_matrix_item.toarray()
         print("similarity_matrix_item ",self.similarity_matrix_item.shape)
 
         self.n_factors = n_factors
