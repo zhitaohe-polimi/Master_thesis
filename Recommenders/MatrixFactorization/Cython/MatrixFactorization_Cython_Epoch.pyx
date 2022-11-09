@@ -140,7 +140,6 @@ cdef class MatrixFactorization_Cython_Epoch:
         # print("similarity_matrix_item ",self.similarity_matrix_item.shape)
 
         self.similarity_matrix_user = (URM_train @ URM_train.transpose()).toarray()
-        print((URM_train @ URM_train.transpose()).get_shape())
         print("a ",self.similarity_matrix_user.shape)
 
         self.similarity_matrix_item = (URM_train.transpose() @ URM_train).toarray()
