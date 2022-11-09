@@ -130,14 +130,21 @@ cdef class MatrixFactorization_Cython_Epoch:
         self.n_users, self.n_items = URM_train.shape
 
         #compute similarity between users or items
-        URM_train_array=URM_train.toarray()
-        print("URM shape: ",URM_train_array.shape)
-        self.similarity_matrix_user = URM_train_array.dot(URM_train_array.T)
-        self.similarity_matrix_user=self.similarity_matrix_user.toarray()
-        print("similarity_matrix_user ",self.similarity_matrix_user.shape)
-        self.similarity_matrix_item = URM_train_array.T.dot(URM_train_array)
-        self.similarity_matrix_item=self.similarity_matrix_item.toarray()
-        print("similarity_matrix_item ",self.similarity_matrix_item.shape)
+        # URM_train_array=URM_train.toarray()
+        # print("URM shape: ",URM_train_array.shape)
+        # self.similarity_matrix_user = URM_train_array.dot(URM_train_array.T)
+        # self.similarity_matrix_user=self.similarity_matrix_user.toarray()
+        # print("similarity_matrix_user ",self.similarity_matrix_user.shape)
+        # self.similarity_matrix_item = URM_train_array.T.dot(URM_train_array)
+        # self.similarity_matrix_item=self.similarity_matrix_item.toarray()
+        # print("similarity_matrix_item ",self.similarity_matrix_item.shape)
+
+        self.similarity_matrix_user = (URM_train @ URM_train.transpose()).toarray()
+        print("a ",self.similarity_matrix_user.shape)
+
+        self.similarity_matrix_item = (URM_train.transpose() @ URM_train).toarray()
+        print("b ",self.similarity_matrix_item.shape)
+
 
         self.n_factors = n_factors
         self.n_factors_user = n_factors_user
