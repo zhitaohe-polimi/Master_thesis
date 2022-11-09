@@ -90,7 +90,7 @@ cdef class MatrixFactorization_Cython_Epoch:
     cdef double [:,:] sgd_cache_bias_I_momentum_1, sgd_cache_bias_I_momentum_2
     cdef double [:,:] sgd_cache_bias_U_momentum_1, sgd_cache_bias_U_momentum_2
     cdef double [:,:] sgd_cache_bias_GLOBAL_momentum_1, sgd_cache_bias_GLOBAL_momentum_2
-    cdef double  [:,:] similarity_matrix_user, similarity_matrix_item
+    cdef float  [:,:] similarity_matrix_user, similarity_matrix_item
     cdef double beta_1, beta_2, beta_1_power_t, beta_2_power_t
     cdef double momentum_1, momentum_2
 
