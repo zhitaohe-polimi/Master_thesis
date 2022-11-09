@@ -90,7 +90,7 @@ cdef class MatrixFactorization_Cython_Epoch:
     cdef double [:,:] sgd_cache_bias_I_momentum_1, sgd_cache_bias_I_momentum_2
     cdef double [:,:] sgd_cache_bias_U_momentum_1, sgd_cache_bias_U_momentum_2
     cdef double [:,:] sgd_cache_bias_GLOBAL_momentum_1, sgd_cache_bias_GLOBAL_momentum_2
-    cdef float  [:,:] similarity_matrix_user, similarity_matrix_item
+    cdef  similarity_matrix_user, similarity_matrix_item
     cdef double beta_1, beta_2, beta_1_power_t, beta_2_power_t
     cdef double momentum_1, momentum_2
 
@@ -139,11 +139,11 @@ cdef class MatrixFactorization_Cython_Epoch:
         # self.similarity_matrix_item=self.similarity_matrix_item.toarray()
         # print("similarity_matrix_item ",self.similarity_matrix_item.shape)
 
-        self.similarity_matrix_user = (URM_train @ URM_train.transpose()).toarray().reshape([URM_train.shape[0],URM_train.shape[0]])
+        self.similarity_matrix_user = (URM_train @ URM_train.transpose()).toarray()
         print((URM_train @ URM_train.transpose()).get_shape())
         print("a ",self.similarity_matrix_user.shape)
 
-        self.similarity_matrix_item = (URM_train.transpose() @ URM_train).toarray().reshape([URM_train.shape[1],URM_train.shape[1]])
+        self.similarity_matrix_item = (URM_train.transpose() @ URM_train).toarray()
         print("b ",self.similarity_matrix_item.shape)
 
 
