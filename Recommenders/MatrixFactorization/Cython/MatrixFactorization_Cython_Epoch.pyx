@@ -133,7 +133,9 @@ cdef class MatrixFactorization_Cython_Epoch:
         URM_train_array=URM_train.toarray()
         print("URM shape: ",URM_train_array.shape)
         self.similarity_matrix_user = np.dot(URM_train_array, URM_train_array.T)
+        print("similarity_matrix_user ",self.similarity_matrix_user)
         self.similarity_matrix_item = np.dot(URM_train_array.T, URM_train_array)
+        print("similarity_matrix_item ",self.similarity_matrix_item)
 
         self.n_factors = n_factors
         self.n_factors_user = n_factors_user
@@ -425,9 +427,7 @@ cdef class MatrixFactorization_Cython_Epoch:
         for n_current_batch in range(n_total_batch):
 
             self._clear_minibatch_data_structures()
-            print("a ",self.similarity_matrix_user.shape)
             print("b ",item_scores_for_user.shape)
-            print("c ",self.similarity_matrix_item.shape)
             print("d ", item_scores_for_item.shape)
 
             # Iterate over samples in batch
