@@ -436,8 +436,6 @@ cdef class MatrixFactorization_Cython_Epoch:
         for n_current_batch in range(n_total_batch):
 
             self._clear_minibatch_data_structures()
-            print("b ",item_scores_for_user.shape)
-            print("d ", item_scores_for_item.shape)
 
             # Iterate over samples in batch
             for n_sample_in_batch in range(self.batch_size):
