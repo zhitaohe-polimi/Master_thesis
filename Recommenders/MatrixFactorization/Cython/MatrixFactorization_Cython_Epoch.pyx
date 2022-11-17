@@ -584,19 +584,19 @@ cdef class MatrixFactorization_Cython_Epoch:
     def get_ITEM_factors_user(self):
         return np.array(self.ITEM_factors_user)
 
+    def get_USER_factors_item(self):
+        return np.array(self.USER_factors_item)
+
+
+    def get_ITEM_factors_item(self):
+        return np.array(self.ITEM_factors_item)
+
     def get_similarity_matrix_user(self):
         return np.array(self.similarity_matrix_user)
 
 
     def get_similarity_matrix_item(self):
         return np.array(self.similarity_matrix_item)
-
-    def get_USER_factors(self):
-        return np.array(self.USER_factors)
-
-
-    def get_ITEM_factors(self):
-        return np.array(self.ITEM_factors)
 
 
     def get_USER_bias(self):
