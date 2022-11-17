@@ -504,8 +504,8 @@ cdef class MatrixFactorization_Cython_Epoch:
                             #coefficient_similarity_user=1
 
                             # Compute gradients
-                            local_gradient_item_u = prediction_error * np.sum(W_u * coefficient_similarity_user) - self.item_reg_u * H_i
-                            local_gradient_user_u = prediction_error * np.sum(H_i * coefficient_similarity_user) - self.user_reg_u * W_u
+                            local_gradient_item_u = prediction_error * np.sum(coefficient_similarity_user) * W_u - self.item_reg_u * H_i
+                            local_gradient_user_u = prediction_error * np.sum(coefficient_similarity_user) * H_i - self.user_reg_u * W_u
 
                             # Store the gradient in the temporary accumulator
                             self.ITEM_factors_minibatch_accumulator_user[sample.item, factor_index] += local_gradient_item_u
@@ -523,8 +523,8 @@ cdef class MatrixFactorization_Cython_Epoch:
                             #coefficient_similarity_user=1
 
                             # Compute gradients
-                            local_gradient_item_i = prediction_error * np.sum(W_u * coefficient_similarity_item) - self.item_reg_i * H_i
-                            local_gradient_user_i = prediction_error * np.sum(H_i * coefficient_similarity_item) - self.user_reg_i * W_u
+                            local_gradient_item_i = prediction_error * np.sum(coefficient_similarity_item) * W_u - self.item_reg_i * H_i
+                            local_gradient_user_i = prediction_error * np.sum(coefficient_similarity_item) * H_i - self.user_reg_i * W_u
 
                             # Store the gradient in the temporary accumulator
                             self.ITEM_factors_minibatch_accumulator_item[sample.item, factor_index] += local_gradient_item_i
