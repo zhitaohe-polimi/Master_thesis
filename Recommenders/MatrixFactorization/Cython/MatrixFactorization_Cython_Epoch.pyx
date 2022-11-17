@@ -499,12 +499,13 @@ cdef class MatrixFactorization_Cython_Epoch:
                             H_i = self.ITEM_factors_user[sample.item, factor_index]
                             W_u = self.USER_factors_user[sample.user, factor_index]
 
-                            #A=self.Similarity_matrix_user[sample.user]
-                            A=1
+                            #the coefficient of the second MF
+                            A=self.similarity_matrix_user[sample.user,:]
+                            #A=1
 
-                            # Compute gradients                                  需要改
-                            local_gradient_item_u = prediction_error * W_u * A - self.item_reg_u * H_i
-                            local_gradient_user_u = prediction_error * H_i * A - self.user_reg_u * W_u
+                            # Compute gradients
+                            local_gradient_item_u = prediction_error * np.sum(W_u * A) - self.item_reg_u * H_i
+                            local_gradient_user_u = prediction_error * np.sum(H_i * A) - self.user_reg_u * W_u
 
                             # Store the gradient in the temporary accumulator
                             self.ITEM_factors_minibatch_accumulator_user[sample.item, factor_index] += local_gradient_item_u
@@ -517,12 +518,13 @@ cdef class MatrixFactorization_Cython_Epoch:
                             H_i = self.ITEM_factors_item[sample.item, factor_index]
                             W_u = self.USER_factors_item[sample.user, factor_index]
 
-                            #B = self.Similarity_matrix_item[sample.item]
-                            B=1
+                            #the coefficient of the third MF
+                            B = self.similarity_matrix_item[sample.item,:]
+                            #B=1
 
-                            # Compute gradients                                  需要改
-                            local_gradient_item_i = prediction_error * W_u * B - self.item_reg_i * H_i
-                            local_gradient_user_i = prediction_error * H_i * B - self.user_reg_i * W_u
+                            # Compute gradients
+                            local_gradient_item_i = prediction_error * np.sum(W_u * B) - self.item_reg_i * H_i
+                            local_gradient_user_i = prediction_error * np.sum(H_i * B) - self.user_reg_i * W_u
 
                             # Store the gradient in the temporary accumulator
                             self.ITEM_factors_minibatch_accumulator_item[sample.item, factor_index] += local_gradient_item_i
