@@ -52,14 +52,14 @@ class new_algo_with_MFAttetion_Cython(BaseMatrixFactorizationRecommender, Increm
                                                                self.ITEM_factors_user[items_to_compute, :].T)) \
                                                + np.dot(self.similarity_matrix_item[items_to_compute],
                                                         np.dot(self.USER_factors_item[user_id_array],
-                                                               self.ITEM_factors_item[items_to_compute, :].T))
+                                                               self.ITEM_factors_item[items_to_compute, :].T).T)
 
         else:
             item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T) \
                           + np.dot(self.similarity_matrix_user[user_id_array],
                                    np.dot(self.USER_factors_user[user_id_array], self.ITEM_factors_user.T)) \
                           + np.dot(self.similarity_matrix_item,
-                                   np.dot(self.USER_factors_item[user_id_array], self.ITEM_factors_item.T))
+                                   np.dot(self.USER_factors_item[user_id_array], self.ITEM_factors_item.T).T)
 
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
