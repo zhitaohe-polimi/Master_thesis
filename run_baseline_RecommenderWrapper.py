@@ -185,8 +185,8 @@ def read_data_split_and_search(args):
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
             # new_MatrixFactorization_FunkSVD_Cython,
-            # PyTorchMF_MSE_Recommender,
-            PyTorchMF_BPR_Recommender,
+            PyTorchMF_MSE_Recommender,
+            # PyTorchMF_BPR_Recommender,
         ]
 
         n_cases = 300
