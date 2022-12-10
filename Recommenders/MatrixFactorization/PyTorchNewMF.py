@@ -177,11 +177,11 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-def loss_MSE(model, batch):
+def loss_MSE(model, batch, URM):
     user, item, rating = batch
 
     # Compute prediction for each element in batch
-    prediction = model.forward(user, item)
+    prediction = model.forward(user, item, URM)
 
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
@@ -276,7 +276,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
-            loss = self._loss_function(self._model, batch)
+            loss = self._loss_function(self._model, batch, self.URM_train)
 
             # Compute gradients given current loss
             loss.backward()
