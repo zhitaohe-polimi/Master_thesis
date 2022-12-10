@@ -917,7 +917,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
 
 
-        if recommender_class is PyTorchMF_BPR_Recommender:
+        if recommender_class is PyTorchMF_BPR_Recommender or recommender_class is PyTorchMF_MSE_Recommender:
 
             hyperparameters_range_dictionary = {
                 "num_factors": Integer(1, 200),
