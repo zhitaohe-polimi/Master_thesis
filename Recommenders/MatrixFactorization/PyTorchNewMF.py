@@ -56,9 +56,10 @@ class _SimpleNewMFModel(torch.nn.Module):
 
     def forward(self, user, item, URM):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
+        print(URM.shape)
 
         user_sim = torch.einsum("bi,ci->bc", URM[user], URM)
-        total_user = torch.Tensor([self.n_users]).type(torch.LongTensor)
+        total_user = torch.Tensor([]).type(torch.LongTensor)
         MF_u = batch_dot(self._embedding_user_u(total_user), self._embedding_item_u(item))
         prediction += torch.einsum("ik,jk->ij", user_sim, MF_u)
 
