@@ -222,11 +222,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
-        # self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
-        #                                 embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
-        self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
-        # self._model.to("cuda")
+        self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
+                                        embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
+
+        # self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
+        self._model.to("cuda")
 
         # URM_train_coo = self.URM_train.tocoo()
         #
