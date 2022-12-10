@@ -221,17 +221,15 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             **earlystopping_kwargs):
 
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
-                                       num_workers=0,
-                                       #os.cpu_count(),
-                                       pin_memory=True)
+                                       num_workers=os.cpu_count(), pin_memory=True)
         self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
-        self._model.to("cuda")
+        # self._model.to("cuda")
 
         URM_train_coo = self.URM_train.tocoo()
 
         self.URM_tensor = torch.FloatTensor(torch.LongTensor([URM_train_coo.row.tolist(), URM_train_coo.col.tolist()]),
-                                            torch.FloatTensor(URM_train_coo.data.astype(np.float))).cuda()
+                                            torch.FloatTensor(URM_train_coo.data.astype(np.float)))#.cuda()
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
