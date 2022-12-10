@@ -276,7 +276,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
-            loss = self._loss_function(self._model, batch, self.URM_train)
+            loss = self._loss_function(self._model, batch, self.URM_tensor)
 
             # Compute gradients given current loss
             loss.backward()
