@@ -233,6 +233,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         self.URM_tensor = torch.sparse.FloatTensor(torch.LongTensor([URM_train_coo.row.tolist(), URM_train_coo.col.tolist()]),
                                             torch.FloatTensor(URM_train_coo.data.astype(np.float))).cuda()
+        self.URM_tensor.to("cuda")
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
