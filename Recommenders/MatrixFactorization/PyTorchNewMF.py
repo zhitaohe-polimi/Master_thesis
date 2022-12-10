@@ -24,7 +24,7 @@ def batch_dot(tensor_1, tensor_2):
     :return:
     """
     # torch.einsum("ki,ki->k", tensor_1, tensor_2)
-    return torch.einsum("ki,ki->k", tensor_1, tensor_2)#tensor_1.multiply(tensor_2).sum(axis=1)
+    return torch.einsum("ki,ki->k", tensor_1, tensor_2)  # tensor_1.multiply(tensor_2).sum(axis=1)
 
 
 class _SimpleMFModel(torch.nn.Module):
@@ -58,7 +58,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
         user_sim = torch.einsum("bi,ci->bc", URM[user], URM)
-        MF_u = batch_dot(self._embedding_user_u(), self._embedding_item_u(item))
+        total_user = torch.Tensor([self.n_users]).type(torch.LongTensor)
+        MF_u = batch_dot(self._embedding_user_u(total_user), self._embedding_item_u(item))
         prediction += torch.einsum("ik,jk->ij", user_sim, MF_u)
 
         item_sim = torch.einsum("ib,ic->bc", URM, URM[item])
