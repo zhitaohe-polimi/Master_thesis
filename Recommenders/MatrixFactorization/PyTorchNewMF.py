@@ -232,6 +232,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
         self.URM_tensor = torch.tensor(URM_array)
+        print(type(self.URM_tensor))
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
