@@ -42,7 +42,7 @@ class _SimpleMFModel(torch.nn.Module):
 class _SimpleNewMFModel(torch.nn.Module):
 
     def __init__(self, n_users, n_items, embedding_dim=20, embedding_dim_u=20, embedding_dim_i=20):
-        super(_SimpleMFModel, self).__init__()
+        super(_SimpleNewMFModel, self).__init__()
 
         self._embedding_user = torch.nn.Embedding(n_users, embedding_dim=embedding_dim)
         self._embedding_item = torch.nn.Embedding(n_items, embedding_dim=embedding_dim)
