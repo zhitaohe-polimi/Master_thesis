@@ -13,6 +13,7 @@ import numpy as np
 import torch, os
 from torch.utils.data import Dataset, DataLoader
 from torch.profiler import profile, record_function, ProfilerActivity
+from sklearn.preprocessing import normalize
 
 
 def batch_dot(tensor_1, tensor_2):
@@ -229,10 +230,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
         # self._model.to("cuda")
 
-        URM_train_coo = self.URM_train.tocoo()
-
-        self.URM_tensor = torch.sparse.FloatTensor(torch.LongTensor([URM_train_coo.row.tolist(), URM_train_coo.col.tolist()]),
-                                            torch.FloatTensor(URM_train_coo.data.astype(np.float)))
+        URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
+        self.URM_tensor = torch.tensor(URM_array)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
