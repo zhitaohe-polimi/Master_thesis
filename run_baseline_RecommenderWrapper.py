@@ -29,6 +29,7 @@ from Recommenders.MatrixFactorization.Cython.new_algo_with_MFAttention_Cython im
 from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_FunkSVD_Cython
 from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
 from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
+from Recommenders.MatrixFactorization.PyTorchNewMF import PyTorchMF_MSE_Recommender,PyTorchMF_BPR_Recommender
 from Conferences.HGB.HGB_our_interface.customized_PureSVDRecommender import customized_PureSVDRecommender
 # from Utils.ResultFolderLoader import ResultFolderLoader
 from Utils.assertions_on_data_for_experiments import assert_implicit_data, assert_disjoint_matrices
@@ -183,7 +184,9 @@ def read_data_split_and_search(args):
             # customized_PureSVDRecommender,
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
-            new_MatrixFactorization_FunkSVD_Cython,
+            # new_MatrixFactorization_FunkSVD_Cython,
+            PyTorchMF_MSE_Recommender,
+            # PyTorchMF_BPR_Recommender,
         ]
 
         n_cases = 300

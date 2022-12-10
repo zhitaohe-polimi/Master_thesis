@@ -36,6 +36,7 @@ from Recommenders.MatrixFactorization.NMFRecommender import NMFRecommender
 from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_BPR_Cython,\
     MatrixFactorization_FunkSVD_Cython, MatrixFactorization_AsySVD_Cython
 from Recommenders.MatrixFactorization.Cython.new_algo_with_MFAttention_Cython import new_MatrixFactorization_FunkSVD_Cython
+from Recommenders.MatrixFactorization.PyTorchNewMF import PyTorchMF_MSE_Recommender,PyTorchMF_BPR_Recommender
 
 from Recommenders.Neural.MultVAERecommender import MultVAERecommender_OptimizerMask as MultVAERecommender
 # from Recommenders.FactorizationMachines.LightFMRecommender import LightFMCFRecommender
@@ -891,6 +892,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         ##########################################################################################################
 
+
         if recommender_class is IALSRecommender:
 
             hyperparameters_range_dictionary = {
@@ -909,6 +911,33 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 FIT_KEYWORD_ARGS = {},
                 EARLYSTOPPING_KEYWORD_ARGS = earlystopping_keywargs,
             )
+
+
+        ##########################################################################################################
+
+
+
+        if recommender_class is PyTorchMF_BPR_Recommender:
+
+            hyperparameters_range_dictionary = {
+                "num_factors": Integer(1, 200),
+                "num_factors_u":Integer(1, 200),
+                "num_factors_i":Integer(1, 200),
+                "epochs": Categorical([300]),
+                "sgd_mode": Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
+                "batch_size": Categorical([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]),
+                "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
+                "l2_reg": Real(low = 1e-5, high = 1e-2, prior = 'log-uniform'),
+            }
+
+            recommender_input_args = SearchInputRecommenderArgs(
+                CONSTRUCTOR_POSITIONAL_ARGS = [URM_train],
+                CONSTRUCTOR_KEYWORD_ARGS = {},
+                FIT_POSITIONAL_ARGS = [],
+                FIT_KEYWORD_ARGS = {},
+                EARLYSTOPPING_KEYWORD_ARGS = earlystopping_keywargs,
+            )
+
 
 
         ##########################################################################################################
