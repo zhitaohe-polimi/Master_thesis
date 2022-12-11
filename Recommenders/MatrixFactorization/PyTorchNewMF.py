@@ -201,11 +201,12 @@ def loss_MSE(model, batch, URM, n_user, n_item):
     return loss
 
 
-def loss_BPR(model, batch):
+def loss_BPR(model, batch, URM, n_user, n_item):
     user, item_positive, item_negative = batch
 
     # Compute prediction for each element in batch
-    x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
+    x_ij = model.forward(user, item_positive, URM, n_user, n_item) - model.forward(user, item_negative, URM, n_user,
+                                                                                   n_item)
 
     # Compute total loss for batch
     loss = -x_ij.sigmoid().log().mean()
@@ -253,10 +254,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         #
         self._model.to(device)
         self.URM_tensor.to(device)
-
-
-
-
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
