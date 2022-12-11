@@ -254,7 +254,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         else:
             device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
-        self._model.to("cuda")
+        # self._model.to("cuda")
         self.URM_tensor.to("cuda")
 
         if sgd_mode.lower() == "adagrad":
