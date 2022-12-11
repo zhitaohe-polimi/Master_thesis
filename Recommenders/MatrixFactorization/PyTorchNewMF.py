@@ -244,6 +244,20 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
         self.URM_tensor = torch.tensor(URM_array)
 
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+            print("MF_MSE_PyTorch: Using CUDA")
+        else:
+            device = torch.device('cpu')
+            print("MF_MSE_PyTorch: Using CPU")
+
+        self._model.to(device)
+        self.URM_tensor.to(device)
+
+
+
+
+
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
