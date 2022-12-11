@@ -55,7 +55,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, URM, n_user, n_item):
-        print(self._embedding_user.device,self._embedding_item.device)
+        # print(self._embedding_user.device,self._embedding_item.device)
         print(URM.device)
         # prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
         # # print(self._embedding_user(user).shape, self._embedding_item(item).shape, prediction.shape)
