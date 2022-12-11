@@ -55,8 +55,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, URM, n_user, n_item):
-        user=user.to("cuda")
-        item=item.to("cuda")
+        # user=user.to("cuda")
+        # item=item.to("cuda")
         # print(self._embedding_user.device,self._embedding_item.device)
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
         # print(self._embedding_user(user).shape, self._embedding_item(item).shape, prediction.shape)
@@ -192,7 +192,18 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-def loss_MSE(model, batch, URM, n_user, n_item):
+def loss_MSE(model, batch):
+    user, item, rating = batch
+
+    # Compute prediction for each element in batch
+    prediction = model.forward(user, item)
+
+    # Compute total loss for batch
+    loss = (prediction - rating).pow(2).mean()
+
+    return loss
+
+def loss_MSE_new(model, batch, URM, n_user, n_item):
     user, item, rating = batch
 
     # Compute prediction for each element in batch
@@ -204,7 +215,18 @@ def loss_MSE(model, batch, URM, n_user, n_item):
     return loss
 
 
-def loss_BPR(model, batch, URM, n_user, n_item):
+def loss_BPR(model, batch):
+    user, item_positive, item_negative = batch
+
+    # Compute prediction for each element in batch
+    x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
+
+    # Compute total loss for batch
+    loss = -x_ij.sigmoid().log().mean()
+
+    return loss
+
+def loss_BPR_new(model, batch, URM, n_user, n_item):
     user, item_positive, item_negative = batch
 
     # Compute prediction for each element in batch
@@ -299,7 +321,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
-            loss = self._loss_function(self._model, batch, self.URM_tensor, self.n_users, self.n_items)
+            loss = self._loss_function(self._model, batch)
+            # loss = self._loss_function(self._model, batch, self.URM_tensor, self.n_users, self.n_items)
 
             # Compute gradients given current loss
             loss.backward()
