@@ -55,6 +55,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, URM, n_user, n_item):
+        user=user.to("cuda")
+        item=item.to("cuda")
         # print(self._embedding_user.device,self._embedding_item.device)
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
         # print(self._embedding_user(user).shape, self._embedding_item(item).shape, prediction.shape)
@@ -255,9 +257,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         self._model.to(device)
         self.URM_tensor.to(device)
-
-
-        print(self._model.is_cuda)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
