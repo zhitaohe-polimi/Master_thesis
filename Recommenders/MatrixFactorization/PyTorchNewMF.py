@@ -72,7 +72,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         print(item_sim.shape)
         item_list = list(range(n_item))
         total_item = torch.Tensor(item_list).type(torch.LongTensor)
-        MF_i = batch_dot("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(total_item))
+        MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(total_item))
         prediction += torch.einsum("bi,ib->b", MF_i, item_sim)
         print(prediction.shape)
 
