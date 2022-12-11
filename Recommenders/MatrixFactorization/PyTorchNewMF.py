@@ -191,7 +191,6 @@ class BPR_Dataset(Dataset):
 
 def loss_MSE(model, batch, URM, n_user, n_item):
     user, item, rating = batch
-    print(type(user))
 
     # Compute prediction for each element in batch
     prediction = model.forward(user, item, URM, n_user, n_item)
