@@ -55,29 +55,22 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, URM, n_user, n_item):
-        # user=user.to("cuda")
-        # item=item.to("cuda")
-        # print(self._embedding_user.device,self._embedding_item.device)
+        user = user.to("cuda")
+        item = item.to("cuda")
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
-        # print(self._embedding_user(user).shape, self._embedding_item(item).shape, prediction.shape)
         user_sim = torch.einsum("bi,ci->bc", URM[user], URM)
-        # print(user_sim.shape)
         user_list = list(range(n_user))
         total_user = torch.Tensor(user_list).type(torch.LongTensor)
-        # print(user, item, total_user.shape, item.shape)
-        # print(self._embedding_user_u(total_user).shape, self._embedding_item_u(item).shape)
         MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(total_user), self._embedding_item_u(item))
         # print("MF_u.shape: ", MF_u.shape)
         prediction += torch.einsum("bi,ib->b", user_sim, MF_u)
         # print("prediction.shape: ", prediction.shape)
 
         item_sim = torch.einsum("ib,ic->bc", URM, URM[:, item])
-        # print(item_sim.shape)
         item_list = list(range(n_item))
         total_item = torch.Tensor(item_list).type(torch.LongTensor)
         MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(total_item))
         prediction += torch.einsum("bi,ib->b", MF_i, item_sim)
-        # print(prediction.shape)
 
         return prediction
 
@@ -203,6 +196,7 @@ def loss_MSE(model, batch):
 
     return loss
 
+
 def loss_MSE_new(model, batch, URM, n_user, n_item):
     user, item, rating = batch
 
@@ -225,6 +219,7 @@ def loss_BPR(model, batch):
     loss = -x_ij.sigmoid().log().mean()
 
     return loss
+
 
 def loss_BPR_new(model, batch, URM, n_user, n_item):
     user, item_positive, item_negative = batch
@@ -353,5 +348,5 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         self._loss_function = loss_MSE_new
 
     def fit(self, positive_quota=0.5, **kwargs):
-        self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota).to("cuda")
+        self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
         super(PyTorchMF_MSE_Recommender, self).fit(**kwargs)
