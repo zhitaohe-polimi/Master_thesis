@@ -190,7 +190,7 @@ def read_data_split_and_search(args):
             # PyTorchMF_BPR_Recommender,
         ]
 
-        n_cases = 300
+        n_cases = 200
 
         # runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
         #                                                    URM_train=URM_train,
