@@ -65,7 +65,9 @@ class _SimpleNewMFModel(torch.nn.Module):
         # print(user, item, total_user.shape, item.shape)
         print(self._embedding_user_u(total_user).shape, self._embedding_item_u(item).shape)
         MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(total_user), self._embedding_item_u(item))
-        # prediction += torch.einsum("ik,jk->ij", user_sim, MF_u)
+        print("MF_u.shape: ", MF_u.shape)
+        prediction += torch.einsum("ik,jk->ij", user_sim, MF_u)
+        print("prediction.shape: ", prediction.shape)
 
         # item_sim = torch.einsum("ib,ic->bc", URM, URM[item])
         # item_list = list(range(n_item))
