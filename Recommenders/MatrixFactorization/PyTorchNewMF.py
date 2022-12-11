@@ -256,6 +256,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model.to(device)
         self.URM_tensor.to(device)
 
+
+        print(self._model.is_cuda)
+
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
