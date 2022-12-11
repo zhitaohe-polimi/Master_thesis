@@ -56,21 +56,20 @@ class _SimpleNewMFModel(torch.nn.Module):
 
     def forward(self, user, item, URM, n_user, n_item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
-        print(self._embedding_user(user).shape, self._embedding_item(item).shape, prediction.shape)
-        # print(prediction)
-
+        # print(self._embedding_user(user).shape, self._embedding_item(item).shape, prediction.shape)
         user_sim = torch.einsum("bi,ci->bc", URM[user], URM)
         # print(user_sim.shape)
         user_list = list(range(n_user))
         total_user = torch.Tensor(user_list).type(torch.LongTensor)
         # print(user, item, total_user.shape, item.shape)
-        print(self._embedding_user_u(total_user).shape, self._embedding_item_u(item).shape)
+        # print(self._embedding_user_u(total_user).shape, self._embedding_item_u(item).shape)
         MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(total_user), self._embedding_item_u(item))
-        print("MF_u.shape: ", MF_u.shape)
+        # print("MF_u.shape: ", MF_u.shape)
         prediction += torch.einsum("bi,ib->b", user_sim, MF_u)
-        print("prediction.shape: ", prediction.shape)
+        # print("prediction.shape: ", prediction.shape)
 
-        # item_sim = torch.einsum("ib,ic->bc", URM, URM[item])
+        item_sim = torch.einsum("ib,ic->bc", URM, URM[:, item])
+        print(item_sim.shape)
         # item_list = list(range(n_item))
         # total_item = torch.Tensor([item_list]).type(torch.LongTensor)
         # MF_i = batch_dot(self._embedding_user_i(user), self._embedding_user_i(total_item))
