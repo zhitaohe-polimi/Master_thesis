@@ -250,11 +250,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         if torch.cuda.is_available():
             device = torch.device('cuda')
+            torch.cuda.set_device(1)
             print("MF_MSE_PyTorch: Using CUDA")
         else:
             device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
-
         self._model.to(device)
         self.URM_tensor.to(device)
 
