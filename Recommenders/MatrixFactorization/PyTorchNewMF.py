@@ -239,10 +239,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
 
-        self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
-                                        embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
+        # self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
+        #                                 embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
-        # self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
+        self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
         # self._model.to("cuda")
 
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
@@ -254,8 +254,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         else:
             device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
-        # self._model.to("cuda")
-        self.URM_tensor.to("cuda")
+        self._model.to("cuda")
+        # self.URM_tensor.to("cuda")
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
