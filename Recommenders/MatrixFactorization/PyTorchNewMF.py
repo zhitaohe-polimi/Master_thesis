@@ -24,7 +24,7 @@ def batch_dot(tensor_1, tensor_2):
     :return:
     """
     # torch.einsum("ki,ki->k", tensor_1, tensor_2)
-    return tensor_1.multiply(tensor_2).sum(axis=1)
+    return torch.einsum("ki,ki->k", tensor_1, tensor_2) #tensor_1.multiply(tensor_2).sum(axis=1)
 
 
 class _SimpleMFModel(torch.nn.Module):
