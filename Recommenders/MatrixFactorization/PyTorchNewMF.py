@@ -67,7 +67,7 @@ class _SimpleNewMFModel(torch.nn.Module):
 
         item_sim = items_sim[item]
         MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items)).to("cuda")
-        prediction += torch.einsum("bi,bi->b", MF_i, item_sim)
+        prediction += torch.einsum("bi,bi->b", item_sim, MF_i)
 
         return prediction
 
@@ -301,11 +301,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             print(np.dot(self.USER_factors_u[user_id_array], self.ITEM_factors_u.T).shape)
             print(items_sim.shape)
             print(np.dot(self.USER_factors_i[user_id_array], self.ITEM_factors_i.T).T.shape)
-            # item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T) \
-            #               + np.dot(users_sim[user_id_array],
-            #                        np.dot(self.USER_factors_u[user_id_array], self.ITEM_factors_u.T)) \
-            #               + np.dot(items_sim,
-            #                        np.dot(self.USER_factors_i[user_id_array], self.ITEM_factors_i.T).T)
+            item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T) \
+                          + np.dot(users_sim[user_id_array],
+                                   np.dot(self.USER_factors_u[user_id_array], self.ITEM_factors_u.T)) \
+                          + np.dot(items_sim,
+                                   np.dot(self.USER_factors_i[user_id_array], self.ITEM_factors_i.T).T)
 
         # No need to select only the specific negative items or warm users because the -inf score will not change
         # if self.use_bias:
