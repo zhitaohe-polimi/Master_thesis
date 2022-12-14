@@ -330,25 +330,17 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
-        # self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
-        # self._model.to("cuda")
-
-        URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
-        self.URM_tensor = torch.tensor(URM_array)
-
         self._model = self._model.to(device)
-        self.URM_tensor = self.URM_tensor.to(device)
+        
+        URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
+        self.URM_tensor = torch.tensor(URM_array).to(device)
 
         user_list = list(range(self.n_users))
-        self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
-        self.all_users = self.all_users.to(device)
-
+        self.all_users = torch.Tensor(user_list).type(torch.LongTensor).to(device)
         self.user_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor).to(device)
 
         item_list = list(range(self.n_items))
-        self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
-        self.all_items = self.all_items.to(device)
-
+        self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
         self.item_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor).to(device)
 
         if sgd_mode.lower() == "adagrad":
