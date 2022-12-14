@@ -401,7 +401,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             # loss = self._loss_function(self._model, batch)
-            loss = self._loss_function(self._model, batch, self.user_sim, self.item_sim, self.all_users, self.all_items)
+            loss = self._loss_function(self._model, batch, self.users_sim, self.items_sim, self.all_users, self.all_items)
 
             # Compute gradients given current loss
             loss.backward()
