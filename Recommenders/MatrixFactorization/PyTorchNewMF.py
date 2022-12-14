@@ -14,6 +14,7 @@ import torch, os
 from torch.utils.data import Dataset, DataLoader
 from torch.profiler import profile, record_function, ProfilerActivity
 from sklearn.preprocessing import normalize
+from tqdm.notebook import tqdm
 
 
 def batch_dot(tensor_1, tensor_2):
@@ -54,25 +55,22 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_user_i = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_i)
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
-    def forward(self, user, item, URM, n_user, n_item):
+    def forward(self, user, item, URM, all_users, all_items):
         user = user.to("cuda")
         item = item.to("cuda")
+        all_users = all_users.to("cuda")
+        all_items = all_items.to("cuda")
+
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
+
         user_sim = torch.einsum("bi,ci->bc", URM[user], URM).to("cuda")
-        user_list = list(range(n_user))
-        total_user = torch.Tensor(user_list).type(torch.LongTensor)
-        total_user = total_user.to("cuda")
-        MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(total_user), self._embedding_item_u(item)).to("cuda")
+        MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(all_users), self._embedding_item_u(item)).to("cuda")
         # print("MF_u.shape: ", MF_u.shape)
         prediction += torch.einsum("bi,ib->b", user_sim, MF_u)
-        # print("prediction.shape: ", prediction.shape)
 
-        item_sim = torch.einsum("ib,ic->bc", URM, URM[:, item]).to("cuda")
-        item_list = list(range(n_item))
-        total_item = torch.Tensor(item_list).type(torch.LongTensor)
-        total_item = total_item.to("cuda")
-        MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(total_item)).to("cuda")
-        prediction += torch.einsum("bi,ib->b", MF_i, item_sim)
+        item_sim = torch.einsum("ib,ic->bc", URM[:, item], URM).to("cuda")
+        MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items)).to("cuda")
+        prediction += torch.einsum("bi,bi->b", MF_i, item_sim)
 
         return prediction
 
@@ -199,11 +197,11 @@ def loss_MSE(model, batch):
     return loss
 
 
-def loss_MSE_new(model, batch, URM, n_user, n_item):
+def loss_MSE_new(model, batch, URM, all_users, all_items):
     user, item, rating = batch
 
     # Compute prediction for each element in batch
-    prediction = model.forward(user, item, URM, n_user, n_item)
+    prediction = model.forward(user, item, URM, all_users, all_items)
 
     rating = rating.to("cuda")
 
@@ -225,12 +223,15 @@ def loss_BPR(model, batch):
     return loss
 
 
-def loss_BPR_new(model, batch, URM, n_user, n_item):
+def loss_BPR_new(model, batch, URM, all_users, all_items):
     user, item_positive, item_negative = batch
+    item_positive = item_positive.to("cuda")
+    item_negative = item_negative.to("cuda")
 
     # Compute prediction for each element in batch
-    x_ij = model.forward(user, item_positive, URM, n_user, n_item) - model.forward(user, item_negative, URM, n_user,
-                                                                                   n_item)
+    x_ij = model.forward(user, item_positive, URM, all_users, all_items) - model.forward(user, item_negative, URM,
+                                                                                         all_users,
+                                                                                         all_items)
 
     # Compute total loss for batch
     loss = -x_ij.sigmoid().log().mean()
@@ -275,8 +276,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         else:
             device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
+
         self._model.to("cuda")
         self.URM_tensor.to("cuda")
+        user_list = list(range(self.n_users))
+        self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
+        item_list = list(range(self.n_items))
+        self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
@@ -316,12 +322,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
-        for batch in self._data_loader:
+        for batch in tqdm(self._data_loader):
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
             # loss = self._loss_function(self._model, batch)
-            loss = self._loss_function(self._model, batch, self.URM_tensor, self.n_users, self.n_items)
+            loss = self._loss_function(self._model, batch, self.URM_tensor, self.all_users, self.all_items)
 
             # Compute gradients given current loss
             loss.backward()
