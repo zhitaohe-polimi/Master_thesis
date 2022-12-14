@@ -14,7 +14,6 @@ import torch, os
 from torch.utils.data import Dataset, DataLoader
 from torch.profiler import profile, record_function, ProfilerActivity
 from sklearn.preprocessing import normalize
-from tqdm.notebook import tqdm
 
 
 def batch_dot(tensor_1, tensor_2):
@@ -69,6 +68,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         item_sim = torch.einsum("ib,ic->bc", URM[:, item], URM).to("cuda")
         MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items)).to("cuda")
         prediction += torch.einsum("bi,bi->b", MF_i, item_sim)
+
+        print(prediction.shape)
 
         return prediction
 
@@ -257,10 +258,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             **earlystopping_kwargs):
 
         if torch.cuda.is_available():
-            self.device = torch.device('cuda')
+            device = torch.device('cuda')
             print("MF_MSE_PyTorch: Using CUDA")
         else:
-            self.device = torch.device('cpu')
+            device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
 
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
@@ -275,16 +276,16 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
         self.URM_tensor = torch.tensor(URM_array)
 
-        self._model = self._model.to(self.device)
-        self.URM_tensor = self.URM_tensor.to(self.device)
+        self._model = self._model.to(device)
+        self.URM_tensor = self.URM_tensor.to(device)
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
-        self.all_users = self.all_users.to(self.device)
+        self.all_users = self.all_users.to(device)
 
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
-        self.all_items = self.all_items.to(self.device)
+        self.all_items = self.all_items.to(device)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
@@ -336,7 +337,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
-        for batch in tqdm(self._data_loader):
+        for batch in self._data_loader:
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
