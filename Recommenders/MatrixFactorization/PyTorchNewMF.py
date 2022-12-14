@@ -56,10 +56,10 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, URM, all_users, all_items):
-        user = user.to("cuda")
-        item = item.to("cuda")
-        all_users = all_users.to("cuda")
-        all_items = all_items.to("cuda")
+        # user = user.to("cuda")
+        # item = item.to("cuda")
+        # all_users = all_users.to("cuda")
+        # all_items = all_items.to("cuda")
 
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
@@ -271,18 +271,22 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.URM_tensor = torch.tensor(URM_array)
 
         if torch.cuda.is_available():
-            device = torch.device('cuda')
+            self.device = torch.device('cuda')
             print("MF_MSE_PyTorch: Using CUDA")
         else:
-            device = torch.device('cpu')
+            self.device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
 
-        self._model.to("cuda")
-        self.URM_tensor.to("cuda")
+        self._model = self._model.to(self.device)
+        self.URM_tensor = self.URM_tensor.to(self.device)
+
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
+        self.all_users = self.all_users.to(self.device)
+        
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
+        self.all_items = self.all_items.to(self.device)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
@@ -315,9 +319,21 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
         self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
 
+        self.USER_factors_u = self._model._embedding_user_u.weight.detach().cpu().numpy()
+        self.ITEM_factors_u = self._model._embedding_item_u.weight.detach().cpu().numpy()
+
+        self.USER_factors_i = self._model._embedding_user_i.weight.detach().cpu().numpy()
+        self.ITEM_factors_i = self._model._embedding_item_i.weight.detach().cpu().numpy()
+
     def _update_best_model(self):
         self.USER_factors_best = self._model._embedding_user.weight.detach().cpu().numpy()
         self.ITEM_factors_best = self._model._embedding_item.weight.detach().cpu().numpy()
+
+        self.USER_factors_best_u = self._model._embedding_user_u.weight.detach().cpu().numpy()
+        self.ITEM_factors_best_u = self._model._embedding_item_u.weight.detach().cpu().numpy()
+
+        self.USER_factors_best_i = self._model._embedding_user_i.weight.detach().cpu().numpy()
+        self.ITEM_factors_best_i = self._model._embedding_item_i.weight.detach().cpu().numpy()
 
     def _run_epoch(self, num_epoch):
 
