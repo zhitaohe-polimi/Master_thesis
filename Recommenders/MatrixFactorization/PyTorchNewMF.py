@@ -297,15 +297,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                                                                self.ITEM_factors_i[items_to_compute, :].T).T)
 
         else:
-            print(users_sim[user_id_array].shape)
-            print(np.dot(self.USER_factors_u[user_id_array], self.ITEM_factors_u.T).shape)
-            print(items_sim.shape)
-            print(np.dot(self.USER_factors_i[user_id_array], self.ITEM_factors_i.T).T.shape)
             item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T) \
                           + np.dot(users_sim[user_id_array],
                                    np.dot(self.USER_factors_u, self.ITEM_factors_u.T)) \
                           + np.dot(items_sim,
-                                   np.dot(self.USER_factors_i[user_id_array], self.ITEM_factors_i.T).T)
+                                   np.dot(self.USER_factors_i[user_id_array], self.ITEM_factors_i.T).T).T
 
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
