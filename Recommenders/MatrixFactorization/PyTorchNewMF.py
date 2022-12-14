@@ -56,10 +56,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, URM, all_users, all_items):
-        # user = user.to("cuda")
-        # item = item.to("cuda")
-        # all_users = all_users.to("cuda")
-        # all_items = all_items.to("cuda")
+        user = user.to(self.device)
+        item = item.to(self.device)
 
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
@@ -258,6 +256,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             learning_rate=1e-2,
             **earlystopping_kwargs):
 
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+            print("MF_MSE_PyTorch: Using CUDA")
+        else:
+            self.device = torch.device('cpu')
+            print("MF_MSE_PyTorch: Using CPU")
+
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
 
@@ -270,20 +275,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
         self.URM_tensor = torch.tensor(URM_array)
 
-        if torch.cuda.is_available():
-            self.device = torch.device('cuda')
-            print("MF_MSE_PyTorch: Using CUDA")
-        else:
-            self.device = torch.device('cpu')
-            print("MF_MSE_PyTorch: Using CPU")
-
         self._model = self._model.to(self.device)
         self.URM_tensor = self.URM_tensor.to(self.device)
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
         self.all_users = self.all_users.to(self.device)
-        
+
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
         self.all_items = self.all_items.to(self.device)
