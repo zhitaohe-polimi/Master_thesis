@@ -340,15 +340,18 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = self._model.to(device)
 
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
-        self.URM_tensor = torch.tensor(URM_array).to(device)
+        self.URM_tensor = torch.tensor(URM_array)
+        self.URM_tensor = self.URM_tensor.to(device)
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor).to(device)
-        self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor).to(device)
+        self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
+        self.users_sim = self.users_sim.to(device)
 
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
-        self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor).to(device)
+        self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
+        self.users_sim = self.users_sim.to(device)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
