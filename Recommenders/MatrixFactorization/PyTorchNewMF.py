@@ -56,8 +56,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, URM, all_users, all_items):
-        user = user.to(self.device)
-        item = item.to(self.device)
+        # user = user.to("cuda")
+        # item = item.to("cuda")
 
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
@@ -266,7 +266,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
 
-        self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
+        self._model = _SimpleNewMFModel(self.n_users.to(self.device), self.n_items.to(self.device), embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
         # self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
