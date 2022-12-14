@@ -56,8 +56,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, URM, all_users, all_items):
-        # user = user.to("cuda")
-        # item = item.to("cuda")
+        user = user.to("cuda")
+        item = item.to("cuda")
 
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
@@ -341,7 +341,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             # loss = self._loss_function(self._model, batch)
-            loss = self._loss_function(self._model, batch.to(self.device), self.URM_tensor, self.all_users, self.all_items)
+            loss = self._loss_function(self._model, batch, self.URM_tensor, self.all_users, self.all_items)
 
             # Compute gradients given current loss
             loss.backward()
