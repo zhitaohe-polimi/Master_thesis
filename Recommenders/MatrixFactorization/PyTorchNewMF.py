@@ -266,7 +266,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
 
-        self._model = _SimpleNewMFModel(self.n_users.to(self.device), self.n_items.to(self.device), embedding_dim=num_factors,
+        self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
         # self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
@@ -341,7 +341,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             # loss = self._loss_function(self._model, batch)
-            loss = self._loss_function(self._model, batch, self.URM_tensor, self.all_users, self.all_items)
+            loss = self._loss_function(self._model, batch.to(self.device), self.URM_tensor, self.all_users, self.all_items)
 
             # Compute gradients given current loss
             loss.backward()
