@@ -282,8 +282,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
-        users_sim = self.users_sim.detach().cpu().numpy()
-        items_sim = self.items_sim.detach().cpu().numpy()
+        users_sim = self.users_sim  # .detach().cpu().numpy()
+        items_sim = self.items_sim  # .detach().cpu().numpy()
+        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
 
         if items_to_compute is not None:
             item_scores = - np.ones((len(user_id_array), self.ITEM_factors.shape[0]), dtype=np.float32) * np.inf
@@ -297,11 +298,19 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                                                                self.ITEM_factors_i[items_to_compute, :].T).T)
 
         else:
-            item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T) \
-                          + np.dot(users_sim[user_id_array],
-                                   np.dot(self.USER_factors_u, self.ITEM_factors_u.T)) \
-                          + np.dot(items_sim,
-                                   np.dot(self.USER_factors_i[user_id_array], self.ITEM_factors_i.T).T).T
+            item_scores = torch.einsum("bi,ci->bc", self.USER_factors(user_id_array), self.ITEM_factors).to("cuda")
+            MF_1 = torch.einsum("bi,ci->bc", self.USER_factors_u, self.ITEM_factors_u).to("cuda")
+            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1).to("cuda")
+            MF_2 = torch.einsum("bi,ci->bc", self.USER_factors_i[user_id_array], self.ITEM_factors_i).to("cuda")
+            item_scores += torch.einsum("bi,ic->cb", items_sim, MF_2).to("cuda")
+
+            item_scores = item_scores.detach().cpu().numpy()
+
+            # item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T) \
+            #               + np.dot(users_sim[user_id_array],
+            #                        np.dot(self.USER_factors_u, self.ITEM_factors_u.T)) \
+            #               + np.dot(np.dot(self.USER_factors_i[user_id_array], self.ITEM_factors_i.T),
+            #                        items_sim)
 
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
@@ -383,24 +392,24 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.ITEM_factors_i = self.ITEM_factors_best_i.copy()
 
     def _prepare_model_for_validation(self):
-        self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
-        self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
+        self.USER_factors = self._model._embedding_user  # .weight.detach().cpu().numpy()
+        self.ITEM_factors = self._model._embedding_item  # .weight.detach().cpu().numpy()
 
-        self.USER_factors_u = self._model._embedding_user_u.weight.detach().cpu().numpy()
-        self.ITEM_factors_u = self._model._embedding_item_u.weight.detach().cpu().numpy()
+        self.USER_factors_u = self._model._embedding_user_u  # .weight.detach().cpu().numpy()
+        self.ITEM_factors_u = self._model._embedding_item_u  # .weight.detach().cpu().numpy()
 
-        self.USER_factors_i = self._model._embedding_user_i.weight.detach().cpu().numpy()
-        self.ITEM_factors_i = self._model._embedding_item_i.weight.detach().cpu().numpy()
+        self.USER_factors_i = self._model._embedding_user_i  # .weight.detach().cpu().numpy()
+        self.ITEM_factors_i = self._model._embedding_item_i  # .weight.detach().cpu().numpy()
 
     def _update_best_model(self):
-        self.USER_factors_best = self._model._embedding_user.weight.detach().cpu().numpy()
-        self.ITEM_factors_best = self._model._embedding_item.weight.detach().cpu().numpy()
+        self.USER_factors_best = self._model._embedding_user  # .weight.detach().cpu().numpy()
+        self.ITEM_factors_best = self._model._embedding_item  # .weight.detach().cpu().numpy()
 
-        self.USER_factors_best_u = self._model._embedding_user_u.weight.detach().cpu().numpy()
-        self.ITEM_factors_best_u = self._model._embedding_item_u.weight.detach().cpu().numpy()
+        self.USER_factors_best_u = self._model._embedding_user_u  # .weight.detach().cpu().numpy()
+        self.ITEM_factors_best_u = self._model._embedding_item_u  # .weight.detach().cpu().numpy()
 
-        self.USER_factors_best_i = self._model._embedding_user_i.weight.detach().cpu().numpy()
-        self.ITEM_factors_best_i = self._model._embedding_item_i.weight.detach().cpu().numpy()
+        self.USER_factors_best_i = self._model._embedding_user_i  # .weight.detach().cpu().numpy()
+        self.ITEM_factors_best_i = self._model._embedding_item_i  # .weight.detach().cpu().numpy()
 
     def _run_epoch(self, num_epoch):
 
@@ -410,7 +419,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             # loss = self._loss_function(self._model, batch)
-            loss = self._loss_function(self._model, batch, self.users_sim, self.items_sim, self.all_users, self.all_items)
+            loss = self._loss_function(self._model, batch, self.users_sim, self.items_sim, self.all_users,
+                                       self.all_items)
 
             # Compute gradients given current loss
             loss.backward()
