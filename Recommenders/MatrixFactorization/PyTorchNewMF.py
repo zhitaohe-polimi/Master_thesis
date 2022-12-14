@@ -68,9 +68,6 @@ class _SimpleNewMFModel(torch.nn.Module):
         item_sim = items_sim[item]
         MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items)).to("cuda")
         prediction += torch.einsum("bi,bi->b", MF_i, item_sim)
-        print(item_sim.shape,MF_i.shape)
-
-        print(prediction.shape)
 
         return prediction
 
