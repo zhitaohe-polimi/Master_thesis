@@ -290,7 +290,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # ITEM_factors_u = torch.tensor(self.ITEM_factors_u).to("cuda")
         # USER_factors_i = torch.tensor(self.USER_factors_i).to("cuda")
         # ITEM_factors_i = torch.tensor(self.ITEM_factors_i).to("cuda")
-        print(user_id_array)
+        print(user_id_array.shape)
         # user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
 
         if items_to_compute is not None:
