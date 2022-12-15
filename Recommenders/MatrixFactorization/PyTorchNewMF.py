@@ -306,14 +306,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         else:
             item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors).to("cuda")
-            print(item_scores.shape)
             MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u).to("cuda")
             item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1).to("cuda")
-            print(MF_1.shape)
             MF_2 = torch.einsum("bi,ci->bc", USER_factors_i[user_id_array], ITEM_factors_i).to("cuda")
-            print(MF_2.shape)
-            #item_scores += torch.einsum("bi,ic->cb", items_sim, MF_2).to("cuda")
-            #
+            item_scores += torch.einsum("bi,ic->bc", MF_2, items_sim).to("cuda")
             item_scores = item_scores.detach().cpu().numpy()
 
             # item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T) \
