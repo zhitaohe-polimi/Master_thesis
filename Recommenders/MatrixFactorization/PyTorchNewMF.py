@@ -335,6 +335,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.items_sim = torch.einsum("ib,ib->b", self.URM_tensor, self.URM_tensor)
         # set all elements in diagnal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
+        print(self.users_sim)
         self.items_sim = self.items_sim.to(device)
 
         if sgd_mode.lower() == "adagrad":
