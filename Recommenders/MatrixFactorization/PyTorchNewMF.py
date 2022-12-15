@@ -331,7 +331,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # users_sim_diag = torch.diag_embed(users_get_diag)
         # # get the tensor of user similarity without main diagnal
         # users_sim = users_sim-users_sim_diag
-        users_sim_array = users_sim.detach().cpu().array()
+        users_sim_array = users_sim.detach().cpu().numpy()
         users_sim_array[np.diag_indices_from(users_sim_array)] = 0
         self.users_sim = torch.tensor(users_sim_array).to(device)
 
@@ -344,7 +344,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # items_sim_diag = torch.diag_embed(items_get_diag)
         # # get the tensor of item similarity without main diagnal
         # items_sim = items_sim - items_sim_diag
-        items_sim_array = items_sim.detach().cpu().array()
+        items_sim_array = items_sim.detach().cpu().numpy()
         items_sim_array[np.diag_indices_from(items_sim_array)] = 0
         self.items_sim = torch.tensor(items_sim_array).to(device)
 
