@@ -325,16 +325,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor).to(device)
         self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
-        # get the diagnal values of the matrix of user similarity
-        # users_get_diag = torch.diag(self.users_sim)
-        # # get the tensor of user similarity without main diagnal
-        # self.users_sim = self.users_sim-torch.diag_embed(users_get_diag)
-
-        # # from tensor convert into np.array
-        # self.users_sim = self.users_sim.detach().cpu().numpy()
-        # # set all elements in diagnal to 0
-        # self.users_sim[np.diag_indices_from(self.users_sim)] = 0
-        # # convert it to tensor
+        # set all elements in diagnal to 0
         self.users_sim = self.users_sim.fill_diagonal_(0)
         self.users_sim = self.users_sim.to(device)
 
@@ -342,16 +333,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
         self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
-        # get the diagnal values of the matrix of item similarity
-        # items_get_diag = torch.diag(self.items_sim)
-        # get the tensor of item similarity without main diagnal
-        # self.items_sim = self.items_sim - torch.diag_embed(items_get_diag)
-
-        # #from tensor convert into np.array
-        # self.items_sim = self.items_sim.detach().cpu().numpy()
-        # # set all elements in diagnal to 0
-        # self.items_sim[np.diag_indices_from(self.items_sim)] = 0
-        # # convert it to tensor
+        # set all elements in diagnal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
         self.items_sim = self.items_sim.to(device)
 
