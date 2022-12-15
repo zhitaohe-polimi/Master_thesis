@@ -324,7 +324,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor).to(device)
-        self.users_sim = torch.einsum("bi,bi->b", self.URM_tensor, self.URM_tensor)
+        self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
         # set all elements in diagnal to 0
         self.users_sim = self.users_sim.fill_diagonal_(0)
         self.users_sim = self.users_sim.to(device)
@@ -332,7 +332,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
-        self.items_sim = torch.einsum("ib,ib->b", self.URM_tensor, self.URM_tensor)
+        self.items_sim = torch.einsum("ib,ic->c", self.URM_tensor, self.URM_tensor)
         # set all elements in diagnal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
         print(self.users_sim)
