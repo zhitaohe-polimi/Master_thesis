@@ -54,7 +54,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_user_i = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_i)
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
-    def forward_new(self, user, item, users_sim, items_sim, all_users, all_items):
+    def forward(self, user, item, users_sim, items_sim, all_users, all_items):
         user = user.to("cuda")
         item = item.to("cuda")
 
@@ -68,25 +68,6 @@ class _SimpleNewMFModel(torch.nn.Module):
         item_sim = items_sim[item]
         MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items)).to("cuda")
         prediction += torch.einsum("bi,bi->b", item_sim, MF_i)
-
-        return prediction
-
-    def forward(self, user, item, URM, all_users, all_items):
-        user = user.to("cuda")
-        item = item.to("cuda")
-
-        prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
-
-        user_sim = torch.einsum("bi,ci->bc", URM[user], URM).to("cuda")
-        MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(all_users), self._embedding_item_u(item)).to("cuda")
-        # print("MF_u.shape: ", MF_u.shape)
-        prediction += torch.einsum("bi,ib->b", user_sim, MF_u)
-
-        item_sim = torch.einsum("ib,ic->bc", URM[:, item], URM).to("cuda")
-        MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items)).to("cuda")
-        prediction += torch.einsum("bi,bi->b", MF_i, item_sim)
-
-        # print(prediction.shape)
 
         return prediction
 
@@ -201,23 +182,12 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-def loss_MSE(model, batch):
-    user, item, rating = batch
-
-    # Compute prediction for each element in batch
-    prediction = model.forward(user, item)
-
-    # Compute total loss for batch
-    loss = (prediction - rating).pow(2).mean()
-
-    return loss
-
 
 def loss_MSE_new(model, batch, users_sim, items_sim, all_users, all_items):
     user, item, rating = batch
 
     # Compute prediction for each element in batch
-    prediction = model.forward_new(user, item, users_sim, items_sim, all_users, all_items)
+    prediction = model.forward(user, item, users_sim, items_sim, all_users, all_items)
 
     rating = rating.to("cuda")
 
@@ -355,13 +325,25 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor).to(device)
-        self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
-        self.users_sim = self.users_sim.to(device)
+        users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
+        # get the diagnal values of the matrix of user similarity
+        users_get_diag = torch.diag(users_sim)
+        # convert it to tensor
+        users_sim_diag = torch.diag_embed(users_get_diag)
+        # get the tensor of user similarity without main diagnal
+        users_sim = users_sim-users_sim_diag
+        self.users_sim = users_sim.to(device)
 
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
-        self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
-        self.users_sim = self.users_sim.to(device)
+        items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
+        #get the diagnal values of the matrix of item similarity
+        items_get_diag = torch.diag(items_sim)
+        #convert it to tensor
+        items_sim_diag = torch.diag_embed(items_get_diag)
+        #get the tensor of item similarity without main diagnal
+        items_sim = items_sim - items_sim_diag
+        self.users_sim = items_sim.to(device)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
