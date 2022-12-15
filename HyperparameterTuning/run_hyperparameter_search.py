@@ -803,7 +803,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam"]),
                 "epochs": Categorical([1500]),
                 "num_factors": Integer(1, 200),
-                "batch_size": Categorical([16, 32, 64, 128, 256, 512, 1024]),
+                "batch_size": Categorical([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]),
                 "positive_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
                 "negative_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
                 "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
@@ -849,7 +849,8 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "num_factors_i": Integer(1, 200),
                 "epochs": Categorical([300]),
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
-                "batch_size": Categorical([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]),
+                "batch_size": Categorical([ 16, 32, 64, 128, 256, 512, 1024 #1, 2, 4, 8,
+                                            ]),
                 "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
                 "l2_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
             }
