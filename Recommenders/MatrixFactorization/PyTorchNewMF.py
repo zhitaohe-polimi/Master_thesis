@@ -324,32 +324,37 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor).to(device)
-        users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
+        self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
         # get the diagnal values of the matrix of user similarity
         # users_get_diag = torch.diag(users_sim)
         # # convert it to tensor
         # users_sim_diag = torch.diag_embed(users_get_diag)
         # # get the tensor of user similarity without main diagnal
         # users_sim = users_sim-users_sim_diag
-        users_sim_array = users_sim.detach().cpu().numpy()
-        users_sim_array[np.diag_indices_from(users_sim_array)] = 0
-        self.users_sim = torch.tensor(users_sim_array).to(device)
+
+        # from tensor convert into np.array
+        self.users_sim = self.users_sim.detach().cpu().numpy()
+        # set all elements in diagnal to 0
+        self.users_sim[np.diag_indices_from(self.users_sim)] = 0
+        # convert it to tensor
+        self.users_sim = torch.tensor(self.users_sim).to(device)
 
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
-        items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
+        self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
         # # get the diagnal values of the matrix of item similarity
         # items_get_diag = torch.diag(items_sim)
         # # convert it to tensor
         # items_sim_diag = torch.diag_embed(items_get_diag)
         # # get the tensor of item similarity without main diagnal
         # items_sim = items_sim - items_sim_diag
+
         #from tensor convert into np.array
-        items_sim_array = items_sim.detach().cpu().numpy()
+        self.items_sim = self.items_sim.detach().cpu().numpy()
         # set all elements in diagnal to 0
-        items_sim_array[np.diag_indices_from(items_sim_array)] = 0
+        self.items_sim[np.diag_indices_from(self.items_sim)] = 0
         # convert it to tensor
-        self.items_sim = torch.tensor(items_sim_array).to(device)
+        self.items_sim = torch.tensor(self.items_sim).to(device)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
