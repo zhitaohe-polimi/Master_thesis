@@ -282,14 +282,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
-        users_sim = self.users_sim.detach().cpu().numpy()
-        items_sim = self.items_sim.detach().cpu().numpy()
-        # USER_factors = torch.tensor(self.USER_factors).to("cuda")
-        # ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
-        # USER_factors_u = torch.tensor(self.USER_factors_u).to("cuda")
-        # ITEM_factors_u = torch.tensor(self.ITEM_factors_u).to("cuda")
-        # USER_factors_i = torch.tensor(self.USER_factors_i).to("cuda")
-        # ITEM_factors_i = torch.tensor(self.ITEM_factors_i).to("cuda")
+        users_sim = self.users_sim#.detach().cpu().numpy()
+        items_sim = self.items_sim#.detach().cpu().numpy()
+        USER_factors = torch.tensor(self.USER_factors).to("cuda")
+        ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
+        USER_factors_u = torch.tensor(self.USER_factors_u).to("cuda")
+        ITEM_factors_u = torch.tensor(self.ITEM_factors_u).to("cuda")
+        USER_factors_i = torch.tensor(self.USER_factors_i).to("cuda")
+        ITEM_factors_i = torch.tensor(self.ITEM_factors_i).to("cuda")
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
         print(user_id_array.shape)
 
@@ -305,13 +305,16 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                                                                self.ITEM_factors_i[items_to_compute, :].T).T)
 
         else:
-            # item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors).to("cuda")
-            # MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u).to("cuda")
-            # item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1).to("cuda")
-            # MF_2 = torch.einsum("bi,ci->bc", USER_factors_i[user_id_array], ITEM_factors_i).to("cuda")
-            # item_scores += torch.einsum("bi,ic->cb", items_sim, MF_2).to("cuda")
+            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors).to("cuda")
+            print(item_scores.shape)
+            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u).to("cuda")
+            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1).to("cuda")
+            print(MF_1.shape)
+            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i[user_id_array], ITEM_factors_i).to("cuda")
+            print(MF_2.shape)
+            #item_scores += torch.einsum("bi,ic->cb", items_sim, MF_2).to("cuda")
             #
-            # item_scores = item_scores.detach().cpu().numpy()
+            item_scores = item_scores.detach().cpu().numpy()
 
             item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T) \
                           + np.dot(users_sim[user_id_array],
