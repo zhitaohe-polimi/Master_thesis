@@ -344,8 +344,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # items_sim_diag = torch.diag_embed(items_get_diag)
         # # get the tensor of item similarity without main diagnal
         # items_sim = items_sim - items_sim_diag
+        #from tensor convert into np.array
         items_sim_array = items_sim.detach().cpu().numpy()
+        # set all elements in diagnal to 0
         items_sim_array[np.diag_indices_from(items_sim_array)] = 0
+        # convert it to tensor
         self.items_sim = torch.tensor(items_sim_array).to(device)
 
         if sgd_mode.lower() == "adagrad":
