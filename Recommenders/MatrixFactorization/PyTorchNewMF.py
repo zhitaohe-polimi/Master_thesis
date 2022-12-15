@@ -182,7 +182,6 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-
 def loss_MSE_new(model, batch, users_sim, items_sim, all_users, all_items):
     user, item, rating = batch
 
@@ -252,8 +251,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
-        users_sim = self.users_sim#.detach().cpu().numpy()
-        items_sim = self.items_sim#.detach().cpu().numpy()
+        users_sim = self.users_sim  # .detach().cpu().numpy()
+        items_sim = self.items_sim  # .detach().cpu().numpy()
         USER_factors = torch.tensor(self.USER_factors).to("cuda")
         ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
         USER_factors_u = torch.tensor(self.USER_factors_u).to("cuda")
@@ -327,23 +326,27 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor).to(device)
         users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
         # get the diagnal values of the matrix of user similarity
-        users_get_diag = torch.diag(users_sim)
-        # convert it to tensor
-        users_sim_diag = torch.diag_embed(users_get_diag)
-        # get the tensor of user similarity without main diagnal
-        users_sim = users_sim-users_sim_diag
-        self.users_sim = users_sim.to(device)
+        # users_get_diag = torch.diag(users_sim)
+        # # convert it to tensor
+        # users_sim_diag = torch.diag_embed(users_get_diag)
+        # # get the tensor of user similarity without main diagnal
+        # users_sim = users_sim-users_sim_diag
+        users_sim_array = users_sim.detach().cpu().array()
+        users_sim_array[np.diag_indices_from(users_sim_array)] = 0
+        self.users_sim = torch.tensor(users_sim_array).to(device)
 
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
         items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
-        #get the diagnal values of the matrix of item similarity
-        items_get_diag = torch.diag(items_sim)
-        #convert it to tensor
-        items_sim_diag = torch.diag_embed(items_get_diag)
-        #get the tensor of item similarity without main diagnal
-        items_sim = items_sim - items_sim_diag
-        self.users_sim = items_sim.to(device)
+        # # get the diagnal values of the matrix of item similarity
+        # items_get_diag = torch.diag(items_sim)
+        # # convert it to tensor
+        # items_sim_diag = torch.diag_embed(items_get_diag)
+        # # get the tensor of item similarity without main diagnal
+        # items_sim = items_sim - items_sim_diag
+        items_sim_array = items_sim.detach().cpu().array()
+        items_sim_array[np.diag_indices_from(items_sim_array)] = 0
+        self.items_sim = torch.tensor(items_sim_array).to(device)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
