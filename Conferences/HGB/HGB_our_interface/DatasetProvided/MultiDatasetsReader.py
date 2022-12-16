@@ -63,7 +63,7 @@ class MultiDatasetsReader(object):
                 "The percentage of training set: %.1f, test set: %.1f" % (URM_train.nnz / (URM_train.nnz + URM_test.nnz)
                                                                           ,
                                                                           URM_test.nnz / (URM_train.nnz + URM_test.nnz))
-                )
+            )
             print("#interactions: %d" % (URM_train.nnz + URM_test.nnz))
             print("Maximum number of row: %d, column: %d" % (n_rows, n_cols))
 
@@ -75,6 +75,9 @@ class MultiDatasetsReader(object):
             # Split the train data in train and validation
             URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train.copy(),
                                                                                     train_percentage=0.8)
+
+            print("#interactions of URM_train: %d, URM_validation: %d, URM_test: %d" % (
+                URM_train, URM_validation, URM_test))
 
             # TODO get the sparse matrices in the correct dictionary with the correct name
             # TODO ICM_DICT and UCM_DICT can be empty if no ICMs or UCMs are required
