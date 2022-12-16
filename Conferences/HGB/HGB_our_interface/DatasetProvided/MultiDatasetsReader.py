@@ -77,7 +77,7 @@ class MultiDatasetsReader(object):
                                                                                     train_percentage=0.8)
 
             print("#interactions of URM_train: %d, URM_validation: %d, URM_test: %d" % (
-                URM_train, URM_validation, URM_test))
+                URM_train.nnz, URM_validation.nnz, URM_test.nnz))
 
             # TODO get the sparse matrices in the correct dictionary with the correct name
             # TODO ICM_DICT and UCM_DICT can be empty if no ICMs or UCMs are required
