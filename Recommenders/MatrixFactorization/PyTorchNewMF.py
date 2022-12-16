@@ -251,8 +251,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
-        users_sim = self.users_sim  # .detach().cpu().numpy()
-        items_sim = self.items_sim  # .detach().cpu().numpy()
+        # users_sim = self.users_sim  # .detach().cpu().numpy()
+        # items_sim = self.items_sim  # .detach().cpu().numpy()
+        print("ITERACTIONS OF URM_TRAIN(compute_item_score): ", self.URM_train.nnz)
+        URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
+        URM_tensor = torch.tensor(URM_array).to("cuda")
+        users_sim = torch.einsum("bi,ci->bc", URM_tensor, URM_tensor).fill_diagonal_(0)
+        items_sim = torch.einsum("ib,ic->bc", URM_tensor, URM_tensor).fill_diagonal_(0)
+
         USER_factors = torch.tensor(self.USER_factors).to("cuda")
         ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
         USER_factors_u = torch.tensor(self.USER_factors_u).to("cuda")
@@ -318,6 +324,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         self._model = self._model.to(device)
 
+        print("ITERACTIONS OF URM_TRAIN(fit): ", self.URM_train.nnz)
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
         self.URM_tensor = torch.tensor(URM_array)
         self.URM_tensor = self.URM_tensor.to(device)
@@ -329,13 +336,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.users_sim = self.users_sim.fill_diagonal_(0)
         self.users_sim = self.users_sim.to(device)
 
-
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
         self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
         # set all elements in diagnal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
-        print(self.users_sim)
         self.items_sim = self.items_sim.to(device)
 
         if sgd_mode.lower() == "adagrad":
