@@ -54,6 +54,21 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_user_i = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_i)
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
+    def forward(self, user, item, users_sim, items_sim, all_users, all_items):
+        user = user.to("cuda")
+        item = item.to("cuda")
+
+        prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
+
+        user_sim = users_sim[user]
+        MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(all_users), self._embedding_item_u(item)).to("cuda")
+        prediction += torch.einsum("bi,ib->b", user_sim, MF_u)
+
+        item_sim = items_sim[:, item]
+        MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items)).to("cuda")
+        prediction += torch.einsum("bi,ib->b", MF_i, item_sim)
+
+        return prediction
 
     def forward_test(self, user, item, users_sim, items_sim):
         user = user.to("cuda")
@@ -182,6 +197,19 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
+def loss_MSE(model, batch, users_sim, items_sim, all_users, all_items):
+    user, item, rating = batch
+
+    # Compute prediction for each element in batch
+    prediction = model.forward_test(user, item, users_sim, items_sim, all_users, all_items)
+
+    rating = rating.to("cuda")
+
+    # Compute total loss for batch
+    loss = (prediction - rating).pow(2).mean()
+
+    return loss
+
 def loss_MSE_new(model, batch, users_sim, items_sim):
     user, item, rating = batch
 
@@ -285,12 +313,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i).to("cuda")
             item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim).to("cuda")
             item_scores = item_scores.detach().cpu().numpy()
-
-            # item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T) \
-            #               + np.dot(users_sim[user_id_array],
-            #                        np.dot(self.USER_factors_u, self.ITEM_factors_u.T)) \
-            #               + np.dot(np.dot(self.USER_factors_i[user_id_array], self.ITEM_factors_i.T),
-            #                        items_sim)
 
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
@@ -404,7 +426,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             # loss = self._loss_function(self._model, batch)
-            loss = self._loss_function(self._model, batch, self.users_sim, self.items_sim)
+            loss = self._loss_function(self._model, batch, self.users_sim, self.items_sim, self.all_users, self.all_items)
 
             # Compute gradients given current loss
             loss.backward()
@@ -432,7 +454,7 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
 
         self._dataset = None
-        self._loss_function = loss_MSE_new
+        self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
         self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
