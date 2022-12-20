@@ -273,8 +273,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         print("ITERACTIONS OF URM_TRAIN(compute_item_score): ", self.URM_train.nnz)
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
         URM_tensor = torch.tensor(URM_array).to("cuda")
-        users_sim = torch.einsum("bi,ci->bc", URM_tensor[user_id_array], URM_tensor).fill_diagonal_(0).to("cuda")
-        items_sim = torch.einsum("ib,ic->bc", URM_tensor, URM_tensor).fill_diagonal_(0).to("cuda")
+        users_sim = torch.einsum("bi,ci->bc", URM_tensor[user_id_array], URM_tensor[user_id_array]).fill_diagonal_(0).to("cuda")
+        items_sim = torch.einsum("ib,ic->bc", URM_tensor[user_id_array], URM_tensor[user_id_array]).fill_diagonal_(0).to("cuda")
 
         USER_factors = torch.tensor(self.USER_factors).to("cuda")
         ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
@@ -296,7 +296,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         else:
             item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors).to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u).to("cuda")
+            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u[user_id_array], ITEM_factors_u).to("cuda")
             item_scores += torch.einsum("bi,ic->bc", users_sim, MF_1).to("cuda")
             MF_2 = torch.einsum("bi,ci->bc", USER_factors_i[user_id_array], ITEM_factors_i).to("cuda")
             item_scores += torch.einsum("bi,ic->bc", MF_2, items_sim).to("cuda")
