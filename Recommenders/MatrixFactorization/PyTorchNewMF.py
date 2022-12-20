@@ -258,8 +258,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
         URM_tensor = torch.tensor(URM_array).to("cuda")
         users_sim = torch.einsum("bi,ci->bc", URM_tensor, URM_tensor).fill_diagonal_(0).to("cuda")
-        items_sim = torch.einsum("ib,ic->bc", URM_tensor, URM_tensor).fill_diagonal_(
-            0).to("cuda")
+        items_sim = torch.einsum("ib,ic->bc", URM_tensor, URM_tensor).fill_diagonal_(0).to("cuda")
 
         USER_factors = torch.tensor(self.USER_factors).to("cuda")
         ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
