@@ -32,6 +32,7 @@ class ItemKNNCFRecommender(BaseItemSimilarityMatrixRecommender):
 
         self.topK = topK
         self.shrink = shrink
+        print(self.URM_train.nnz)
 
         if feature_weighting not in self.FEATURE_WEIGHTING_VALUES:
             raise ValueError("Value for 'feature_weighting' not recognized. Acceptable values are {}, provided was '{}'".format(self.FEATURE_WEIGHTING_VALUES, feature_weighting))
