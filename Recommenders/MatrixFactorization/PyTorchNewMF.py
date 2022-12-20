@@ -198,7 +198,7 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-def loss_MSE_new(model, batch, users_sim, items_sim, all_users, all_items):
+def loss_MSE_new(model, batch, users_sim, items_sim):
     user, item, rating = batch
 
     # Compute prediction for each element in batch
@@ -224,7 +224,7 @@ def loss_BPR(model, batch):
     return loss
 
 
-def loss_BPR_new(model, batch, users_sim, items_sim, all_users, all_items):
+def loss_BPR_new(model, batch, users_sim, items_sim):
     user, item_positive, item_negative = batch
     item_positive = item_positive.to("cuda")
     item_negative = item_negative.to("cuda")
