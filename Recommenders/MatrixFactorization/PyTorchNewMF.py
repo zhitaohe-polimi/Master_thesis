@@ -251,14 +251,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
-        # users_sim = self.users_sim  # .detach().cpu().numpy()
-        # items_sim = self.items_sim  # .detach().cpu().numpy()
+        users_sim = self.users_sim  # .detach().cpu().numpy()
+        items_sim = self.items_sim  # .detach().cpu().numpy()
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
         print("ITERACTIONS OF URM_TRAIN(compute_item_score): ", self.URM_train.nnz)
         URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
         URM_tensor = torch.tensor(URM_array).to("cuda")
-        users_sim = torch.einsum("bi,ci->bc", URM_tensor, URM_tensor).fill_diagonal_(0).to("cuda")
-        items_sim = torch.einsum("ib,ic->bc", URM_tensor, URM_tensor).fill_diagonal_(0).to("cuda")
+        # users_sim = torch.einsum("bi,ci->bc", URM_tensor, URM_tensor).fill_diagonal_(0).to("cuda")
+        # items_sim = torch.einsum("ib,ic->bc", URM_tensor, URM_tensor).fill_diagonal_(0).to("cuda")
 
         USER_factors = torch.tensor(self.USER_factors).to("cuda")
         ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
