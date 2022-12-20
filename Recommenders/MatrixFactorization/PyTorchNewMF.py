@@ -284,7 +284,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         users_sim = self.users_sim  # .detach().cpu().numpy()
         items_sim = self.items_sim  # .detach().cpu().numpy()
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
-        print(self.get_URM_train().nnz)
 
         # print("ITERACTIONS OF URM_TRAIN(compute_item_score): ", self.URM_train.nnz)
         # URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
