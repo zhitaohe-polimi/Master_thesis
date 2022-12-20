@@ -284,7 +284,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         users_sim = self.users_sim  # .detach().cpu().numpy()
         items_sim = self.items_sim  # .detach().cpu().numpy()
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
-        print("ITERACTIONS OF URM_TRAIN(compute_item_score): ", self.URM_train.nnz)
+        # print("ITERACTIONS OF URM_TRAIN(compute_item_score): ", self.URM_train.nnz)
         # URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
         # URM_tensor = torch.tensor(URM_array).to("cuda")
         # users_sim = torch.einsum("bi,ci->bc", URM_tensor, URM_tensor).fill_diagonal_(0).to("cuda")
@@ -299,14 +299,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         if items_to_compute is not None:
             item_scores = - np.ones((len(user_id_array), self.ITEM_factors.shape[0]), dtype=np.float32) * np.inf
-            item_scores[:, items_to_compute] = np.dot(self.USER_factors[user_id_array],
-                                                      self.ITEM_factors[items_to_compute, :].T) \
-                                               + np.dot(users_sim[user_id_array],
-                                                        np.dot(self.USER_factors_u[user_id_array],
-                                                               self.ITEM_factors_u[items_to_compute, :].T)) \
-                                               + np.dot(self.items_sim[items_to_compute],
-                                                        np.dot(self.USER_factors_i[user_id_array],
-                                                               self.ITEM_factors_i[items_to_compute, :].T).T)
+            # item_scores[:, items_to_compute] = np.dot(self.USER_factors[user_id_array],
+            #                                           self.ITEM_factors[items_to_compute, :].T) \
+            #                                    + np.dot(users_sim[user_id_array],
+            #                                             np.dot(self.USER_factors_u[user_id_array],
+            #                                                    self.ITEM_factors_u[items_to_compute, :].T)) \
+            #                                    + np.dot(self.items_sim[items_to_compute],
+            #                                             np.dot(self.USER_factors_i[user_id_array],
+            #                                                    self.ITEM_factors_i[items_to_compute, :].T).T)
 
         else:
             item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors).to("cuda")
