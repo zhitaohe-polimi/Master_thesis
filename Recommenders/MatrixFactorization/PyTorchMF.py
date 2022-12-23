@@ -35,7 +35,7 @@ class _SimpleMFModel(torch.nn.Module):
         self._embedding_item = torch.nn.Embedding(n_items, embedding_dim=embedding_dim)
 
     def forward(self, user, item):
-        prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
+        prediction = batch_dot(self._embedding_user(user), self._embedding_item(item)).to("cuda")
         return prediction
 
 
