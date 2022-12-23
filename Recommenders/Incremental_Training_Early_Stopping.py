@@ -208,7 +208,6 @@ class Incremental_Training_Early_Stopping(object):
                 print("{}: Validation begins...".format(algorithm_name))
 
                 self._prepare_model_for_validation()
-                print("evaluator: ", evaluator_object.nnz)
 
                 # If the evaluator validation has multiple cutoffs, choose the first one
                 start_time_validation = time.time()

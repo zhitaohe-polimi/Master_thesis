@@ -440,25 +440,25 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             epoch_loss += loss.item()
 
 
-class PyTorchMF_BPR_Recommender(_PyTorchMFRecommender):
+class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
     RECOMMENDER_NAME = "PyTorchMF_BPR_Recommender"
 
     def __init__(self, URM_train, verbose=True):
-        super(PyTorchMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
+        super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
 
         self._dataset = BPR_Dataset(self.URM_train)
         self._loss_function = loss_BPR_new
 
 
-class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
+class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
     RECOMMENDER_NAME = "PyTorchMF_MSE_Recommender"
 
     def __init__(self, URM_train, verbose=True):
-        super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
+        super(PyTorchNewMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
 
         self._dataset = None
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
         self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
-        super(PyTorchMF_MSE_Recommender, self).fit(**kwargs)
+        super(PyTorchNewMF_MSE_Recommender, self).fit(**kwargs)
