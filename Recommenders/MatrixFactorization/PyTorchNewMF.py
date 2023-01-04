@@ -442,7 +442,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
 
 class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchMF_BPR_Recommender"
+    RECOMMENDER_NAME = "PyTorchNewMF_BPR_Recommender"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
@@ -452,7 +452,7 @@ class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
 
 
 class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchMF_MSE_Recommender"
+    RECOMMENDER_NAME = "PyTorchNewMF_MSE_Recommender"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
