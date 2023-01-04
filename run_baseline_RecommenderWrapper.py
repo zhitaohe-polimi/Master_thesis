@@ -25,9 +25,10 @@ from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
-from Recommenders.MatrixFactorization.Cython.new_algo_with_MFAttention_Cython import \
-    new_MatrixFactorization_FunkSVD_Cython
-from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_FunkSVD_Cython
+# from Recommenders.MatrixFactorization.Cython.new_algo_with_MFAttention_Cython import \
+#     new_MatrixFactorization_FunkSVD_Cython
+from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_FunkSVD_Cython, \
+    MatrixFactorization_BPR_Cython
 from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
 from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
 from Recommenders.MatrixFactorization.PyTorchNewMF import PyTorchNewMF_MSE_Recommender, PyTorchNewMF_BPR_Recommender
@@ -176,9 +177,9 @@ def read_data_split_and_search(args):
 
     if args.flag_baselines_tune:
         recommender_class_list = [
-            # MatrixFactorization_BPR_Cython,
+            MatrixFactorization_BPR_Cython,
             # IALSRecommender,
-            # MatrixFactorization_FunkSVD_Cython,
+            MatrixFactorization_FunkSVD_Cython,
             # EASE_R_Recommender,
             # ItemKNNCFRecommender,
             # UserKNNCFRecommender,
@@ -187,46 +188,46 @@ def read_data_split_and_search(args):
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
             # new_MatrixFactorization_FunkSVD_Cython,
-            PyTorchNewMF_MSE_Recommender,
+            # PyTorchNewMF_MSE_Recommender,
             # PyTorchMF_BPR_Recommender,
             # PyTorchMF_MSE_Recommender
         ]
 
-        n_cases = 1000
+        n_cases = 500
 
-        # runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
-        #                                                    URM_train=URM_train,
-        #                                                    URM_train_last_test=URM_train_original,
-        #                                                    metric_to_optimize=metric_to_optimize,
-        #                                                    cutoff_to_optimize=cutoff_to_optimize,
-        #                                                    n_cases=n_cases,
-        #                                                    n_random_starts=int(n_cases / 3),
-        #                                                    evaluator_validation_earlystopping=evaluator_validation,
-        #                                                    evaluator_validation=evaluator_validation,
-        #                                                    evaluate_on_test='best',
-        #                                                    evaluator_test=evaluator_test,
-        #                                                    output_folder_path=model_folder_path,
-        #                                                    resume_from_saved=True,
-        #                                                    similarity_type_list=None,  # all
-        #                                                    parallelizeKNN=False)
-        #
-        # pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
-        # pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
-        runHyperparameterSearch_Collaborative(PyTorchMF_MSE_Recommender,
-                                              URM_train=URM_train,
-                                              URM_train_last_test=URM_train_original,
-                                              metric_to_optimize=metric_to_optimize,
-                                              cutoff_to_optimize=cutoff_to_optimize,
-                                              n_cases=n_cases,
-                                              n_random_starts=int(n_cases / 3),
-                                              evaluator_validation_earlystopping=evaluator_validation,
-                                              evaluator_validation=evaluator_validation,
-                                              evaluate_on_test='best',
-                                              evaluator_test=evaluator_test,
-                                              output_folder_path=model_folder_path,
-                                              resume_from_saved=True,
-                                              similarity_type_list=None,  # all
-                                              parallelizeKNN=False)
+        runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
+                                                           URM_train=URM_train,
+                                                           URM_train_last_test=URM_train_original,
+                                                           metric_to_optimize=metric_to_optimize,
+                                                           cutoff_to_optimize=cutoff_to_optimize,
+                                                           n_cases=n_cases,
+                                                           n_random_starts=int(n_cases / 3),
+                                                           evaluator_validation_earlystopping=evaluator_validation,
+                                                           evaluator_validation=evaluator_validation,
+                                                           evaluate_on_test='best',
+                                                           evaluator_test=evaluator_test,
+                                                           output_folder_path=model_folder_path,
+                                                           resume_from_saved=True,
+                                                           similarity_type_list=None,  # all
+                                                           parallelizeKNN=False)
+
+        pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
+        pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
+        # runHyperparameterSearch_Collaborative(PyTorchMF_MSE_Recommender,
+        #                                       URM_train=URM_train,
+        #                                       URM_train_last_test=URM_train_original,
+        #                                       metric_to_optimize=metric_to_optimize,
+        #                                       cutoff_to_optimize=cutoff_to_optimize,
+        #                                       n_cases=n_cases,
+        #                                       n_random_starts=int(n_cases / 3),
+        #                                       evaluator_validation_earlystopping=evaluator_validation,
+        #                                       evaluator_validation=evaluator_validation,
+        #                                       evaluate_on_test='best',
+        #                                       evaluator_test=evaluator_test,
+        #                                       output_folder_path=model_folder_path,
+        #                                       resume_from_saved=True,
+        #                                       similarity_type_list=None,  # all
+        #                                       parallelizeKNN=False)
 
     # if args.flag_print_results:
     #     KNN_similarity_to_report_list = ["cosine", "dice", "jaccard", "asymmetric", "tversky"]
