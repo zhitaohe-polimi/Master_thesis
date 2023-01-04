@@ -38,7 +38,6 @@ class _SimpleMFModel(torch.nn.Module):
         user = user.to("cuda")
         item = item.to("cuda")
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item)).to("cuda")
-        print(prediction.shape)
         return prediction
 
 
@@ -58,6 +57,7 @@ class _SimpleMFBiasModel(torch.nn.Module):
         item = item.type(torch.long)#.to("cuda")
         prediction = self._global_bias + self._user_bias[user] + self._item_bias[item]
         prediction += batch_dot(self._embedding_user(user), self._embedding_item(item))#.to("cuda")
+        print(prediction.shape)
         return prediction
 
 
