@@ -336,12 +336,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             learning_rate=1e-2,
             **earlystopping_kwargs):
 
-        # if torch.cuda.is_available():
-        #     device = torch.device('cuda')
-        #     print("MF_MSE_PyTorch: Using CUDA")
-        # else:
-        #     device = torch.device('cpu')
-        #     print("MF_MSE_PyTorch: Using CPU")
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+            print("MF_MSE_PyTorch: Using CUDA")
+        else:
+            device = torch.device('cpu')
+            print("MF_MSE_PyTorch: Using CPU")
 
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
@@ -349,14 +349,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
-        # self._model = self._model.to(device)
+        self._model = self._model.to(device)
 
         print("ITERACTIONS OF URM_TRAIN(fit): ", self.URM_train.nnz)
         self.URM_tensor = torch.tensor(self.URM_train.toarray())
         # self.URM_tensor = self.URM_tensor.to(device)
 
         user_list = list(range(self.n_users))
-        # self.all_users = torch.Tensor(user_list).type(torch.LongTensor).to(device)
+        self.all_users = torch.Tensor(user_list).type(torch.LongTensor)#.to(device)
         self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
         self.users_sim = torch.nn.functional.normalize(self.users_sim, dim=1)
         # set all elements in diagnal to 0
@@ -364,7 +364,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # self.users_sim = self.users_sim.to(device)
 
         item_list = list(range(self.n_items))
-        # self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
+        self.all_items = torch.Tensor(item_list).type(torch.LongTensor)#.to(device)
         self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
         self.items_sim = torch.nn.functional.normalize(self.items_sim, dim=1)
         # set all elements in diagnal to 0
