@@ -212,6 +212,7 @@ def loss_MSE(model, batch, users_sim, items_sim, all_users, all_items):
 
     return loss
 
+
 def loss_MSE_new(model, batch, users_sim, items_sim):
     user, item, rating = batch
 
@@ -350,15 +351,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = self._model.to(device)
 
         print("ITERACTIONS OF URM_TRAIN(fit): ", self.URM_train.nnz)
-        print(self.URM_train.toarray())
-        URM_array = normalize(self.URM_train, norm='l2', axis=1).toarray()
-        print(URM_array)
         self.URM_tensor = torch.tensor(self.URM_train.toarray())
         self.URM_tensor = self.URM_tensor.to(device)
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor).to(device)
         self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
+        self.users_sim = torch.nn.functional.normalize(self.users_sim, dim=1)
         # set all elements in diagnal to 0
         self.users_sim = self.users_sim.fill_diagonal_(0)
         self.users_sim = self.users_sim.to(device)
@@ -366,6 +365,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor).to(device)
         self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
+        self.items_sim = torch.nn.functional.normalize(self.items_sim, dim=1)
         # set all elements in diagnal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
         self.items_sim = self.items_sim.to(device)
@@ -431,7 +431,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             # loss = self._loss_function(self._model, batch)
-            loss = self._loss_function(self._model, batch, self.users_sim, self.items_sim, self.all_users, self.all_items)
+            loss = self._loss_function(self._model, batch, self.users_sim, self.items_sim, self.all_users,
+                                       self.all_items)
 
             # Compute gradients given current loss
             loss.backward()
