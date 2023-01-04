@@ -843,7 +843,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         ##########################################################################################################
 
-        if recommender_class is PyTorchNewMF_BPR_Recommender or recommender_class is PyTorchNewMF_MSE_Recommender:
+        if recommender_class is PyTorchNewMF_BPR_Recommender:
             hyperparameters_range_dictionary = {
                 "num_factors": Integer(1, 200),
                 "num_factors_u": Integer(1, 200),
@@ -853,6 +853,29 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "batch_size": Categorical([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]),
                 "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
                 "l2_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
+            }
+
+            recommender_input_args = SearchInputRecommenderArgs(
+                CONSTRUCTOR_POSITIONAL_ARGS=[URM_train],
+                CONSTRUCTOR_KEYWORD_ARGS={},
+                FIT_POSITIONAL_ARGS=[],
+                FIT_KEYWORD_ARGS={},
+                EARLYSTOPPING_KEYWORD_ARGS=earlystopping_keywargs,
+            )
+
+        ##########################################################################################################
+
+        if recommender_class is PyTorchNewMF_MSE_Recommender:
+            hyperparameters_range_dictionary = {
+                "num_factors": Integer(1, 200),
+                "num_factors_u": Integer(1, 200),
+                "num_factors_i": Integer(1, 200),
+                "epochs": Categorical([1000]),
+                "sgd_mode": Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
+                "batch_size": Categorical([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]),
+                "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
+                "l2_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
+                "positive_quota": Real(low=0.0, high=0.5, prior='uniform'),
             }
 
             recommender_input_args = SearchInputRecommenderArgs(
