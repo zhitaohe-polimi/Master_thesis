@@ -157,7 +157,7 @@ def loss_MSE(model, batch):
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
 
-    rating.to("cuda")
+    rating = rating.to("cuda")
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
 
