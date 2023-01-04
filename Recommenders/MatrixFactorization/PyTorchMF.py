@@ -277,7 +277,7 @@ class PyTorchMF_BPR_Recommender(_PyTorchMFRecommender):
 
 
 class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchMF_MSE_Recommender"
+    RECOMMENDER_NAME = "PyTorchMF_MSE_Recommender_aaa"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
@@ -286,7 +286,6 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
-        print(1)
         self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
         super(PyTorchMF_MSE_Recommender, self).fit(**kwargs)
 
