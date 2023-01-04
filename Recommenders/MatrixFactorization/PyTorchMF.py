@@ -156,7 +156,7 @@ class BPR_Dataset(Dataset):
 def loss_MSE(model, batch):
     user, item, rating = batch
 
-    rating = rating.to("cuda")
+    # rating = rating.to("cuda")
 
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
@@ -212,7 +212,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
         self._model = _SimpleMFBiasModel(self.n_users, self.n_items, embedding_dim=num_factors)
-        self._model.cuda()
+        # self._model.cuda()
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
