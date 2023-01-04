@@ -286,6 +286,7 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
+        print(1)
         self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
         super(PyTorchMF_MSE_Recommender, self).fit(**kwargs)
 
