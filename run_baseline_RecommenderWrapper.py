@@ -28,7 +28,7 @@ from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
 # from Recommenders.MatrixFactorization.Cython.new_algo_with_MFAttention_Cython import \
 #     new_MatrixFactorization_FunkSVD_Cython
 from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_FunkSVD_Cython, \
-    MatrixFactorization_BPR_Cython
+    MatrixFactorization_BPR_Cython,MatrixFactorization_AsySVD_Cython
 from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
 from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
 from Recommenders.MatrixFactorization.PyTorchNewMF import PyTorchNewMF_MSE_Recommender, PyTorchNewMF_BPR_Recommender
@@ -177,9 +177,10 @@ def read_data_split_and_search(args):
 
     if args.flag_baselines_tune:
         recommender_class_list = [
-            MatrixFactorization_BPR_Cython,
-            # IALSRecommender,
-            MatrixFactorization_FunkSVD_Cython,
+            # MatrixFactorization_BPR_Cython,
+            IALSRecommender,
+            # MatrixFactorization_FunkSVD_Cython,
+            MatrixFactorization_AsySVD_Cython,
             # EASE_R_Recommender,
             # ItemKNNCFRecommender,
             # UserKNNCFRecommender,
