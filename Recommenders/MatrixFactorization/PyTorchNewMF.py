@@ -336,12 +336,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             learning_rate=1e-2,
             **earlystopping_kwargs):
 
-        if torch.cuda.is_available():
-            device = torch.device('cuda')
-            print("MF_MSE_PyTorch: Using CUDA")
-        else:
-            device = torch.device('cpu')
-            print("MF_MSE_PyTorch: Using CPU")
+        # if torch.cuda.is_available():
+        #     device = torch.device('cuda')
+        #     print("MF_MSE_PyTorch: Using CUDA")
+        # else:
+        #     device = torch.device('cpu')
+        #     print("MF_MSE_PyTorch: Using CPU")
 
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
