@@ -278,14 +278,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         users_sim = self.users_sim  # .detach().cpu().numpy()
         items_sim = self.items_sim  # .detach().cpu().numpy()
-        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
+        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)#.to("cuda")
 
-        USER_factors = torch.tensor(self.USER_factors).to("cuda")
-        ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
-        USER_factors_u = torch.tensor(self.USER_factors_u).to("cuda")
-        ITEM_factors_u = torch.tensor(self.ITEM_factors_u).to("cuda")
-        USER_factors_i = torch.tensor(self.USER_factors_i).to("cuda")
-        ITEM_factors_i = torch.tensor(self.ITEM_factors_i).to("cuda")
+        USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
+        ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
+        USER_factors_u = torch.tensor(self.USER_factors_u)#.to("cuda")
+        ITEM_factors_u = torch.tensor(self.ITEM_factors_u)#.to("cuda")
+        USER_factors_i = torch.tensor(self.USER_factors_i)#.to("cuda")
+        ITEM_factors_i = torch.tensor(self.ITEM_factors_i)#.to("cuda")
 
         if items_to_compute is not None:
             items_to_compute_tensor = torch.Tensor(items_to_compute).type(torch.LongTensor)
