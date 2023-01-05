@@ -455,8 +455,6 @@ class EvaluatorHoldout(Evaluator):
                                                   self.ignore_items_ID,
                                                   self.ignore_users_ID,
                                                   self.diversity_object)
-        print(self.URM_test.nnz)
-
 
         if self.ignore_items_flag:
             recommender_object.set_items_to_ignore(self.ignore_items_ID)
