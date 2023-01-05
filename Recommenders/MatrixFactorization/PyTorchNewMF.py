@@ -345,7 +345,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         print("ITERACTIONS OF URM_TRAIN(fit): ", self.URM_train.nnz)
         self.URM_tensor = torch.tensor(self.URM_train.toarray())
-        self.URM_tensor = self.URM_tensor.to(device)
+        # self.URM_tensor = self.URM_tensor.to(device)
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
@@ -355,6 +355,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # set all elements in diagnal to 0
         self.users_sim = self.users_sim.fill_diagonal_(0)
         self.users_sim = torch.nn.functional.normalize(self.users_sim, dim=1)
+        print("user similarity computed.")
         #self.users_sim = self.users_sim.to(device)
 
         item_list = list(range(self.n_items))
@@ -365,6 +366,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # set all elements in diagnal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
         self.items_sim = torch.nn.functional.normalize(self.items_sim, dim=1)
+        print("item similarity computed.")
         #self.items_sim = self.items_sim.to(device)
 
         if sgd_mode.lower() == "adagrad":
