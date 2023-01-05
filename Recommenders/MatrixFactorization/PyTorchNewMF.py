@@ -195,6 +195,7 @@ class BPR_Dataset(Dataset):
 
 
 def loss_MSE(model, batch, users_sim, items_sim, all_users, all_items):
+    batch = torch.LongTensor(batch)
     batch = batch.to("cuda")
     user, item, rating = batch
 
