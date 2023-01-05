@@ -345,7 +345,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         print("ITERACTIONS OF URM_TRAIN(fit): ", self.URM_train.nnz)
         self.URM_tensor = torch.tensor(self.URM_train.toarray())
-        # self.URM_tensor = self.URM_tensor.to(device)
+        self.URM_tensor = self.URM_tensor.to(device)
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
