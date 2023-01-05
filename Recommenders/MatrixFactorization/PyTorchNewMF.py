@@ -217,8 +217,6 @@ def loss_MSE_new(model, batch, users_sim, items_sim):
     # Compute prediction for each element in batch
     prediction = model.forward_test(user, item, users_sim, items_sim)
 
-    # rating = rating.to("cuda")
-
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
 
@@ -239,8 +237,6 @@ def loss_BPR(model, batch):
 
 def loss_BPR_new(model, batch, users_sim, items_sim):
     user, item_positive, item_negative = batch
-    # item_positive = item_positive.to("cuda")
-    # item_negative = item_negative.to("cuda")
 
     # Compute prediction for each element in batch
     x_ij = model.forward_test(user, item_positive, users_sim, items_sim) - \
