@@ -55,17 +55,17 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, users_sim, items_sim, all_users, all_items):
-        user = user#.to("cuda")
-        item = item#.to("cuda")
+        user = user  # .to("cuda")
+        item = item  # .to("cuda")
 
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
         user_sim = users_sim[user]
-        MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(all_users), self._embedding_item_u(item))#.to("cuda")
+        MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(all_users), self._embedding_item_u(item))  # .to("cuda")
         prediction += torch.einsum("bi,ib->b", user_sim, MF_u)
 
         item_sim = items_sim[:, item]
-        MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items))#.to("cuda")
+        MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items))  # .to("cuda")
         prediction += torch.einsum("bi,ib->b", MF_i, item_sim)
 
         return prediction
@@ -284,32 +284,34 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         users_sim = self.users_sim  # .detach().cpu().numpy()
         items_sim = self.items_sim  # .detach().cpu().numpy()
-        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)#.to("cuda")
+        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)  # .to("cuda")
 
-        USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
-        ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
-        USER_factors_u = torch.tensor(self.USER_factors_u)#.to("cuda")
-        ITEM_factors_u = torch.tensor(self.ITEM_factors_u)#.to("cuda")
-        USER_factors_i = torch.tensor(self.USER_factors_i)#.to("cuda")
-        ITEM_factors_i = torch.tensor(self.ITEM_factors_i)#.to("cuda")
+        USER_factors = torch.tensor(self.USER_factors)  # .to("cuda")
+        ITEM_factors = torch.tensor(self.ITEM_factors)  # .to("cuda")
+        USER_factors_u = torch.tensor(self.USER_factors_u)  # .to("cuda")
+        ITEM_factors_u = torch.tensor(self.ITEM_factors_u)  # .to("cuda")
+        USER_factors_i = torch.tensor(self.USER_factors_i)  # .to("cuda")
+        ITEM_factors_i = torch.tensor(self.ITEM_factors_i)  # .to("cuda")
 
         if items_to_compute is not None:
+            items_to_compute_tensor = torch.Tensor(items_to_compute).type(torch.LongTensor)
+
             item_scores = - np.ones((len(user_id_array), self.ITEM_factors.shape[0]), dtype=np.float32) * np.inf
-            # item_scores[:, items_to_compute] = np.dot(self.USER_factors[user_id_array],
-            #                                           self.ITEM_factors[items_to_compute, :].T) \
-            #                                    + np.dot(users_sim[user_id_array],
-            #                                             np.dot(self.USER_factors_u[user_id_array],
-            #                                                    self.ITEM_factors_u[items_to_compute, :].T)) \
-            #                                    + np.dot(self.items_sim[items_to_compute],
-            #                                             np.dot(self.USER_factors_i[user_id_array],
-            #                                                    self.ITEM_factors_i[items_to_compute, :].T).T)
+            item_scores_t = torch.einsum("bi,ci->bc", USER_factors[user_id_array],
+                                       ITEM_factors[items_to_compute_tensor])  # .to("cuda")
+            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u[items_to_compute_tensor])  # .to("cuda")
+            item_scores_t += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
+            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i[items_to_compute_tensor])  # .to("cuda")
+            item_scores_t += torch.einsum("bi,ic->bc", MF_2[user_id_array],
+                                        items_sim[items_to_compute_tensor, items_to_compute_tensor])  # .to("cuda")
+            item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
 
         else:
-            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)#.to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)#.to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)#.to("cuda")
-            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)#.to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)#.to("cuda")
+            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)  # .to("cuda")
+            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)  # .to("cuda")
+            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
+            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)  # .to("cuda")
+            item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)  # .to("cuda")
             item_scores = item_scores.detach().cpu().numpy()
 
         # No need to select only the specific negative items or warm users because the -inf score will not change
@@ -349,7 +351,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # self.URM_tensor = self.URM_tensor.to(device)
 
         user_list = list(range(self.n_users))
-        self.all_users = torch.Tensor(user_list).type(torch.LongTensor)#.to(device)
+        self.all_users = torch.Tensor(user_list).type(torch.LongTensor)  # .to(device)
         self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
         # set all elements in diagnal to 0
         self.users_sim = self.users_sim.fill_diagonal_(0)
@@ -357,7 +359,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # self.users_sim = self.users_sim.to(device)
 
         item_list = list(range(self.n_items))
-        self.all_items = torch.Tensor(item_list).type(torch.LongTensor)#.to(device)
+        self.all_items = torch.Tensor(item_list).type(torch.LongTensor)  # .to(device)
         self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
         # set all elements in diagnal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
