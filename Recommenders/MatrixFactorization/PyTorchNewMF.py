@@ -352,7 +352,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # set all elements in diagnal to 0
         self.users_sim = self.users_sim.fill_diagonal_(0)
         self.users_sim = torch.nn.functional.normalize(self.users_sim, dim=1)
-        # self.users_sim = self.users_sim.to(device)
+        self.users_sim = self.users_sim.to(device)
 
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
@@ -361,7 +361,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # set all elements in diagnal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
         self.items_sim = torch.nn.functional.normalize(self.items_sim, dim=1)
-        # self.items_sim = self.items_sim.to(device)
+        self.items_sim = self.items_sim.to(device)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
