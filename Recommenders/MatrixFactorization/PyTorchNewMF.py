@@ -280,12 +280,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         items_sim = self.items_sim  # .detach().cpu().numpy()
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
 
-        USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
-        ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
-        USER_factors_u = torch.tensor(self.USER_factors_u)#.to("cuda")
-        ITEM_factors_u = torch.tensor(self.ITEM_factors_u)#.to("cuda")
-        USER_factors_i = torch.tensor(self.USER_factors_i)#.to("cuda")
-        ITEM_factors_i = torch.tensor(self.ITEM_factors_i)#.to("cuda")
+        USER_factors = torch.tensor(self.USER_factors)  # .to("cuda")
+        ITEM_factors = torch.tensor(self.ITEM_factors)  # .to("cuda")
+        USER_factors_u = torch.tensor(self.USER_factors_u)  # .to("cuda")
+        ITEM_factors_u = torch.tensor(self.ITEM_factors_u)  # .to("cuda")
+        USER_factors_i = torch.tensor(self.USER_factors_i)  # .to("cuda")
+        ITEM_factors_i = torch.tensor(self.ITEM_factors_i)  # .to("cuda")
 
         if items_to_compute is not None:
             items_to_compute_tensor = torch.Tensor(items_to_compute).type(torch.LongTensor)
@@ -301,14 +301,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
 
         else:
-            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)#.to("cuda")
+            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)  # .to("cuda")
             item_scores = item_scores.to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)#.to("cuda")
+            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)  # .to("cuda")
             MF_1 = MF_1.to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)#.to("cuda")
-            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)#.to("cuda")
+            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
+            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)  # .to("cuda")
             MF_2 = MF_2.to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)#.to("cuda")
+            item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)  # .to("cuda")
             item_scores = item_scores.detach().cpu().numpy()
 
         # No need to select only the specific negative items or warm users because the -inf score will not change
@@ -356,7 +356,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.users_sim = self.users_sim.fill_diagonal_(0)
         self.users_sim = torch.nn.functional.normalize(self.users_sim, dim=1)
         print("user similarity computed.")
-        #self.users_sim = self.users_sim.to(device)
 
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
@@ -367,7 +366,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.items_sim = self.items_sim.fill_diagonal_(0)
         self.items_sim = torch.nn.functional.normalize(self.items_sim, dim=1)
         print("item similarity computed.")
-        #self.items_sim = self.items_sim.to(device)
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
@@ -443,7 +441,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             epoch_loss += loss.item()
 
-        print("%s: epoch_loss: %.2f" % (self.RECOMMENDER_NAME,epoch_loss))
+        print("%s: epoch_loss: %.2f" % (self.RECOMMENDER_NAME, epoch_loss))
 
 
 class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
