@@ -161,7 +161,7 @@ def loss_MSE(model, batch):
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
 
-    return loss
+    return loss.to("cuda")
 
 
 def loss_CrossEntropy(model, batch):
@@ -284,7 +284,7 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
 
         self._dataset = None
-        self._loss_function = loss_MSE.cuda()
+        self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
         self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
