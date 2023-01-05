@@ -161,7 +161,7 @@ def loss_MSE(model, batch):
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
 
-    return loss.to("cuda")
+    return torch.tensor(loss).to("cuda")
 
 
 def loss_CrossEntropy(model, batch):
