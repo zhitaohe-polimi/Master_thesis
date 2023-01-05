@@ -67,22 +67,6 @@ class _SimpleNewMFModel(torch.nn.Module):
 
         return prediction
 
-    # def forward_test(self, user, item, users_sim, items_sim):
-    #     user = user.to("cuda")
-    #     item = item.to("cuda")
-    #
-    #     prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
-    #
-    #     user_sim = users_sim[user][:, user]
-    #     MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(user), self._embedding_item_u(item)).to("cuda")
-    #     prediction += torch.einsum("bi,ib->b", user_sim, MF_u)
-    #
-    #     item_sim = items_sim[item][:, item]
-    #     MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(item)).to("cuda")
-    #     prediction += torch.einsum("bi,ib->b", MF_i, item_sim)
-    #
-    #     return prediction
-
 
 class _SimpleMFBiasModel(torch.nn.Module):
 
