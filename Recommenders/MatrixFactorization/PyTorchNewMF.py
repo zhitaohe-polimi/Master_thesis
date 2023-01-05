@@ -301,11 +301,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
 
         else:
-            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors).to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u).to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1).to("cuda")
-            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i).to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim).to("cuda")
+            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)#.to("cuda")
+            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)#.to("cuda")
+            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)#.to("cuda")
+            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)#.to("cuda")
+            item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)#.to("cuda")
             item_scores = item_scores.detach().cpu().numpy()
 
         # No need to select only the specific negative items or warm users because the -inf score will not change
