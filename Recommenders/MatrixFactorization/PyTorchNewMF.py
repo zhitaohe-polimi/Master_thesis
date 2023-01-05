@@ -357,6 +357,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
         self.all_items = self.all_items.to(device)
+
         self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
         # set all elements in diagnal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
