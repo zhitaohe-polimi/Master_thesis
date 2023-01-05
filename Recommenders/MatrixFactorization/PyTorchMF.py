@@ -284,8 +284,7 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
 
         self._dataset = None
-        self._loss_function = loss_MSE
-        self._loss_function = self._loss_function.to("cuda")
+        self._loss_function = loss_MSE.cuda()
 
     def fit(self, positive_quota=0.5, **kwargs):
         self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
