@@ -278,7 +278,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         users_sim = self.users_sim  # .detach().cpu().numpy()
         items_sim = self.items_sim  # .detach().cpu().numpy()
-        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)#.to("cuda")
+        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
 
         USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
         ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
