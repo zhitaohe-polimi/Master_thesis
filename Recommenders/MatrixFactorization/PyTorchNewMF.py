@@ -280,31 +280,31 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         items_sim = self.items_sim  # .detach().cpu().numpy()
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
 
-        USER_factors = torch.tensor(self.USER_factors).to("cuda")
-        ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
-        USER_factors_u = torch.tensor(self.USER_factors_u).to("cuda")
-        ITEM_factors_u = torch.tensor(self.ITEM_factors_u).to("cuda")
-        USER_factors_i = torch.tensor(self.USER_factors_i).to("cuda")
-        ITEM_factors_i = torch.tensor(self.ITEM_factors_i).to("cuda")
+        # USER_factors = torch.tensor(self.USER_factors).to("cuda")
+        # ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
+        # USER_factors_u = torch.tensor(self.USER_factors_u).to("cuda")
+        # ITEM_factors_u = torch.tensor(self.ITEM_factors_u).to("cuda")
+        # USER_factors_i = torch.tensor(self.USER_factors_i).to("cuda")
+        # ITEM_factors_i = torch.tensor(self.ITEM_factors_i).to("cuda")
 
         if items_to_compute is not None:
             items_to_compute_tensor = torch.Tensor(items_to_compute).type(torch.LongTensor)
 
             item_scores = - np.ones((len(user_id_array), self.ITEM_factors.shape[0]), dtype=np.float32) * np.inf
-            item_scores_t = torch.einsum("bi,ci->bc", USER_factors[user_id_array],
-                                         ITEM_factors[items_to_compute_tensor])  # .to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u[items_to_compute_tensor])  # .to("cuda")
+            item_scores_t = torch.einsum("bi,ci->bc", self.USER_factors[user_id_array],
+                                         self.ITEM_factors[items_to_compute_tensor])  # .to("cuda")
+            MF_1 = torch.einsum("bi,ci->bc", self.USER_factors_u, self.ITEM_factors_u[items_to_compute_tensor])  # .to("cuda")
             item_scores_t += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
-            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i[items_to_compute_tensor])  # .to("cuda")
+            MF_2 = torch.einsum("bi,ci->bc", self.USER_factors_i, self.ITEM_factors_i[items_to_compute_tensor])  # .to("cuda")
             item_scores_t += torch.einsum("bi,ic->bc", MF_2[user_id_array],
                                           items_sim[items_to_compute_tensor, items_to_compute_tensor])  # .to("cuda")
             item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
 
         else:
-            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)#.to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)#.to("cuda")
+            item_scores = torch.einsum("bi,ci->bc", self.USER_factors[user_id_array], self.ITEM_factors)#.to("cuda")
+            MF_1 = torch.einsum("bi,ci->bc", self.USER_factors_u, self.ITEM_factors_u)#.to("cuda")
             item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)#.to("cuda")
-            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)#.to("cuda")
+            MF_2 = torch.einsum("bi,ci->bc", self.USER_factors_i, self.ITEM_factors_i)#.to("cuda")
             item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)#.to("cuda")
             item_scores = item_scores.detach().cpu().numpy()
 
@@ -397,14 +397,23 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.ITEM_factors_i = self.ITEM_factors_best_i.copy()
 
     def _prepare_model_for_validation(self):
-        self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
-        self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
+        # self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
+        # self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
+        #
+        # self.USER_factors_u = self._model._embedding_user_u.weight.detach().cpu().numpy()
+        # self.ITEM_factors_u = self._model._embedding_item_u.weight.detach().cpu().numpy()
+        #
+        # self.USER_factors_i = self._model._embedding_user_i.weight.detach().cpu().numpy()
+        # self.ITEM_factors_i = self._model._embedding_item_i.weight.detach().cpu().numpy()
 
-        self.USER_factors_u = self._model._embedding_user_u.weight.detach().cpu().numpy()
-        self.ITEM_factors_u = self._model._embedding_item_u.weight.detach().cpu().numpy()
+        self.USER_factors = self._model._embedding_user
+        self.ITEM_factors = self._model._embedding_item
 
-        self.USER_factors_i = self._model._embedding_user_i.weight.detach().cpu().numpy()
-        self.ITEM_factors_i = self._model._embedding_item_i.weight.detach().cpu().numpy()
+        self.USER_factors_u = self._model._embedding_user_u
+        self.ITEM_factors_u = self._model._embedding_item_u
+
+        self.USER_factors_i = self._model._embedding_user_i
+        self.ITEM_factors_i = self._model._embedding_item_i
 
     def _update_best_model(self):
         self.USER_factors_best = self._model._embedding_user.weight.detach().cpu().numpy()
