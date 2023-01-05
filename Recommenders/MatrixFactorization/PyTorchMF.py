@@ -161,6 +161,8 @@ def loss_MSE(model, batch):
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
 
+    loss = loss.to("cuda")
+
     return loss
 
 
@@ -174,6 +176,8 @@ def loss_CrossEntropy(model, batch):
     loss = torch.nn.CrossEntropyLoss()
     loss = loss(predicted_class, ground_truth)
 
+    loss = loss.to("cuda")
+
     return loss
 
 
@@ -185,6 +189,8 @@ def loss_BPR(model, batch):
 
     # Compute total loss for batch
     loss = -x_ij.sigmoid().log().mean()
+
+    loss = loss.to("cuda")
 
     return loss
 
@@ -254,7 +260,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             loss = self._loss_function(self._model, batch)
-            loss = loss.cuda()
+            # loss = loss.cuda()
 
             # Compute gradients given current loss
             loss.backward()
