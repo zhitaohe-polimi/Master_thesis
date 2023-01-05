@@ -257,66 +257,66 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def __init__(self, URM_train, verbose=True):
         super(_PyTorchMFRecommender, self).__init__(URM_train, verbose=verbose)
 
-    def _compute_item_score(self, user_id_array, items_to_compute=None):
-        """
-        USER_factors is n_users x n_factors
-        ITEM_factors is n_items x n_factors
-
-        The prediction for cold users will always be -inf for ALL items
-
-        :param user_id_array:
-        :param items_to_compute:
-        :return:
-        """
-
-        assert self.USER_factors.shape[1] == self.ITEM_factors.shape[1], \
-            "{}: User and Item factors have inconsistent shape".format(self.RECOMMENDER_NAME)
-
-        assert self.USER_factors.shape[0] > np.max(user_id_array), \
-            "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
-                self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
-
-        users_sim = self.users_sim  # .detach().cpu().numpy()
-        items_sim = self.items_sim  # .detach().cpu().numpy()
-        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
-
-        USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
-        ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
-        USER_factors_u = torch.tensor(self.USER_factors_u)#.to("cuda")
-        ITEM_factors_u = torch.tensor(self.ITEM_factors_u)#.to("cuda")
-        USER_factors_i = torch.tensor(self.USER_factors_i)#.to("cuda")
-        ITEM_factors_i = torch.tensor(self.ITEM_factors_i)#.to("cuda")
-
-        if items_to_compute is not None:
-            items_to_compute_tensor = torch.Tensor(items_to_compute).type(torch.LongTensor)
-
-            item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
-            item_scores_t = torch.einsum("bi,ci->bc", USER_factors[user_id_array],
-                                         ITEM_factors[items_to_compute_tensor])  # .to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u[items_to_compute_tensor])  # .to("cuda")
-            item_scores_t += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
-            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i[items_to_compute_tensor])  # .to("cuda")
-            item_scores_t += torch.einsum("bi,ic->bc", MF_2[user_id_array],
-                                          items_sim[items_to_compute_tensor, items_to_compute_tensor])  # .to("cuda")
-            item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
-
-        else:
-            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)#.to("cuda")
-            item_scores = item_scores.to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)#.to("cuda")
-            MF_1 = MF_1.to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)#.to("cuda")
-            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)#.to("cuda")
-            MF_2 = MF_2.to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)#.to("cuda")
-            item_scores = item_scores.detach().cpu().numpy()
-
-        # No need to select only the specific negative items or warm users because the -inf score will not change
-        if self.use_bias:
-            item_scores += self.ITEM_bias + self.GLOBAL_bias
-            item_scores = (item_scores.T + self.USER_bias[user_id_array]).T
-
-        return item_scores
+    # def _compute_item_score(self, user_id_array, items_to_compute=None):
+    #     """
+    #     USER_factors is n_users x n_factors
+    #     ITEM_factors is n_items x n_factors
+    #
+    #     The prediction for cold users will always be -inf for ALL items
+    #
+    #     :param user_id_array:
+    #     :param items_to_compute:
+    #     :return:
+    #     """
+    #
+    #     assert self.USER_factors.shape[1] == self.ITEM_factors.shape[1], \
+    #         "{}: User and Item factors have inconsistent shape".format(self.RECOMMENDER_NAME)
+    #
+    #     assert self.USER_factors.shape[0] > np.max(user_id_array), \
+    #         "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
+    #             self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
+    #
+    #     users_sim = self.users_sim  # .detach().cpu().numpy()
+    #     items_sim = self.items_sim  # .detach().cpu().numpy()
+    #     user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
+    #
+    #     USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
+    #     ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
+    #     USER_factors_u = torch.tensor(self.USER_factors_u)#.to("cuda")
+    #     ITEM_factors_u = torch.tensor(self.ITEM_factors_u)#.to("cuda")
+    #     USER_factors_i = torch.tensor(self.USER_factors_i)#.to("cuda")
+    #     ITEM_factors_i = torch.tensor(self.ITEM_factors_i)#.to("cuda")
+    #
+    #     if items_to_compute is not None:
+    #         items_to_compute_tensor = torch.Tensor(items_to_compute).type(torch.LongTensor)
+    #
+    #         item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
+    #         item_scores_t = torch.einsum("bi,ci->bc", USER_factors[user_id_array],
+    #                                      ITEM_factors[items_to_compute_tensor])  # .to("cuda")
+    #         MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u[items_to_compute_tensor])  # .to("cuda")
+    #         item_scores_t += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
+    #         MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i[items_to_compute_tensor])  # .to("cuda")
+    #         item_scores_t += torch.einsum("bi,ic->bc", MF_2[user_id_array],
+    #                                       items_sim[items_to_compute_tensor, items_to_compute_tensor])  # .to("cuda")
+    #         item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
+    #
+    #     else:
+    #         item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)#.to("cuda")
+    #         item_scores = item_scores.to("cuda")
+    #         MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)#.to("cuda")
+    #         MF_1 = MF_1.to("cuda")
+    #         item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)#.to("cuda")
+    #         MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)#.to("cuda")
+    #         MF_2 = MF_2.to("cuda")
+    #         item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)#.to("cuda")
+    #         item_scores = item_scores.detach().cpu().numpy()
+    #
+    #     # No need to select only the specific negative items or warm users because the -inf score will not change
+    #     if self.use_bias:
+    #         item_scores += self.ITEM_bias + self.GLOBAL_bias
+    #         item_scores = (item_scores.T + self.USER_bias[user_id_array]).T
+    #
+    #     return item_scores
 
     def fit(self, epochs=300,
             batch_size=8,
