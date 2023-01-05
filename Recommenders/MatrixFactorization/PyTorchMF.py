@@ -51,8 +51,6 @@ class _SimpleMFBiasModel(torch.nn.Module):
         self._item_bias = torch.nn.Parameter(torch.randn((n_items), dtype=torch.float))
 
     def forward(self, user, item):
-        # user = user.to("cuda")
-        # item = item.to("cuda")
         prediction = self._global_bias + self._user_bias[user] + self._item_bias[item]
         prediction += batch_dot(self._embedding_user(user), self._embedding_item(item))
         return prediction
@@ -153,10 +151,12 @@ class BPR_Dataset(Dataset):
 
 def loss_MSE(model, batch):
     user, item, rating = batch
+    user = user.cuda()
+    item = item.cuda()
+    rating = item.cuda()
 
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
-    # rating = rating.to("cuda")
 
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
@@ -209,7 +209,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
         self._model = _SimpleMFBiasModel(self.n_users, self.n_items, embedding_dim=num_factors)
-        # self._model.to("cuda")
+        self._model.to("cuda")
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
@@ -254,6 +254,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             loss = self._loss_function(self._model, batch)
+            loss = loss.cuda()
 
             # Compute gradients given current loss
             loss.backward()
