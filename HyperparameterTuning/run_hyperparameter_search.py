@@ -571,7 +571,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
     earlystopping_keywargs = {"validation_every_n": 5,
                               "stop_on_validation": True,
                               "evaluator_object": evaluator_validation_earlystopping,
-                              "lower_validations_allowed": 10,
+                              "lower_validations_allowed": 5,
                               "validation_metric": metric_to_optimize,
                               }
 
