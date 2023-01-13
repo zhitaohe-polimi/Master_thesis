@@ -333,7 +333,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.all_users = self.all_users.to(device)
 
         self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
-        # set all elements in diagnal to 0
+        # set all elements in diagonal to 0
         self.users_sim = self.users_sim.fill_diagonal_(0)
         self.users_sim = torch.nn.functional.normalize(self.users_sim, dim=1)
         print("user similarity computed.")
@@ -343,7 +343,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.all_items = self.all_items.to(device)
 
         self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
-        # set all elements in diagnal to 0
+        # set all elements in diagonal to 0
         self.items_sim = self.items_sim.fill_diagonal_(0)
         self.items_sim = torch.nn.functional.normalize(self.items_sim, dim=1)
         print("item similarity computed.")
