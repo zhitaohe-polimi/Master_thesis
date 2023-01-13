@@ -230,35 +230,6 @@ def read_data_split_and_search(args):
         #                                       similarity_type_list=None,  # all
         #                                       parallelizeKNN=False)
 
-    # if args.flag_print_results:
-    #     KNN_similarity_to_report_list = ["cosine", "dice", "jaccard", "asymmetric", "tversky"]
-    #
-    #     n_test_users = np.sum(np.ediff1d(URM_test.indptr)>=1)
-    #
-    #     result_loader = ResultFolderLoader(model_folder_path,
-    #                                        base_algorithm_list = None,
-    #                                        other_algorithm_list = None,
-    #                                        KNN_similarity_list = KNN_similarity_to_report_list,
-    #                                        ICM_names_list = dataset.ICM_DICT.keys(),
-    #                                        UCM_names_list = dataset.UCM_DICT.keys(),
-    #                                        )
-    #
-    #     result_loader.generate_latex_results(result_folder_path + "{}_latex_results.txt".format("accuracy_metrics"),
-    #                                        metrics_list = ['RECALL', 'PRECISION', 'MAP', 'NDCG'],
-    #                                        cutoffs_list = [cutoff_to_optimize],
-    #                                        table_title = None,
-    #                                        highlight_best = True)
-    #
-    #     result_loader.generate_latex_results(result_folder_path + "{}_latex_results.txt".format("beyond_accuracy_metrics"),
-    #                                        metrics_list = ["NOVELTY", "DIVERSITY_MEAN_INTER_LIST", "COVERAGE_ITEM", "DIVERSITY_GINI", "SHANNON_ENTROPY"],
-    #                                        cutoffs_list = cutoff_list,
-    #                                        table_title = None,
-    #                                        highlight_best = True)
-    #
-    #     result_loader.generate_latex_time_statistics(result_folder_path + "{}_latex_results.txt".format("time"),
-    #                                        n_evaluation_users=n_test_users,
-    #                                        table_title = None)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run KGAT.")
