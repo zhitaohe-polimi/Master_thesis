@@ -180,9 +180,9 @@ class BPR_Dataset(Dataset):
 
 def loss_MSE(model, batch, users_sim, items_sim, all_users, all_items):
     user, item, rating = batch
-    user = user.to("cuda")
-    item = item.to("cuda")
-    rating = rating.to("cuda")
+    # user = user.to("cuda")
+    # item = item.to("cuda")
+    # rating = rating.to("cuda")
 
     # Compute prediction for each element in batch
     # prediction = model.forward_test(user, item, users_sim, items_sim)
@@ -262,14 +262,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         users_sim = self.users_sim  # .detach().cpu().numpy()
         items_sim = self.items_sim  # .detach().cpu().numpy()
-        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to("cuda")
+        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)#.to("cuda")
 
-        USER_factors = torch.tensor(self.USER_factors).to("cuda")
-        ITEM_factors = torch.tensor(self.ITEM_factors).to("cuda")
-        USER_factors_u = torch.tensor(self.USER_factors_u).to("cuda")
-        ITEM_factors_u = torch.tensor(self.ITEM_factors_u).to("cuda")
-        USER_factors_i = torch.tensor(self.USER_factors_i).to("cuda")
-        ITEM_factors_i = torch.tensor(self.ITEM_factors_i).to("cuda")
+        USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
+        ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
+        USER_factors_u = torch.tensor(self.USER_factors_u)#.to("cuda")
+        ITEM_factors_u = torch.tensor(self.ITEM_factors_u)#.to("cuda")
+        USER_factors_i = torch.tensor(self.USER_factors_i)#.to("cuda")
+        ITEM_factors_i = torch.tensor(self.ITEM_factors_i)#.to("cuda")
 
         if items_to_compute is not None:
             items_to_compute_tensor = torch.Tensor(items_to_compute).type(torch.LongTensor)
@@ -322,15 +322,15 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
-        self._model = self._model.to(device)
+        # self._model = self._model.to(device)
 
         print("ITERACTIONS OF URM_TRAIN(fit): ", self.URM_train.nnz)
         self.URM_tensor = torch.tensor(self.URM_train.toarray())
-        self.URM_tensor = self.URM_tensor.to(device)
+        # self.URM_tensor = self.URM_tensor.to(device)
 
         user_list = list(range(self.n_users))
         self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
-        self.all_users = self.all_users.to(device)
+        # self.all_users = self.all_users.to(device)
 
         self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
         # set all elements in diagonal to 0
@@ -340,7 +340,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         item_list = list(range(self.n_items))
         self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
-        self.all_items = self.all_items.to(device)
+        # self.all_items = self.all_items.to(device)
 
         self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
         # set all elements in diagonal to 0
@@ -412,7 +412,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             loss = self._loss_function(self._model, batch, self.users_sim, self.items_sim, self.all_users,
                                        self.all_items)
 
-            loss = loss.cuda()
+            # loss = loss.cuda()
 
             # Compute gradients given current loss
             loss.backward()
