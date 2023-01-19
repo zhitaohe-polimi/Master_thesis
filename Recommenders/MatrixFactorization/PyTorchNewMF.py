@@ -48,22 +48,24 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_user = torch.nn.Embedding(n_users, embedding_dim=embedding_dim)
         self._embedding_item = torch.nn.Embedding(n_items, embedding_dim=embedding_dim)
 
-        self._embedding_user_u = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_u)
-        self._embedding_item_u = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_u)
+        self._embedding_user_vi = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_u)
+        self._embedding_item_vi = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_u)
 
-        self._embedding_user_i = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_i)
-        self._embedding_item_i = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
+        self._embedding_user_uj = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_i)
+        self._embedding_item_uj = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item, users_sim, items_sim, all_users, all_items):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
-        user_sim = users_sim[user]
-        MF_u = torch.einsum("bi,ci->bc", self._embedding_user_u(all_users), self._embedding_item_u(item))
-        prediction += torch.einsum("bi,ib->b", user_sim, MF_u)
+        user_sim_uv = users_sim[user]
+        alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi(all_users), self._embedding_item_vi(item))
+        summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
+        prediction += summation_v
 
-        item_sim = items_sim[:, item]
-        MF_i = torch.einsum("bi,ci->bc", self._embedding_user_i(user), self._embedding_item_i(all_items))
-        prediction += torch.einsum("bi,ib->b", MF_i, item_sim)
+        item_sim_ij = items_sim[:, item]
+        alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj(all_items))
+        summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
+        prediction += summation_j
 
         return prediction
 
@@ -264,34 +266,38 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         items_sim = self.items_sim  # .detach().cpu().numpy()
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)#.to("cuda")
 
-        USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
-        ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
-        USER_factors_u = torch.tensor(self.USER_factors_u)#.to("cuda")
-        ITEM_factors_u = torch.tensor(self.ITEM_factors_u)#.to("cuda")
-        USER_factors_i = torch.tensor(self.USER_factors_i)#.to("cuda")
-        ITEM_factors_i = torch.tensor(self.ITEM_factors_i)#.to("cuda")
+        # USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
+        # ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
+        # USER_factors_u = torch.tensor(self.USER_factors_u)#.to("cuda")
+        # ITEM_factors_u = torch.tensor(self.ITEM_factors_u)#.to("cuda")
+        # USER_factors_i = torch.tensor(self.USER_factors_i)#.to("cuda")
+        # ITEM_factors_i = torch.tensor(self.ITEM_factors_i)#.to("cuda")
 
         if items_to_compute is not None:
-            items_to_compute_tensor = torch.Tensor(items_to_compute).type(torch.LongTensor)
-
-            item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
-            item_scores_t = torch.einsum("bi,ci->bc", USER_factors[user_id_array],
-                                         ITEM_factors[items_to_compute_tensor])  # .to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u[items_to_compute_tensor])  # .to("cuda")
-            item_scores_t += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
-            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i[items_to_compute_tensor])  # .to("cuda")
-            item_scores_t += torch.einsum("bi,ic->bc", MF_2[user_id_array],
-                                          items_sim[items_to_compute_tensor, items_to_compute_tensor])  # .to("cuda")
-            item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
+            pass
+            # items_to_compute_tensor = torch.Tensor(items_to_compute).type(torch.LongTensor)
+            #
+            # item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
+            # item_scores_t = torch.einsum("bi,ci->bc", USER_factors[user_id_array],
+            #                              ITEM_factors[items_to_compute_tensor])  # .to("cuda")
+            # MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u[items_to_compute_tensor])  # .to("cuda")
+            # item_scores_t += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
+            # MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i[items_to_compute_tensor])  # .to("cuda")
+            # item_scores_t += torch.einsum("bi,ic->bc", MF_2[user_id_array],
+            #                               items_sim[items_to_compute_tensor, items_to_compute_tensor])  # .to("cuda")
+            # item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
 
         else:
-            item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)  # .to("cuda")
-            MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)  # .to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
-            MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)  # .to("cuda")
-            item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)  # .to("cuda")
-            item_scores = item_scores.detach().cpu().numpy()
+            # item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)  # .to("cuda")
+            # MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)  # .to("cuda")
+            # item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
+            # MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)  # .to("cuda")
+            # item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)  # .to("cuda")
+            # item_scores = item_scores.detach().cpu().numpy()
 
+            #需不需要把init赋值？
+            item_scores = self._model.forward(user_id_array,self.all_items,users_sim,items_sim,self.all_users,self.all_users)
+            item_scores = item_scores.detach().cpu().numpy()
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
             item_scores += self.ITEM_bias + self.GLOBAL_bias
@@ -385,21 +391,21 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
         self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
 
-        self.USER_factors_u = self._model._embedding_user_u.weight.detach().cpu().numpy()
-        self.ITEM_factors_u = self._model._embedding_item_u.weight.detach().cpu().numpy()
+        self.USER_factors_u = self._model._embedding_user_vi.weight.detach().cpu().numpy()
+        self.ITEM_factors_u = self._model._embedding_item_vi.weight.detach().cpu().numpy()
 
-        self.USER_factors_i = self._model._embedding_user_i.weight.detach().cpu().numpy()
-        self.ITEM_factors_i = self._model._embedding_item_i.weight.detach().cpu().numpy()
+        self.USER_factors_i = self._model._embedding_user_uj.weight.detach().cpu().numpy()
+        self.ITEM_factors_i = self._model._embedding_item_uj.weight.detach().cpu().numpy()
 
     def _update_best_model(self):
         self.USER_factors_best = self._model._embedding_user.weight.detach().cpu().numpy()
         self.ITEM_factors_best = self._model._embedding_item.weight.detach().cpu().numpy()
 
-        self.USER_factors_best_u = self._model._embedding_user_u.weight.detach().cpu().numpy()
-        self.ITEM_factors_best_u = self._model._embedding_item_u.weight.detach().cpu().numpy()
+        self.USER_factors_best_u = self._model._embedding_user_vi.weight.detach().cpu().numpy()
+        self.ITEM_factors_best_u = self._model._embedding_item_vi.weight.detach().cpu().numpy()
 
-        self.USER_factors_best_i = self._model._embedding_user_i.weight.detach().cpu().numpy()
-        self.ITEM_factors_best_i = self._model._embedding_item_i.weight.detach().cpu().numpy()
+        self.USER_factors_best_i = self._model._embedding_user_uj.weight.detach().cpu().numpy()
+        self.ITEM_factors_best_i = self._model._embedding_item_uj.weight.detach().cpu().numpy()
 
     def _run_epoch(self, num_epoch):
 
