@@ -425,9 +425,10 @@ class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
+        print(self.batch_size)
         use_cython_sampler = True
         data_iterator_class = InteractionIterator if use_cython_sampler else InteractionIterator
         self._data_iterator = data_iterator_class(self.URM_train, positive_quota=positive_quota,
-                                                  batch_size=self.batch_size)
+                                                  )
         # self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
         super(PyTorchNewMF_MSE_Recommender, self).fit(**kwargs)
