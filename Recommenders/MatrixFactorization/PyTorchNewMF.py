@@ -54,16 +54,20 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_user_uj = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_i)
         self._embedding_item_uj = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
-    def forward(self, user, item, users_sim, items_sim, all_users, all_items):
+    def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
+        ratings = torch.einsum("bi,ci->bc", self._embedding_user.weight, self._embedding_item.weight)
+
+        users_sim = torch.einsum("bi,ci->bc", ratings, ratings)
         user_sim_uv = users_sim[user]
-        alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi(all_users), self._embedding_item_vi(item))
+        alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
         summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
         prediction += summation_v
 
+        items_sim = torch.einsum("ib,ic->bc", ratings, ratings)
         item_sim_ij = items_sim[:, item]
-        alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj(all_items))
+        alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
 
@@ -180,28 +184,14 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-def loss_MSE(model, batch, users_sim, items_sim, all_users, all_items):
+def loss_MSE(model, batch):
     user, item, rating = batch
     # user = user.to("cuda")
     # item = item.to("cuda")
     # rating = rating.to("cuda")
 
     # Compute prediction for each element in batch
-    # prediction = model.forward_test(user, item, users_sim, items_sim)
-
-    prediction = model.forward(user, item, users_sim, items_sim, all_users, all_items)
-
-    # Compute total loss for batch
-    loss = (prediction - rating).pow(2).mean()
-
-    return loss
-
-
-def loss_MSE_new(model, batch, users_sim, items_sim):
-    user, item, rating = batch
-
-    # Compute prediction for each element in batch
-    prediction = model.forward_test(user, item, users_sim, items_sim)
+    prediction = model.forward(user, item)
 
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
@@ -214,19 +204,6 @@ def loss_BPR(model, batch):
 
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
-
-    # Compute total loss for batch
-    loss = -x_ij.sigmoid().log().mean()
-
-    return loss
-
-
-def loss_BPR_new(model, batch, users_sim, items_sim):
-    user, item_positive, item_negative = batch
-
-    # Compute prediction for each element in batch
-    x_ij = model.forward_test(user, item_positive, users_sim, items_sim) - \
-           model.forward_test(user, item_negative, users_sim, items_sim)
 
     # Compute total loss for batch
     loss = -x_ij.sigmoid().log().mean()
@@ -262,16 +239,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
-        users_sim = self.users_sim  # .detach().cpu().numpy()
-        items_sim = self.items_sim  # .detach().cpu().numpy()
-        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)#.to("cuda")
-
-        # USER_factors = torch.tensor(self.USER_factors)#.to("cuda")
-        # ITEM_factors = torch.tensor(self.ITEM_factors)#.to("cuda")
-        # USER_factors_u = torch.tensor(self.USER_factors_u)#.to("cuda")
-        # ITEM_factors_u = torch.tensor(self.ITEM_factors_u)#.to("cuda")
-        # USER_factors_i = torch.tensor(self.USER_factors_i)#.to("cuda")
-        # ITEM_factors_i = torch.tensor(self.ITEM_factors_i)#.to("cuda")
+        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)  # .to("cuda")
+        item_id_array = torch.Tensor(list(range(self.n_items))).type(torch.LongTensor)
 
         if items_to_compute is not None:
             pass
@@ -288,15 +257,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
 
         else:
-            # item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)  # .to("cuda")
-            # MF_1 = torch.einsum("bi,ci->bc", USER_factors_u, ITEM_factors_u)  # .to("cuda")
-            # item_scores += torch.einsum("bi,ic->bc", users_sim[user_id_array], MF_1)  # .to("cuda")
-            # MF_2 = torch.einsum("bi,ci->bc", USER_factors_i, ITEM_factors_i)  # .to("cuda")
-            # item_scores += torch.einsum("bi,ic->bc", MF_2[user_id_array], items_sim)  # .to("cuda")
-            # item_scores = item_scores.detach().cpu().numpy()
+            self._model._embedding_user = self.USER_factors
+            self._model._embedding_item = self.ITEM_factors
+            self._model._embedding_user_vi = self.USER_factors_vi
+            self._model._embedding_item_vi = self.ITEM_factors_vi
+            self._model._embedding_user_uj = self.USER_factors_uj
+            self._model._embedding_item_uj = self.ITEM_factors_uj
 
-            #需不需要把init赋值？
-            item_scores = self._model.forward(user_id_array,self.all_items,users_sim,items_sim,self.all_users,self.all_users)
+            item_scores = self._model.forward(user_id_array, item_id_array)
             item_scores = item_scores.detach().cpu().numpy()
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
@@ -328,31 +296,31 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
-        # self._model = self._model.to(device)
+        self._model = self._model.to(device)
 
         print("ITERACTIONS OF URM_TRAIN(fit): ", self.URM_train.nnz)
-        self.URM_tensor = torch.tensor(self.URM_train.toarray())
-        # self.URM_tensor = self.URM_tensor.to(device)
-
-        user_list = list(range(self.n_users))
-        self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
-        # self.all_users = self.all_users.to(device)
-
-        self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
-        # set all elements in diagonal to 0
-        self.users_sim = self.users_sim.fill_diagonal_(0)
-        self.users_sim = torch.nn.functional.normalize(self.users_sim, dim=1)
-        print("user similarity computed.")
-
-        item_list = list(range(self.n_items))
-        self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
-        # self.all_items = self.all_items.to(device)
-
-        self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
-        # set all elements in diagonal to 0
-        self.items_sim = self.items_sim.fill_diagonal_(0)
-        self.items_sim = torch.nn.functional.normalize(self.items_sim, dim=1)
-        print("item similarity computed.")
+        # self.URM_tensor = torch.tensor(self.URM_train.toarray())
+        # # self.URM_tensor = self.URM_tensor.to(device)
+        #
+        # user_list = list(range(self.n_users))
+        # self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
+        # # self.all_users = self.all_users.to(device)
+        #
+        # self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
+        # # set all elements in diagonal to 0
+        # self.users_sim = self.users_sim.fill_diagonal_(0)
+        # self.users_sim = torch.nn.functional.normalize(self.users_sim, dim=1)
+        # print("user similarity computed.")
+        #
+        # item_list = list(range(self.n_items))
+        # self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
+        # # self.all_items = self.all_items.to(device)
+        #
+        # self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
+        # # set all elements in diagonal to 0
+        # self.items_sim = self.items_sim.fill_diagonal_(0)
+        # self.items_sim = torch.nn.functional.normalize(self.items_sim, dim=1)
+        # print("item similarity computed.")
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
@@ -381,31 +349,31 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.USER_factors = self.USER_factors_best.copy()
         self.ITEM_factors = self.ITEM_factors_best.copy()
 
-        self.USER_factors_u = self.USER_factors_best_u.copy()
-        self.ITEM_factors_u = self.ITEM_factors_best_u.copy()
+        self.USER_factors_vi = self.USER_factors_best_vi.copy()
+        self.ITEM_factors_vi = self.ITEM_factors_best_vi.copy()
 
-        self.USER_factors_i = self.USER_factors_best_i.copy()
-        self.ITEM_factors_i = self.ITEM_factors_best_i.copy()
+        self.USER_factors_uj = self.USER_factors_best_uj.copy()
+        self.ITEM_factors_uj = self.ITEM_factors_best_uj.copy()
 
     def _prepare_model_for_validation(self):
         self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
         self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
 
-        self.USER_factors_u = self._model._embedding_user_vi.weight.detach().cpu().numpy()
-        self.ITEM_factors_u = self._model._embedding_item_vi.weight.detach().cpu().numpy()
+        self.USER_factors_vi = self._model._embedding_user_vi.weight.detach().cpu().numpy()
+        self.ITEM_factors_vi = self._model._embedding_item_vi.weight.detach().cpu().numpy()
 
-        self.USER_factors_i = self._model._embedding_user_uj.weight.detach().cpu().numpy()
-        self.ITEM_factors_i = self._model._embedding_item_uj.weight.detach().cpu().numpy()
+        self.USER_factors_uj = self._model._embedding_user_uj.weight.detach().cpu().numpy()
+        self.ITEM_factors_uj = self._model._embedding_item_uj.weight.detach().cpu().numpy()
 
     def _update_best_model(self):
         self.USER_factors_best = self._model._embedding_user.weight.detach().cpu().numpy()
         self.ITEM_factors_best = self._model._embedding_item.weight.detach().cpu().numpy()
 
-        self.USER_factors_best_u = self._model._embedding_user_vi.weight.detach().cpu().numpy()
-        self.ITEM_factors_best_u = self._model._embedding_item_vi.weight.detach().cpu().numpy()
+        self.USER_factors_best_vi = self._model._embedding_user_vi.weight.detach().cpu().numpy()
+        self.ITEM_factors_best_vi = self._model._embedding_item_vi.weight.detach().cpu().numpy()
 
-        self.USER_factors_best_i = self._model._embedding_user_uj.weight.detach().cpu().numpy()
-        self.ITEM_factors_best_i = self._model._embedding_item_uj.weight.detach().cpu().numpy()
+        self.USER_factors_best_uj = self._model._embedding_user_uj.weight.detach().cpu().numpy()
+        self.ITEM_factors_best_uj = self._model._embedding_item_uj.weight.detach().cpu().numpy()
 
     def _run_epoch(self, num_epoch):
 
@@ -415,10 +383,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             # loss = self._loss_function(self._model, batch)
-            loss = self._loss_function(self._model, batch, self.users_sim, self.items_sim, self.all_users,
-                                       self.all_items)
+            loss = self._loss_function(self._model, batch)
 
-            # loss = loss.cuda()
+            loss = loss.cuda()
 
             # Compute gradients given current loss
             loss.backward()
@@ -438,7 +405,7 @@ class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
         super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
 
         self._dataset = BPR_Dataset(self.URM_train)
-        self._loss_function = loss_BPR_new
+        self._loss_function = loss_BPR
 
 
 class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
