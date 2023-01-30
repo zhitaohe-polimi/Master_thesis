@@ -221,7 +221,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
     def __init__(self, URM_train, verbose=True):
         super(_PyTorchMFRecommender, self).__init__(URM_train, verbose=verbose)
-        self.batch_size = None
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
         """
@@ -293,9 +292,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
 
-        self.batch_size = batch_size
-
-        self._data_iterator = InteractionIterator(self.URM_train, 0.5, self.batch_size)
+        self._data_iterator = InteractionIterator(self.URM_train, 0.5, batch_size)
 
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
@@ -425,7 +422,6 @@ class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
-        print(self.batch_size)
         use_cython_sampler = True
         data_iterator_class = InteractionIterator if use_cython_sampler else InteractionIterator
         self._data_iterator = data_iterator_class(self.URM_train, positive_quota=positive_quota,

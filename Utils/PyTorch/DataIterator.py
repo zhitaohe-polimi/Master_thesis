@@ -77,6 +77,7 @@ class InteractionIterator(object):
         self.n_data_points = self.URM_train.nnz if set_fixed_len is None else set_fixed_len
         self.n_sampled_points = 0
         self.batch_size = batch_size
+        print(self.batch_size)
         self.positive_quota = positive_quota
 
         self.batch_user = torch.empty((self.batch_size,), dtype=torch.long)
