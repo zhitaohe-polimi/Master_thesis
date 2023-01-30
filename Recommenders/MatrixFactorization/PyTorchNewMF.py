@@ -221,6 +221,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
     def __init__(self, URM_train, verbose=True):
         super(_PyTorchMFRecommender, self).__init__(URM_train, verbose=verbose)
+        self.batch_size = None
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
         """
@@ -427,6 +428,6 @@ class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
         use_cython_sampler = True
         data_iterator_class = InteractionIterator if use_cython_sampler else InteractionIterator
         self._data_iterator = data_iterator_class(self.URM_train, positive_quota=positive_quota,
-                                                  )
+                                                  batch_size=self.batch_size)
         # self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
         super(PyTorchNewMF_MSE_Recommender, self).fit(**kwargs)
