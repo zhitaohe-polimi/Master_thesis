@@ -14,6 +14,8 @@ import torch, os
 from torch.utils.data import Dataset, DataLoader
 from torch.profiler import profile, record_function, ProfilerActivity
 from sklearn.preprocessing import normalize
+# from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython, InteractionIterator as InteractionIterator_cython, InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
+from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
 
 
 def batch_dot(tensor_1, tensor_2):
@@ -290,8 +292,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
 
-        self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
-                                       num_workers=os.cpu_count(), pin_memory=True)
+        use_cython_sampler = True
+        data_iterator_class = InteractionIterator if use_cython_sampler else InteractionIterator
+        self._data_iterator = data_iterator_class(self.URM_train, batch_size=batch_size)
+
+        # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
+        #                                num_workers=os.cpu_count(), pin_memory=True)
 
         self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
@@ -378,7 +384,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
-        for batch in self._data_loader:
+        for batch in self._data_iterator:
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 

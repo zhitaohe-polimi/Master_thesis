@@ -1,6 +1,6 @@
 '''
 Modified on Jan. 1, 2021
-Pytorch implementation of new baseline model for recommendation.
+PyTorch implementation of new baseline model for recommendation.
 @author: Qingsong Lv (lqs19@mails.tsinghua.edu.cn, lqs@mail.bnu.edu.cn)
 
 Created on Dec 18, 2018
