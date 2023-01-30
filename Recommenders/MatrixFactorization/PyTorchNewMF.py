@@ -292,9 +292,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
 
-        use_cython_sampler = True
-        data_iterator_class = InteractionIterator if use_cython_sampler else InteractionIterator
-        self._data_iterator = data_iterator_class(self.URM_train, batch_size=batch_size)
+        self.batch_size = batch_size
+
+        self._data_iterator = InteractionIterator(self.URM_train, 0.5, self.batch_size)
 
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
@@ -420,9 +420,13 @@ class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
 
-        self._dataset = None
+        # self._dataset = None
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
-        self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
+        use_cython_sampler = True
+        data_iterator_class = InteractionIterator if use_cython_sampler else InteractionIterator
+        self._data_iterator = data_iterator_class(self.URM_train, positive_quota=positive_quota,
+                                                  batch_size=self.batch_size)
+        # self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
         super(PyTorchNewMF_MSE_Recommender, self).fit(**kwargs)
