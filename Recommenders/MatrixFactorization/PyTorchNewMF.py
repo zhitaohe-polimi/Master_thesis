@@ -59,19 +59,17 @@ class _SimpleNewMFModel(torch.nn.Module):
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
-        ratings = torch.einsum("bi,ci->bc", self._embedding_user.weight, self._embedding_item.weight)
-
-        user_sim_uv = torch.einsum("bi,ci->bc", ratings[user], ratings)
-        alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
-        summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
-        prediction += summation_v
-
-        item_sim_ij = torch.einsum("ib,ic->bc", ratings, ratings[:, item])
-        alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
-        summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
-        prediction += summation_j
-
-        print(user_sim_uv.shape, item_sim_ij.shape)
+        # ratings = torch.einsum("bi,ci->bc", self._embedding_user.weight, self._embedding_item.weight)
+        #
+        # user_sim_uv = torch.einsum("bi,ci->bc", ratings[user], ratings)
+        # alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
+        # summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
+        # prediction += summation_v
+        #
+        # item_sim_ij = torch.einsum("ib,ic->bc", ratings, ratings[:, item])
+        # alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
+        # summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
+        # prediction += summation_j
 
         return prediction
 
