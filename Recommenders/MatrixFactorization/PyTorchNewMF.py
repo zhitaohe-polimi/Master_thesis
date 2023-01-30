@@ -368,14 +368,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.ITEM_factors_uj = self._model._embedding_item_uj#.weight.detach().cpu().numpy()
 
     def _update_best_model(self):
-        self.USER_factors_best = self._model._embedding_user#.weight.detach().cpu().numpy()
-        self.ITEM_factors_best = self._model._embedding_item#.weight.detach().cpu().numpy()
+        self.USER_factors_best = self._model._embedding_user.weight.detach().cpu().numpy()
+        self.ITEM_factors_best = self._model._embedding_item.weight.detach().cpu().numpy()
 
-        self.USER_factors_best_vi = self._model._embedding_user_vi#.weight.detach().cpu().numpy()
-        self.ITEM_factors_best_vi = self._model._embedding_item_vi#.weight.detach().cpu().numpy()
+        self.USER_factors_best_vi = self._model._embedding_user_vi.weight.detach().cpu().numpy()
+        self.ITEM_factors_best_vi = self._model._embedding_item_vi.weight.detach().cpu().numpy()
 
-        self.USER_factors_best_uj = self._model._embedding_user_uj#.weight.detach().cpu().numpy()
-        self.ITEM_factors_best_uj = self._model._embedding_item_uj#.weight.detach().cpu().numpy()
+        self.USER_factors_best_uj = self._model._embedding_user_uj.weight.detach().cpu().numpy()
+        self.ITEM_factors_best_uj = self._model._embedding_item_uj.weight.detach().cpu().numpy()
 
     def _run_epoch(self, num_epoch):
 
