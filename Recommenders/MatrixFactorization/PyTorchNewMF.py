@@ -239,7 +239,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.weight.shape[0], np.max(user_id_array))
 
-        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)  # .to("cuda")
+        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to(self.device)
 
         if items_to_compute is not None:
             pass
@@ -296,10 +296,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             **earlystopping_kwargs):
 
         if torch.cuda.is_available():
-            device = torch.device('cuda')
+            self.device = torch.device('cuda')
             print("MF_MSE_PyTorch: Using CUDA")
         else:
-            device = torch.device('cpu')
+            self.device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
 
         self._data_iterator = InteractionIterator(self.URM_train, self.positive_quota, batch_size)
@@ -310,7 +310,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
-        self._model = self._model.to(device)
+        self._model = self._model.to(self.device)
 
         print("ITERACTIONS OF URM_TRAIN(fit): ", self.URM_train.nnz)
         # self.URM_tensor = torch.tensor(self.URM_train.toarray())
