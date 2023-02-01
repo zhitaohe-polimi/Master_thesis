@@ -396,10 +396,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
-            # loss = self._loss_function(self._model, batch)
             loss = self._loss_function(self._model, batch)
 
-            loss = loss.cuda()
+            loss = loss.to(self.device)
 
             # Compute gradients given current loss
             loss.backward()
