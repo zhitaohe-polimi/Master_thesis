@@ -17,6 +17,9 @@ from time import time
 
 from Conferences.HGB.HGB_our_interface.DatasetProvided.MultiDatasetsReader import MultiDatasetsReader
 from Conferences.HGB.HGB_our_interface.baseline_RecommenderWrapper import baseline_RecommenderWrapper
+from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
+from Data_manager.split_functions.split_train_validation_random_holdout import \
+    split_train_in_two_percentage_global_sample
 from Evaluation.Evaluator import EvaluatorHoldout
 
 from HyperparameterTuning.run_hyperparameter_search import runHyperparameterSearch_Collaborative
@@ -66,14 +69,20 @@ def read_data_split_and_search(args):
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
 
     if dataset_name == "movie-lens" or dataset_name == "last-fm" or dataset_name == "yelp2018" or dataset_name == "amazon-book":
-        dataset = MultiDatasetsReader(args.data_path + dataset_name)
+        # dataset = MultiDatasetsReader(args.data_path + dataset_name)
+        dataReader = Movielens1MReader()
+        dataset = dataReader.load_data()
+
     else:
         print("Dataset name not supported, current is {}".format(dataset_name))
 
     print('Current dataset is: {}'.format(dataset_name))
-    URM_train = dataset.URM_DICT["URM_train"].copy()
-    URM_validation = dataset.URM_DICT["URM_validation"].copy()
-    URM_test = dataset.URM_DICT["URM_test"].copy()
+    # URM_train = dataset.URM_DICT["URM_train"].copy()
+    # URM_validation = dataset.URM_DICT["URM_validation"].copy()
+    # URM_test = dataset.URM_DICT["URM_test"].copy()
+
+    URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage=0.80)
+    URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.80)
 
     URM_train_original = URM_train + URM_validation
 
