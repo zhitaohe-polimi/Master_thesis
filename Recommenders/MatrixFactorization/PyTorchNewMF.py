@@ -304,8 +304,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         self._data_iterator = InteractionIterator(self.URM_train, self.positive_quota, batch_size)
 
-        print(self.positive_quota)
-
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
 
