@@ -258,15 +258,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
 
         else:
-            # self._model._embedding_user = self.USER_factors
-            # self._model._embedding_item = self.ITEM_factors
-            # self._model._embedding_user_vi = self.USER_factors_vi
-            # self._model._embedding_item_vi = self.ITEM_factors_vi
-            # self._model._embedding_user_uj = self.USER_factors_uj
-            # self._model._embedding_item_uj = self.ITEM_factors_uj
-            #
-            # item_scores = self._model.forward(user_id_array, item_id_array)
-
             item_scores = torch.einsum("bi,ci->bc", self.USER_factors(user_id_array), self.ITEM_factors.weight)
             ratings = torch.einsum("bi,ci->bc", self.USER_factors.weight, self.ITEM_factors.weight)
 
@@ -316,28 +307,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = self._model.to(self.device)
 
         print("ITERACTIONS OF URM_TRAIN(fit): ", self.URM_train.nnz)
-        # self.URM_tensor = torch.tensor(self.URM_train.toarray())
-        # # self.URM_tensor = self.URM_tensor.to(device)
-        #
-        # user_list = list(range(self.n_users))
-        # self.all_users = torch.Tensor(user_list).type(torch.LongTensor)
-        # # self.all_users = self.all_users.to(device)
-        #
-        # self.users_sim = torch.einsum("bi,ci->bc", self.URM_tensor, self.URM_tensor)
-        # # set all elements in diagonal to 0
-        # self.users_sim = self.users_sim.fill_diagonal_(0)
+
         # self.users_sim = torch.nn.functional.normalize(self.users_sim, dim=1)
         # print("user similarity computed.")
-        #
-        # item_list = list(range(self.n_items))
-        # self.all_items = torch.Tensor(item_list).type(torch.LongTensor)
-        # # self.all_items = self.all_items.to(device)
-        #
-        # self.items_sim = torch.einsum("ib,ic->bc", self.URM_tensor, self.URM_tensor)
-        # # set all elements in diagonal to 0
-        # self.items_sim = self.items_sim.fill_diagonal_(0)
-        # self.items_sim = torch.nn.functional.normalize(self.items_sim, dim=1)
-        # print("item similarity computed.")
 
         if sgd_mode.lower() == "adagrad":
             self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
