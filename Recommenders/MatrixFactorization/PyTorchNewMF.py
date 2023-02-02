@@ -234,14 +234,20 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         :return:
         """
 
-        assert self.USER_factors.weight.shape[1] == self.ITEM_factors.weight.shape[1], \
+        assert self.USER_factors.shape[1] == self.ITEM_factors.shape[1], \
             "{}: User and Item factors have inconsistent shape".format(self.RECOMMENDER_NAME)
 
-        assert self.USER_factors.weight.shape[0] > np.max(user_id_array), \
+        assert self.USER_factors.shape[0] > np.max(user_id_array), \
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
-                self.RECOMMENDER_NAME, self.USER_factors.weight.shape[0], np.max(user_id_array))
+                self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to(self.device)
+        USER_factors = torch.tensor(self.USER_factors).to(self.device)
+        ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
+        USER_factors_vi = torch.tensor(self.USER_factors_vi).to(self.device)
+        ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi).to(self.device)
+        USER_factors_uj = torch.tensor(self.USER_factors_uj).to(self.device)
+        ITEM_factors_uj = torch.tensor(self.ITEM_factors_uj).to(self.device)
 
         if items_to_compute is not None:
             pass
@@ -258,17 +264,17 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # item_scores[:, items_to_compute] = item_scores_t.detach().cpu().numpy()
 
         else:
-            item_scores = torch.einsum("bi,ci->bc", self.USER_factors(user_id_array), self.ITEM_factors.weight)
-            ratings = torch.einsum("bi,ci->bc", self.USER_factors.weight, self.ITEM_factors.weight)
+            item_scores = torch.einsum("bi,ci->bc", USER_factors(user_id_array), ITEM_factors.weight)
+            ratings = torch.einsum("bi,ci->bc", USER_factors.weight, ITEM_factors.weight)
 
             user_sim_uv = torch.einsum("bi,ci->bc", ratings[user_id_array], ratings)
             user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
-            alpha_vi = torch.einsum("bi,ci->bc", self.USER_factors_vi.weight, self.ITEM_factors_vi.weight)
+            alpha_vi = torch.einsum("bi,ci->bc", USER_factors_vi.weight, ITEM_factors_vi.weight)
             summation_v = torch.einsum("bi,ic->bc", user_sim_uv, alpha_vi)
             item_scores += summation_v
 
             item_sim_ij = torch.einsum("ib,ic->bc", ratings, ratings).fill_diagonal_(0)
-            alpha_uj = torch.einsum("bi,ci->bc", self.USER_factors_uj(user_id_array), self.ITEM_factors_uj.weight)
+            alpha_uj = torch.einsum("bi,ci->bc", USER_factors_uj(user_id_array), ITEM_factors_uj.weight)
             summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
             item_scores += summation_j
             item_scores = item_scores.detach().cpu().numpy()
@@ -345,14 +351,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.ITEM_factors_uj = self.ITEM_factors_best_uj.copy()
 
     def _prepare_model_for_validation(self):
-        self.USER_factors = self._model._embedding_user  # .weight.detach().cpu().numpy()
-        self.ITEM_factors = self._model._embedding_item  # .weight.detach().cpu().numpy()
+        self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
+        self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
 
-        self.USER_factors_vi = self._model._embedding_user_vi  # .weight.detach().cpu().numpy()
-        self.ITEM_factors_vi = self._model._embedding_item_vi  # .weight.detach().cpu().numpy()
+        self.USER_factors_vi = self._model._embedding_user_vi.weight.detach().cpu().numpy()
+        self.ITEM_factors_vi = self._model._embedding_item_vi.weight.detach().cpu().numpy()
 
-        self.USER_factors_uj = self._model._embedding_user_uj  # .weight.detach().cpu().numpy()
-        self.ITEM_factors_uj = self._model._embedding_item_uj  # .weight.detach().cpu().numpy()
+        self.USER_factors_uj = self._model._embedding_user_uj.weight.detach().cpu().numpy()
+        self.ITEM_factors_uj = self._model._embedding_item_uj.weight.detach().cpu().numpy()
 
     def _update_best_model(self):
         self.USER_factors_best = self._model._embedding_user.weight.detach().cpu().numpy()
