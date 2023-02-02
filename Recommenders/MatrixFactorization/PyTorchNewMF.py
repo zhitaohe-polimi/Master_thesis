@@ -57,9 +57,9 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_item_uj = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
     def forward(self, user, item):
-        prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
-
         ratings = torch.einsum("bi,ci->bc", self._embedding_user.weight, self._embedding_item.weight)
+
+        prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
 
         user_sim_uv = torch.einsum("bi,ci->bc", ratings[user], ratings)
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
