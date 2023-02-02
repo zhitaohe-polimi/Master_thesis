@@ -11,7 +11,7 @@ import pandas as pd
 
 def _loadICM_genres_years(genres_path, header=True, separator=',', genresSeparator="|"):
     ICM_genres_dataframe = pd.read_csv(filepath_or_buffer=genres_path, sep=separator, header=header,
-                                       dtype={0: str, 1: str, 2: str}, engine='python', encoding='gb2312')
+                                       dtype={0: str, 1: str, 2: str}, engine='python', encoding='gbk')
     ICM_genres_dataframe.columns = ["ItemID", "Title", "GenreList"]
 
     ICM_years_dataframe = ICM_genres_dataframe.copy()
