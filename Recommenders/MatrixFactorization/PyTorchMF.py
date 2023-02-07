@@ -246,7 +246,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         epoch_loss = 0
         for batch in self._data_loader:
-            batch = batch.cuda()
+            batch = torch.Tensor(batch).cuda()
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
