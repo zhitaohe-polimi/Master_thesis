@@ -191,7 +191,6 @@ def loss_MSE(model, batch):
     user = user.to("cuda")
     item = item.to("cuda")
     rating = rating.to("cuda")
-
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
 
@@ -203,7 +202,9 @@ def loss_MSE(model, batch):
 
 def loss_BPR(model, batch):
     user, item_positive, item_negative = batch
-
+    user = user.to("cuda")
+    item_positive = item_positive.type(torch.long).to("cuda")
+    item_negative = item_negative.type(torch.long).to("cuda")
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
 
