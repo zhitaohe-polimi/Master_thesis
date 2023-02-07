@@ -38,7 +38,7 @@ from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import M
 from Recommenders.MatrixFactorization.Cython.new_algo_with_MFAttention_Cython import \
     new_MatrixFactorization_FunkSVD_Cython
 from Recommenders.MatrixFactorization.PyTorchNewMF import PyTorchNewMF_MSE_Recommender, PyTorchNewMF_BPR_Recommender
-from Recommenders.MatrixFactorization.PyTorchMF import PyTorchMF_MSE_Recommender,PyTorchMF_BPR_Recommender
+from Recommenders.MatrixFactorization.PyTorchMF import PyTorchMF_MSE_Recommender, PyTorchMF_BPR_Recommender
 
 from Recommenders.Neural.MultVAERecommender import MultVAERecommender_OptimizerMask as MultVAERecommender
 # from Recommenders.FactorizationMachines.LightFMRecommender import LightFMCFRecommender
@@ -850,7 +850,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "num_factors_i": Integer(1, 200),
                 "epochs": Categorical([1500]),
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
-                "batch_size": Categorical([ 64, 128, 256, 512, 1024]),
+                "batch_size": Categorical([64, 128, 256, 512, 1024]),
                 "learning_rate": Real(low=1e-5, high=1e-2, prior='log-uniform'),
                 "l2_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
             }
@@ -872,7 +872,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "num_factors_i": Integer(1, 200),
                 "epochs": Categorical([1500]),
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
-                "batch_size": Categorical([128, 256, 512, 1024]), #1, 2, 4, 8, 16, 32, 64,
+                "batch_size": Categorical([128, 256, 512, 1024]),  # 1, 2, 4, 8, 16, 32, 64,
                 "learning_rate": Real(low=1e-5, high=1e-2, prior='log-uniform'),
                 "l2_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
                 "positive_quota": Real(low=0.0, high=0.5, prior='uniform'),
@@ -888,13 +888,12 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         ##########################################################################################################
 
-
         if recommender_class is PyTorchMF_MSE_Recommender:
             hyperparameters_range_dictionary = {
                 "num_factors": Integer(1, 200),
                 "epochs": Categorical([1500]),
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
-                "batch_size": Categorical([16, 32, 64, 128, 256, 512, 1024]), #1, 2, 4, 8,
+                "batch_size": Categorical([16, 32, 64, 128, 256, 512, 1024]),  # 1, 2, 4, 8,
                 "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
                 "l2_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
                 "positive_quota": Real(low=0.0, high=0.5, prior='uniform'),
