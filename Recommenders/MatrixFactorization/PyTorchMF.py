@@ -207,6 +207,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
                                        num_workers=os.cpu_count(), pin_memory=True)
+        print(self._data_loader)
         self._model = _SimpleMFBiasModel(self.n_users, self.n_items, embedding_dim=num_factors)
         self._model.to("cuda")
 
