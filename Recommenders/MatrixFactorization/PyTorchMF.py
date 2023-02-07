@@ -178,6 +178,7 @@ def loss_CrossEntropy(model, batch):
 
 def loss_BPR(model, batch):
     user, item_positive, item_negative = batch
+    print(type(user),type(item_positive),type(item_negative))
     user = user.to("cuda")
     item_positive = item_positive.to("cuda")
     item_negative = item_negative.to("cuda")
