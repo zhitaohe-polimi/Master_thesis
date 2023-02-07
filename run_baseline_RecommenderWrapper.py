@@ -69,20 +69,20 @@ def read_data_split_and_search(args):
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
 
     if dataset_name == "movie-lens" or dataset_name == "last-fm" or dataset_name == "yelp2018" or dataset_name == "amazon-book":
-        # dataset = MultiDatasetsReader(args.data_path + dataset_name)
-        dataReader = Movielens1MReader()
-        dataset = dataReader.load_data()
+        dataset = MultiDatasetsReader(args.data_path + dataset_name)
+        # dataReader = Movielens1MReader()
+        # dataset = dataReader.load_data()
 
     else:
         print("Dataset name not supported, current is {}".format(dataset_name))
 
     print('Current dataset is: {}'.format(dataset_name))
-    # URM_train = dataset.URM_DICT["URM_train"].copy()
-    # URM_validation = dataset.URM_DICT["URM_validation"].copy()
-    # URM_test = dataset.URM_DICT["URM_test"].copy()
+    URM_train = dataset.URM_DICT["URM_train"].copy()
+    URM_validation = dataset.URM_DICT["URM_validation"].copy()
+    URM_test = dataset.URM_DICT["URM_test"].copy()
 
-    URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage=0.80)
-    URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.80)
+    # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage=0.80)
+    # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage=0.80)
 
     URM_train_original = URM_train + URM_validation
 
@@ -223,7 +223,7 @@ def read_data_split_and_search(args):
         #
         # pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
         # pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
-        runHyperparameterSearch_Collaborative(PyTorchNewMF_MSE_Recommender,
+        runHyperparameterSearch_Collaborative(PyTorchMF_MSE_Recommender, #PyTorchNewMF_MSE_Recommender
                                               URM_train=URM_train,
                                               URM_train_last_test=URM_train_original,
                                               metric_to_optimize=metric_to_optimize,
