@@ -223,7 +223,7 @@ def read_data_split_and_search(args):
         #
         # pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
         # pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
-        runHyperparameterSearch_Collaborative(PyTorchNewMF_MSE_Recommender, #PyTorchMF_MSE_Recommender
+        runHyperparameterSearch_Collaborative(PyTorchMF_MSE_Recommender, #PyTorchNewMF_MSE_Recommender
                                               URM_train=URM_train,
                                               URM_train_last_test=URM_train_original,
                                               metric_to_optimize=metric_to_optimize,
