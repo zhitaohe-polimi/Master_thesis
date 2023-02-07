@@ -53,7 +53,6 @@ class _SimpleMFBiasModel(torch.nn.Module):
     def forward(self, user, item):
         prediction = self._global_bias + self._user_bias[user] + self._item_bias[item]
         prediction += batch_dot(self._embedding_user(user), self._embedding_item(item))
-        print(prediction.is_cuda)
         return prediction
 
 
