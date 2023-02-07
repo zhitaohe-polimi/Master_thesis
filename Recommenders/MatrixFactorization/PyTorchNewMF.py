@@ -387,7 +387,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             epoch_loss += loss.item()
 
-        print("%s: epoch_loss: %.2f" % (self.RECOMMENDER_NAME, epoch_loss))
+        self._print("Loss {:.2E}".format(epoch_loss))
 
 
 class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
