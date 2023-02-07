@@ -62,7 +62,7 @@ def read_data_split_and_search(args):
     # CONFERENCE_NAME = "HGB"
     dataset_name = args.dataset
 
-    metric_to_optimize = 'NDCG'  # 'NDCG' 'RECALL'
+    metric_to_optimize = 'RECALL'  # 'NDCG' 'RECALL'
     result_folder_path = "result_experiments/{}/{}/".format(ALGORITHM_NAME, dataset_name)
     model_folder_path = result_folder_path + "models_%s/" % metric_to_optimize
 
