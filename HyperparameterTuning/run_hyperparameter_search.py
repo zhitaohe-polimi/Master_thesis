@@ -848,7 +848,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "num_factors": Integer(1, 200),
                 "num_factors_u": Integer(1, 200),
                 "num_factors_i": Integer(1, 200),
-                "epochs": Categorical([1000]),
+                "epochs": Categorical([1500]),
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
                 "batch_size": Categorical([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]),
                 "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
@@ -870,7 +870,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "num_factors": Integer(1, 200),
                 "num_factors_u": Integer(1, 200),
                 "num_factors_i": Integer(1, 200),
-                "epochs": Categorical([1000]),
+                "epochs": Categorical([1500]),
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
                 "batch_size": Categorical([128, 256, 512, 1024]), #1, 2, 4, 8, 16, 32, 64,
                 "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
@@ -892,7 +892,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
         if recommender_class is PyTorchMF_MSE_Recommender:
             hyperparameters_range_dictionary = {
                 "num_factors": Integer(1, 200),
-                "epochs": Categorical([500]),
+                "epochs": Categorical([1500]),
                 "sgd_mode": Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
                 "batch_size": Categorical([16, 32, 64, 128, 256, 512, 1024]), #1, 2, 4, 8,
                 "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
