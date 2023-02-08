@@ -214,7 +214,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
 
-        use_cython_sampler = False
+        use_cython_sampler = True
 
         if (self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender"):
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
