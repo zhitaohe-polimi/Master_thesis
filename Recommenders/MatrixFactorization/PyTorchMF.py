@@ -256,8 +256,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             loss = self._loss_function(self._model, batch)
 
-            loss.to("cuda")
-
             # Compute gradients given current loss
             loss.backward()
 
@@ -288,8 +286,8 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         self._dataset = None
         self._loss_function = loss_MSE
 
-    def fit(self, positive_quota=0.5, **kwargs):
-        self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
+    def fit(self, positive_quota_n=0.5, **kwargs):
+        self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota_n)
         super(PyTorchMF_MSE_Recommender, self).fit(**kwargs)
 
 
