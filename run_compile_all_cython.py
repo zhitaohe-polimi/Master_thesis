@@ -19,7 +19,7 @@ if __name__ == '__main__':
         "Recommenders/Similarity",
         "Recommenders/SLIM",
         "Recommenders/FeatureWeighting",
-        "Utils/PyTorch/Cython"
+        "Utils/PyTorch"
     ]
 
 
