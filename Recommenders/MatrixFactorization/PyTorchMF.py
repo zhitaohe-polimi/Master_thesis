@@ -300,7 +300,8 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         # self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
         use_cython_sampler = False
         data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
-        self.data_iterator_class = data_iterator_class(positive_quota=positive_quota)
+        self.data_iterator_class = data_iterator_class(URM_train=self.URM_train, positive_quota=positive_quota)
+        print(self.data_iterator_class.batch_size)
         super(PyTorchMF_MSE_Recommender, self).fit(**kwargs)
 
 
