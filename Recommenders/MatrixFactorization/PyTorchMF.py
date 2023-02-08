@@ -301,7 +301,7 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
 
         # self._dataset = None
-        self.positive_quota = 0
+        self.positive_quota = None
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):

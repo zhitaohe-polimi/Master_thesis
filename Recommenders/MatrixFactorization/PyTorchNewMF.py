@@ -14,7 +14,7 @@ import torch, os
 from torch.utils.data import Dataset, DataLoader
 from torch.profiler import profile, record_function, ProfilerActivity
 from sklearn.preprocessing import normalize
-# from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython, InteractionIterator as InteractionIterator_cython, InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
+from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython, InteractionIterator as InteractionIterator_cython, InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
 from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
 
 
@@ -303,7 +303,17 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self.device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
 
-        self._data_iterator = InteractionIterator(self.URM_train, self.positive_quota, batch_size)
+        use_cython_sampler = True
+
+        if self.RECOMMENDER_NAME == "PyTorchMF_BPR_Recommender":
+            data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
+            self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
+        elif self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender":
+            data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
+            self._data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
+                                                      batch_size=batch_size)
+        else:
+            self._data_iterator = None
 
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
@@ -397,7 +407,7 @@ class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
 
-        self._dataset = BPR_Dataset(self.URM_train)
+        # self._dataset = BPR_Dataset(self.URM_train)
         self._loss_function = loss_BPR
 
 
@@ -407,12 +417,9 @@ class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
 
-        self.positive_quota = 0.5
+        self.positive_quota = None
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
-        # use_cython_sampler = True
-        # data_iterator_class = InteractionIterator if use_cython_sampler else InteractionIterator
         self.positive_quota = positive_quota
-        # self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
         super(PyTorchNewMF_MSE_Recommender, self).fit(**kwargs)
