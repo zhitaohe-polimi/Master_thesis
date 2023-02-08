@@ -214,7 +214,17 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
 
-        self._data_iterator = self.data_iterator_class(self.URM_train, batch_size)
+        use_cython_sampler = False
+
+        if (self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender"):
+            data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
+            self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
+        elif (self.RECOMMENDER_NAME == "PyTorchMF_BPR_Recommender"):
+            data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
+            self.data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
+                                                     batch_size=batch_size)
+        else:
+            self._data_iterator = None
 
         self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
         self._model.to("cuda")
@@ -279,8 +289,6 @@ class PyTorchMF_BPR_Recommender(_PyTorchMFRecommender):
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
-        use_cython_sampler = False
-        self.data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
 
         # self._dataset = BPR_Dataset(self.URM_train)
         self._loss_function = loss_BPR
@@ -293,15 +301,12 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
         super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
 
         # self._dataset = None
-        self.data_iterator_class = None
+        self.positive_quota = 0
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
         # self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
-        use_cython_sampler = False
-        data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
-        self.data_iterator_class = data_iterator_class(URM_train=self.URM_train, positive_quota=positive_quota)
-        print(self.data_iterator_class.batch_size)
+        self.positive_quota = positive_quota
         super(PyTorchMF_MSE_Recommender, self).fit(**kwargs)
 
 
