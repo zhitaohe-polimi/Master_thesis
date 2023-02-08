@@ -216,10 +216,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         use_cython_sampler = True
 
-        if (self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender"):
+        if (self.RECOMMENDER_NAME == "PyTorchMF_BPR_Recommender"):
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
-        elif (self.RECOMMENDER_NAME == "PyTorchMF_BPR_Recommender"):
+        elif (self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender"):
             data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
             self.data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
                                                      batch_size=batch_size)
