@@ -65,10 +65,9 @@ class _SimpleNewMFModel(torch.nn.Module):
         user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
         alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
-        print(self._embedding_user_vi.weight, self._embedding_item_vi.weight)
         summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
         prediction += summation_v
-
+        print(prediction)
         item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
         item_sim_ij[item] = item_sim_ij[item].fill_diagonal_(0)
         alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
