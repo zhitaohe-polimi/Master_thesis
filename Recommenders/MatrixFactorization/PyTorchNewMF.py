@@ -61,10 +61,14 @@ class _SimpleNewMFModel(torch.nn.Module):
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
+        print(prediction)
         user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
+        print(user_sim_uv)
         alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
+        print(alpha_vi)
         summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
+        print(summation_v)
         prediction += summation_v
 
         item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
@@ -209,7 +213,6 @@ def loss_BPR(model, batch):
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
     # Compute total loss for batch
     loss = -x_ij.sigmoid().log().mean()
-    print(loss)
 
     return loss
 
