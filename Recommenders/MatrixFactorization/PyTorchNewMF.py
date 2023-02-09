@@ -305,6 +305,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self.device = torch.device('cpu')
             print("MF_MSE_PyTorch: Using CPU")
 
+        torch.autograd.set_detect_anomaly(True)
+
         use_cython_sampler = True
 
         if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender":
