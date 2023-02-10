@@ -214,11 +214,7 @@ def loss_BPR(model, batch):
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
     # Compute total loss for batch
-    loss = -x_ij.sigmoid().log().mean()
-
-    print("x_ij:", -x_ij)
-    print("sigmoid:", -x_ij.sigmoid())
-    print("log:", -x_ij.sigmoid().log())
+    loss = (-x_ij.sigmoid()+1e-20).log().mean()
 
     if (torch.isnan(loss)):
         breakpoint()
