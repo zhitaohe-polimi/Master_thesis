@@ -19,7 +19,7 @@ from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython,
     InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
 from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
 
-torch.autograd.set_detect_anomaly(True)
+# torch.autograd.set_detect_anomaly(True)
 
 
 def batch_dot(tensor_1, tensor_2):
