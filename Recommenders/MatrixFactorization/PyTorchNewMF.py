@@ -214,7 +214,7 @@ def loss_BPR(model, batch):
     # Compute total loss for batch
     loss = -x_ij.sigmoid().log().mean()
 
-    # print(x_ij,loss)
+    print(loss)
 
     return loss
 
