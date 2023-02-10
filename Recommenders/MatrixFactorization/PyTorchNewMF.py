@@ -19,6 +19,7 @@ from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython,
     InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
 from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
 
+
 # torch.autograd.set_detect_anomaly(True)
 
 
@@ -215,11 +216,11 @@ def loss_BPR(model, batch):
     # Compute total loss for batch
     loss = -x_ij.sigmoid().log().mean()
 
-    print(-x_ij)
-    print(-x_ij.sigmoid())
-    print(-x_ij.sigmoid().log())
+    print("x_ij:", -x_ij)
+    print("sigmoid:", -x_ij.sigmoid())
+    print("log:", -x_ij.sigmoid().log())
 
-    if(torch.isnan(loss)):
+    if (torch.isnan(loss)):
         breakpoint()
 
     # print(loss)
