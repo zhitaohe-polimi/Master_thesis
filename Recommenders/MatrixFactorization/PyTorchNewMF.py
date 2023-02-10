@@ -217,6 +217,9 @@ def loss_BPR(model, batch):
 
     print(-x_ij.sigmoid().log())
 
+    if(torch.isnan(loss)):
+        breakpoint()
+
     # print(loss)
 
     return loss
