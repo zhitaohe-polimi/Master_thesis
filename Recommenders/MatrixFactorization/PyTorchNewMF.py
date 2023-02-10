@@ -18,6 +18,7 @@ from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython,
     InteractionIterator as InteractionIterator_cython, \
     InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
 from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
+torch.autograd.set_detect_anomaly(True)
 
 
 def batch_dot(tensor_1, tensor_2):
@@ -214,7 +215,7 @@ def loss_BPR(model, batch):
     # Compute total loss for batch
     loss = -x_ij.sigmoid().log().mean()
 
-    print(loss)
+    # print(loss)
 
     return loss
 
