@@ -875,7 +875,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "batch_size": Categorical([64, 128, 256, 512, 1024]),  # 1, 2, 4, 8, 16, 32,
                 "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
                 "l2_reg": Real(low=1e-5, high=1e-2, prior='log-uniform'),
-                "positive_quota": Real(low=0.0, high=0.5, prior='uniform'),
+                "positive_quota": Real(low=0.5, high=1.0, prior='uniform'),
             }
 
             recommender_input_args = SearchInputRecommenderArgs(
