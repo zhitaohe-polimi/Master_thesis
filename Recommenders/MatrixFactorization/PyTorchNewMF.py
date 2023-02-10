@@ -18,6 +18,7 @@ from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython,
     InteractionIterator as InteractionIterator_cython, \
     InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
 from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
+
 torch.autograd.set_detect_anomaly(True)
 
 
@@ -58,7 +59,6 @@ class _SimpleNewMFModel(torch.nn.Module):
 
         self._embedding_user_uj = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_i)
         self._embedding_item_uj = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
-
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
@@ -211,8 +211,9 @@ def loss_BPR(model, batch):
     item_positive = item_positive.to("cuda")
     item_negative = item_negative.to("cuda")
     # Compute prediction for each element in batch
-    x_ij = model.forward(user, item_positive) - model.forward(user, item_negative) +1e-8
+    x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
     # Compute total loss for batch
+    print(x_ij)
     loss = -x_ij.sigmoid().log().mean()
 
     # print(loss)
