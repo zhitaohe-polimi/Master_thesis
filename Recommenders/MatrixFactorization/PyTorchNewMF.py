@@ -215,6 +215,8 @@ def loss_BPR(model, batch):
     # Compute total loss for batch
     loss = -x_ij.sigmoid().log().mean()
 
+    print(-x_ij)
+    print(-x_ij.sigmoid())
     print(-x_ij.sigmoid().log())
 
     if(torch.isnan(loss)):
