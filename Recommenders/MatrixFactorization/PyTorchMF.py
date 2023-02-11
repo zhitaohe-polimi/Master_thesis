@@ -293,7 +293,7 @@ class PyTorchMF_BPR_Recommender(_PyTorchMFRecommender):
 
 
 class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchMF_MSE_Recommender"
+    RECOMMENDER_NAME = "PyTorchMF_MSE_Recommender_test"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
