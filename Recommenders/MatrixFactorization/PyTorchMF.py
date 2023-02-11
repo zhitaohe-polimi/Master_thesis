@@ -37,8 +37,8 @@ class _SimpleMFModel(torch.nn.Module):
 
         self._embedding_user = torch.nn.Embedding(n_users, embedding_dim=embedding_dim)
         self._embedding_item = torch.nn.Embedding(n_items, embedding_dim=embedding_dim)
-        self._embedding_user.weight.data.uniform_(0, 0.5)
-        self._embedding_user.weight.data.uniform_(0, 0.5)
+        # self._embedding_user.weight.data.uniform_(0, 0.5)
+        # self._embedding_user.weight.data.uniform_(0, 0.5)
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
@@ -218,7 +218,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         if self.RECOMMENDER_NAME == "PyTorchMF_BPR_Recommender":
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
-        elif self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender_test":
+        elif self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender":
             data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
                                                       batch_size=batch_size)
@@ -293,7 +293,7 @@ class PyTorchMF_BPR_Recommender(_PyTorchMFRecommender):
 
 
 class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchMF_MSE_Recommender_test"
+    RECOMMENDER_NAME = "PyTorchMF_MSE_Recommender"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
