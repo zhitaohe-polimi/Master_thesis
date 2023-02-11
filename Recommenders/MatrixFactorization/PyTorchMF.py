@@ -211,9 +211,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             learning_rate=1e-2,
             **earlystopping_kwargs):
 
-        # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
-        #                                num_workers=os.cpu_count(), pin_memory=True)
-
         use_cython_sampler = True
 
         if self.RECOMMENDER_NAME == "PyTorchMF_BPR_Recommender":
@@ -290,7 +287,6 @@ class PyTorchMF_BPR_Recommender(_PyTorchMFRecommender):
     def __init__(self, URM_train, verbose=True):
         super(PyTorchMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
 
-        # self._dataset = BPR_Dataset(self.URM_train)
         self._loss_function = loss_BPR
 
 
@@ -300,12 +296,10 @@ class PyTorchMF_MSE_Recommender(_PyTorchMFRecommender):
     def __init__(self, URM_train, verbose=True):
         super(PyTorchMF_MSE_Recommender, self).__init__(URM_train, verbose=verbose)
 
-        # self._dataset = None
         self.positive_quota = None
         self._loss_function = loss_MSE
 
     def fit(self, positive_quota=0.5, **kwargs):
-        # self._dataset = Interaction_Dataset(self.URM_train, positive_quota=positive_quota)
         self.positive_quota = positive_quota
         super(PyTorchMF_MSE_Recommender, self).fit(**kwargs)
 
