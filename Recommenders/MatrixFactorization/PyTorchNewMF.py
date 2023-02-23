@@ -63,14 +63,16 @@ class _SimpleNewMFModel(torch.nn.Module):
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
-        user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
+        # user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)\
+        user_sim_uv = torch.corrcoef(self._embedding_user.weight)[user]
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
         user_sim_uv = torch.nn.functional.normalize(user_sim_uv, dim=1)
         alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
         summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
         prediction += summation_v
 
-        item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
+        # item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
+        item_sim_ij = torch.corrcoef(self._embedding_item.weight)[:, item]
         item_sim_ij[item] = item_sim_ij[item].fill_diagonal_(0)
         item_sim_ij = torch.nn.functional.normalize(item_sim_ij, dim=0)
         alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
@@ -212,7 +214,7 @@ def loss_BPR(model, batch):
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
     # Compute total loss for batch
-    loss = -(x_ij.sigmoid()+1e-20).log().mean()
+    loss = -(x_ij.sigmoid() + 1e-20).log().mean()
 
     # print(loss)
 
@@ -271,14 +273,16 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         else:
             item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)
-            user_sim_uv = torch.einsum("bi,ci->bc", USER_factors[user_id_array], USER_factors)
+            # user_sim_uv = torch.einsum("bi,ci->bc", USER_factors[user_id_array], USER_factors)
+            user_sim_uv = torch.corrcoef(USER_factors)[user_id_array]
             user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
             user_sim_uv = torch.nn.functional.normalize(user_sim_uv, dim=1)
             alpha_vi = torch.einsum("bi,ci->bc", USER_factors_vi, ITEM_factors_vi)
             summation_v = torch.einsum("bi,ic->bc", user_sim_uv, alpha_vi)
             item_scores += summation_v
 
-            item_sim_ij = torch.einsum("bi,ci->bc", ITEM_factors, ITEM_factors).fill_diagonal_(0)
+            # item_sim_ij = torch.einsum("bi,ci->bc", ITEM_factors, ITEM_factors).fill_diagonal_(0)
+            item_sim_ij = torch.corrcoef(ITEM_factors).fill_diagonal_(0)
             item_sim_ij = torch.nn.functional.normalize(item_sim_ij, dim=0)
             alpha_uj = torch.einsum("bi,ci->bc", USER_factors_uj[user_id_array], ITEM_factors_uj)
             summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
