@@ -199,6 +199,10 @@ def loss_BPR(model, batch, l2_reg):
                           model._embedding_item(item_positive).norm(2).pow(2) +
                           model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
 
+    print(model._embedding_user(user).norm(2).pow(2),
+            model._embedding_item(item_positive).norm(2).pow(2),
+            model._embedding_item(item_negative).norm(2).pow(2))
+
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
 
