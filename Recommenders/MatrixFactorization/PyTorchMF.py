@@ -155,7 +155,7 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-def loss_MSE(model, batch):
+def loss_MSE(model, batch, l2_reg):
     user, item, rating = batch
     user = user.to("cuda")
     item = item.to("cuda")
@@ -164,7 +164,12 @@ def loss_MSE(model, batch):
     prediction = model.forward(user, item)
 
     # Compute total loss for batch
-    loss = (prediction - rating).pow(2).mean()
+    MSE_loss = (prediction - rating).pow(2).mean()
+
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item).norm(2).pow(2)) / float(len(user))
+
+    loss = MSE_loss + reg_loss * l2_reg
 
     return loss
 
@@ -182,7 +187,7 @@ def loss_CrossEntropy(model, batch):
     return loss
 
 
-def loss_BPR(model, batch):
+def loss_BPR(model, batch, l2_reg):
     user, item_positive, item_negative = batch
     user = user.to("cuda")
     item_positive = item_positive.type(torch.long).to("cuda")
@@ -191,7 +196,13 @@ def loss_BPR(model, batch):
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
 
     # Compute total loss for batch
-    loss = -x_ij.sigmoid().log().mean()
+    BPR_loss = -x_ij.sigmoid().log().mean()
+
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item_positive).norm(2).pow(2) +
+                          model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
+
+    loss = BPR_loss + reg_loss * l2_reg
 
     return loss
 
@@ -212,6 +223,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             sgd_mode='adam',
             learning_rate=1e-2,
             **earlystopping_kwargs):
+
+        self.l2_reg = l2_reg
 
         use_cython_sampler = True
 
@@ -270,7 +283,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
-            loss = self._loss_function(self._model, batch)
+            loss = self._loss_function(self._model, batch, self.l2_reg)
 
             # Compute gradients given current loss
             loss.backward()
