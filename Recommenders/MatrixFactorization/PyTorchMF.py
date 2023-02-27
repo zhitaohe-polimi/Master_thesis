@@ -298,7 +298,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
 
 class PyTorchMF_BPR_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchMF_BPR_Recommender_test"
+    RECOMMENDER_NAME = "PyTorchMF_BPR_Recommender"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
