@@ -239,13 +239,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model.to("cuda")
 
         if sgd_mode.lower() == "adagrad":
-            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
-            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "adam":
-            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "sgd":
-            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         else:
             raise ValueError("sgd_mode attribute value not recognized.")
 
@@ -284,6 +284,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             user = user.to("cuda")
             item_positive = item_positive.type(torch.long).to("cuda")
             item_negative = item_negative.type(torch.long).to("cuda")
+
+            batch = (user, item_positive, item_negative)
 
             reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
                                   self._model._embedding_item(item_positive).norm(2).pow(2) +
