@@ -280,7 +280,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
-            batch = batch.to("cuda")
+            batch = np.array(batch)
+            batch = torch.from_numpy(batch).to("cuda")
             user, item_positive, item_negative = batch
 
             reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
