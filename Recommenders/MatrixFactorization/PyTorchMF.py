@@ -201,8 +201,7 @@ def loss_BPR(model, batch, l2_reg):
     reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
                           model._embedding_item(item_positive).norm(2).pow(2) +
                           model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
-
-    print(l2_reg)
+    print(reg_loss)
 
     loss = BPR_loss + reg_loss * l2_reg
 
