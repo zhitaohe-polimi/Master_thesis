@@ -282,9 +282,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             user, item_positive, item_negative = batch
 
-            reg_loss = (1 / 2) * (self.model._embedding_user(user).norm(2).pow(2) +
-                                  self.model._embedding_item(item_positive).norm(2).pow(2) +
-                                  self.model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
+            reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
+                                  self._model._embedding_item(item_positive).norm(2).pow(2) +
+                                  self._model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
 
             loss = self._loss_function(self._model, batch, self.l2_reg) + reg_loss * self.l2_reg
 
