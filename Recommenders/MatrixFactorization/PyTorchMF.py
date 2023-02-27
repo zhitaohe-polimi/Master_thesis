@@ -189,9 +189,9 @@ def loss_CrossEntropy(model, batch):
 
 def loss_BPR(model, batch, l2_reg):
     user, item_positive, item_negative = batch
-    user = user.to("cuda")
-    item_positive = item_positive.type(torch.long).to("cuda")
-    item_negative = item_negative.type(torch.long).to("cuda")
+    # user = user.to("cuda")
+    # item_positive = item_positive.type(torch.long).to("cuda")
+    # item_negative = item_negative.type(torch.long).to("cuda")
 
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
@@ -280,6 +280,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
+            batch = batch.to("cuda")
             user, item_positive, item_negative = batch
 
             reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
