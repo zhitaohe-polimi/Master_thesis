@@ -276,6 +276,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
+
         for batch in self._data_iterator:
             # Clear previously computed gradients
             self._optimizer.zero_grad()
