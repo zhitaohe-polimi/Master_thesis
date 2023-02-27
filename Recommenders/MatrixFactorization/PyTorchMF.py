@@ -18,6 +18,8 @@ from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython,
     InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
 from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
 
+torch.autograd.set_detect_anomaly(True)
+
 
 def batch_dot(tensor_1, tensor_2):
     """
@@ -291,7 +293,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
                                   self._model._embedding_item(item_positive).norm(2).pow(2) +
                                   self._model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
-            print(reg_loss)
+            print(self._model._embedding_user(user).norm(2).pow(2),
+                  self._model._embedding_item(item_positive).norm(2).pow(2),
+                  self._model._embedding_item(item_negative).norm(2).pow(2),
+                  reg_loss,self.l2_reg)
 
             loss = self._loss_function(self._model, batch, self.l2_reg) + reg_loss * self.l2_reg
 
