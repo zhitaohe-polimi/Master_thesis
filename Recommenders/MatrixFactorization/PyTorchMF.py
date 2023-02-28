@@ -199,10 +199,15 @@ def loss_BPR(model, batch, l2_reg):
                           model._embedding_item(item_positive).norm(2).pow(2) +
                           model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
 
-    print('value %s: %.3e~%.3e' % ('user', model._embedding_user(user).min(), model._embedding_user(user).max()))
-    print('value %s: %.3e~%.3e' % ('pos_item', model._embedding_user(item_positive).min(), model._embedding_user(item_positive).max()))
-    print('value %s: %.3e~%.3e' % ('neg_item', model._embedding_user(item_negative).min(), model._embedding_user(item_negative).max()))
-
+    if(np.nan in model._embedding_user(user).norm(2)):
+        print('value %s: %.3e~%.3e' % ('user', model._embedding_user(user).min(), model._embedding_user(user).max()))
+        breakpoint()
+    if (np.nan in model._embedding_item(item_positive).norm(2)):
+        print('value %s: %.3e~%.3e' % ('pos_item', model._embedding_item(item_positive).min(), model._embedding_item(item_positive).max()))
+        breakpoint()
+    if (np.nan in model._embedding_item(item_negative).norm(2)):
+        print('value %s: %.3e~%.3e' % ('neg_item', model._embedding_item(item_negative).min(), model._embedding_item(item_negative).max()))
+        breakpoint()
     # print(model._embedding_user(user).norm(2).pow(2),
     #         model._embedding_item(item_positive).norm(2).pow(2),
     #         model._embedding_item(item_negative).norm(2).pow(2))
