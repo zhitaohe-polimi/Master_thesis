@@ -168,8 +168,8 @@ def loss_MSE(model, batch, l2_reg):
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
 
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2) +
-                          model._embedding_item(item).norm(2) + 1.0e-12) / float(len(user))
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item).norm(2).pow(2) + 1.0e-12) / float(len(user))
 
     # reg_loss = (1 / 2) * (model._embedding_user(user).square().sum() +
     #                       model._embedding_item(item).square().sum() + 1.0e-12) / float(len(user))
