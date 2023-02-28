@@ -174,6 +174,8 @@ def loss_MSE(model, batch, l2_reg):
     # reg_loss = (1 / 2) * (model._embedding_user(user).square().sum() +
     #                       model._embedding_item(item).square().sum() + 1.0e-12) / float(len(user))
 
+    reg_loss=0
+
     loss = MSE_loss + reg_loss * l2_reg
 
     return loss
