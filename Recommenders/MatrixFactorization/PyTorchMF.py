@@ -168,8 +168,11 @@ def loss_MSE(model, batch, l2_reg):
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
 
-    reg_loss = (1 / 2) * (model._embedding_user(user).square().sum() +
-                          model._embedding_item(item).square().sum() + 1.0e-12) / float(len(user))
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item).norm(2).pow(2) + 1.0e-12) / float(len(user))
+
+    # reg_loss = (1 / 2) * (model._embedding_user(user).square().sum() +
+    #                       model._embedding_item(item).square().sum() + 1.0e-12) / float(len(user))
 
     loss = MSE_loss + reg_loss * l2_reg
 
@@ -195,13 +198,13 @@ def loss_BPR(model, batch, l2_reg):
     item_positive = item_positive.type(torch.long).to("cuda")
     item_negative = item_negative.type(torch.long).to("cuda")
 
-    # reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-    #                       model._embedding_item(item_positive).norm(2).pow(2) +
-    #                       model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item_positive).norm(2).pow(2) +
+                          model._embedding_item(item_negative).norm(2).pow(2) + 1.0e-12) / float(len(user))
 
-    reg_loss = (1 / 2) * (model._embedding_user(user).square().sum() +
-                          model._embedding_item(item_positive).square().sum() +
-                          model._embedding_item(item_negative).square().sum() + 1.0e-12) / float(len(user))
+    # reg_loss = (1 / 2) * (model._embedding_user(user).square().sum() +
+    #                       model._embedding_item(item_positive).square().sum() +
+    #                       model._embedding_item(item_negative).square().sum() + 1.0e-12) / float(len(user))
 
     # if(np.nan in model._embedding_user(user).norm(2)):
     #     print('value %s: %.3e~%.3e' % ('user', model._embedding_user(user).min(), model._embedding_user(user).max()))
