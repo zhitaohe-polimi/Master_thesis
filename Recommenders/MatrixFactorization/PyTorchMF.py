@@ -168,8 +168,8 @@ def loss_MSE(model, batch, l2_reg):
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
 
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item).norm(2).pow(2)) / float(len(user))
+    reg_loss = (1 / 2) * (model._embedding_user(user).square().sum() +
+                          model._embedding_item(item).square().sum() + 1.0e-12) / float(len(user))
 
     loss = MSE_loss + reg_loss * l2_reg
 
@@ -195,19 +195,23 @@ def loss_BPR(model, batch, l2_reg):
     item_positive = item_positive.type(torch.long).to("cuda")
     item_negative = item_negative.type(torch.long).to("cuda")
 
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item_positive).norm(2).pow(2) +
-                          model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
+    # reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+    #                       model._embedding_item(item_positive).norm(2).pow(2) +
+    #                       model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
 
-    if(np.nan in model._embedding_user(user).norm(2)):
-        print('value %s: %.3e~%.3e' % ('user', model._embedding_user(user).min(), model._embedding_user(user).max()))
-        breakpoint()
-    if (np.nan in model._embedding_item(item_positive).norm(2)):
-        print('value %s: %.3e~%.3e' % ('pos_item', model._embedding_item(item_positive).min(), model._embedding_item(item_positive).max()))
-        breakpoint()
-    if (np.nan in model._embedding_item(item_negative).norm(2)):
-        print('value %s: %.3e~%.3e' % ('neg_item', model._embedding_item(item_negative).min(), model._embedding_item(item_negative).max()))
-        breakpoint()
+    reg_loss = (1 / 2) * (model._embedding_user(user).square().sum() +
+                          model._embedding_item(item_positive).square().sum() +
+                          model._embedding_item(item_negative).square().sum() + 1.0e-12) / float(len(user))
+
+    # if(np.nan in model._embedding_user(user).norm(2)):
+    #     print('value %s: %.3e~%.3e' % ('user', model._embedding_user(user).min(), model._embedding_user(user).max()))
+    #     breakpoint()
+    # if (np.nan in model._embedding_item(item_positive).norm(2)):
+    #     print('value %s: %.3e~%.3e' % ('pos_item', model._embedding_item(item_positive).min(), model._embedding_item(item_positive).max()))
+    #     breakpoint()
+    # if (np.nan in model._embedding_item(item_negative).norm(2)):
+    #     print('value %s: %.3e~%.3e' % ('neg_item', model._embedding_item(item_negative).min(), model._embedding_item(item_negative).max()))
+    #     breakpoint()
 
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
@@ -296,18 +300,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         for batch in self._data_iterator:
             # Clear previously computed gradients
             self._optimizer.zero_grad()
-
-            # user, item_positive, item_negative = batch
-            # user = user.to("cuda")
-            # item_positive = item_positive.type(torch.long).to("cuda")
-            # item_negative = item_negative.type(torch.long).to("cuda")
-            #
-            # batch = (user, item_positive, item_negative)
-
-            # print(self._model._embedding_user(user).norm(2).pow(2),
-            #       self._model._embedding_item(item_positive).norm(2).pow(2),
-            #       self._model._embedding_item(item_negative).norm(2).pow(2),
-            #       reg_loss,self.l2_reg)
 
             loss = self._loss_function(self._model, batch, self.l2_reg)
 
