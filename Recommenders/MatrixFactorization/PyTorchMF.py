@@ -162,16 +162,15 @@ def loss_MSE(model, batch, l2_reg):
     user = user.to("cuda")
     item = item.to("cuda")
     rating = rating.to("cuda")
+
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item).norm(2).pow(2)) / float(len(user))
+
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
 
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
-
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item).norm(2).pow(2)) / float(len(user))
-
-    reg_loss=0
 
     loss = MSE_loss + reg_loss * l2_reg
 
@@ -261,13 +260,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model.to("cuda")
 
         if sgd_mode.lower() == "adagrad":
-            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
-            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         elif sgd_mode.lower() == "adam":
-            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         elif sgd_mode.lower() == "sgd":
-            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         else:
             raise ValueError("sgd_mode attribute value not recognized.")
 
