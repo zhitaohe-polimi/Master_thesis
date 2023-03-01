@@ -290,6 +290,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
+        op = True
 
         for batch in self._data_iterator:
             # Clear previously computed gradients
@@ -306,7 +307,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             parameters = []
             for parameter in self._model.parameters():
+                if op == True:
+                    print(parameter.shape)
                 parameters.append(parameter.view(-1))
+
+            op = False
 
             # reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
             #                       self._model._embedding_item(item).norm(2).pow(2)) / float(len(user))
