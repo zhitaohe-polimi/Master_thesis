@@ -163,14 +163,14 @@ def loss_MSE(model, batch, l2_reg):
     item = item.to("cuda")
     rating = rating.to("cuda")
 
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item).norm(2).pow(2)) / float(len(user))
-
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
 
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
+
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item).norm(2).pow(2)) / float(len(user))
 
     loss = MSE_loss + reg_loss * l2_reg
 
