@@ -39,8 +39,6 @@ class _SimpleMFModel(torch.nn.Module):
 
         self._embedding_user = torch.nn.Embedding(n_users, embedding_dim=embedding_dim)
         self._embedding_item = torch.nn.Embedding(n_items, embedding_dim=embedding_dim)
-        # self._embedding_user.weight.data.uniform_(0, 0.5)
-        # self._embedding_user.weight.data.uniform_(0, 0.5)
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
@@ -290,7 +288,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
-        op = True
 
         for batch in self._data_iterator:
             # Clear previously computed gradients
@@ -305,18 +302,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             loss = self._loss_function(self._model, batch)
 
-            parameters = []
-            for parameter in self._model.parameters():
-                if op == True:
-                    print(parameter.shape)
-                parameters.append(parameter.view(-1))
-
-            op = False
-
-            # reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
-            #                       self._model._embedding_item(item).norm(2).pow(2)) / float(len(user))
-
-            reg_loss = (1 / 2) * torch.square(torch.cat(parameters)).sum() / float(len(user))
+            reg_loss = (1 / 2) * (torch.square(self._model._embedding_user(user)).sum() +
+                                  torch.square(self._model._embedding_item(item)).sum()) / float(len(user))
 
             loss += reg_loss * self.l2_reg
 
