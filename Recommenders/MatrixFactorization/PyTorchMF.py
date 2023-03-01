@@ -159,9 +159,9 @@ class BPR_Dataset(Dataset):
 
 def loss_MSE(model, batch, l2_reg):
     user, item, rating = batch
-    user = user.to("cuda")
-    item = item.to("cuda")
-    rating = rating.to("cuda")
+    # user = user.to("cuda")
+    # item = item.to("cuda")
+    # rating = rating.to("cuda")
 
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
@@ -169,10 +169,7 @@ def loss_MSE(model, batch, l2_reg):
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
 
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item).norm(2).pow(2)) / float(len(user))
-
-    loss = MSE_loss + reg_loss * l2_reg
+    loss = MSE_loss
 
     return loss
 
@@ -199,10 +196,6 @@ def loss_BPR(model, batch, l2_reg):
     reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
                           model._embedding_item(item_positive).norm(2).pow(2) +
                           model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
-
-    # reg_loss = (1 / 2) * (model._embedding_user(user).square().sum() +
-    #                       model._embedding_item(item_positive).square().sum() +
-    #                       model._embedding_item(item_negative).square().sum() + 1.0e-12) / float(len(user))
 
     # if(np.nan in model._embedding_user(user).norm(2)):
     #     print('value %s: %.3e~%.3e' % ('user', model._embedding_user(user).min(), model._embedding_user(user).max()))
@@ -260,13 +253,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model.to("cuda")
 
         if sgd_mode.lower() == "adagrad":
-            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
-            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "adam":
-            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "sgd":
-            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         else:
             raise ValueError("sgd_mode attribute value not recognized.")
 
@@ -302,7 +295,19 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
+            user, item, rating = batch
+            user = user.to("cuda")
+            item = item.to("cuda")
+            rating = rating.to("cuda")
+
+            batch = (user, item, rating)
+
             loss = self._loss_function(self._model, batch, self.l2_reg)
+
+            reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
+                                  self._model._embedding_item(item).norm(2).pow(2)) / float(len(user))
+
+            loss += reg_loss * self.l2_reg
 
             # Compute gradients given current loss
             loss.backward()
