@@ -185,15 +185,11 @@ def loss_CrossEntropy(model, batch):
     return loss
 
 
-def loss_BPR(model, batch, l2_reg):
+def loss_BPR(model, batch):
     user, item_positive, item_negative = batch
-    user = user.to("cuda")
-    item_positive = item_positive.type(torch.long).to("cuda")
-    item_negative = item_negative.type(torch.long).to("cuda")
-
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item_positive).norm(2).pow(2) +
-                          model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
+    # user = user.to("cuda")
+    # item_positive = item_positive.type(torch.long).to("cuda")
+    # item_negative = item_negative.type(torch.long).to("cuda")
 
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
@@ -201,7 +197,7 @@ def loss_BPR(model, batch, l2_reg):
     # Compute total loss for batch
     BPR_loss = -(x_ij.sigmoid() + 1e-20).log().mean()
 
-    loss = BPR_loss + reg_loss * l2_reg
+    loss = BPR_loss
 
     return loss
 
@@ -289,8 +285,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             loss = self._loss_function(self._model, batch)
 
-            reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
-                                  self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
+            if self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender":
+                reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
+                                      self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
+            else:
+                reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
+                                      self._model._embedding_item(item).norm(2).pow(2) +
+                                      self._model._embedding_item(rating).norm(2).pow(2)) / float(len(user))
 
             loss += reg_loss * self.l2_reg
 
