@@ -157,9 +157,9 @@ class BPR_Dataset(Dataset):
 
 def loss_MSE(model, batch, l2_reg):
     user, item, rating = batch
-    # user = user.to("cuda")
-    # item = item.to("cuda")
-    # rating = rating.to("cuda")
+    user = user.to("cuda")
+    item = item.to("cuda")
+    rating = rating.to("cuda")
 
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
