@@ -155,7 +155,7 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-def loss_MSE(model, batch, l2_reg):
+def loss_MSE(model, batch):
     user, item, rating = batch
     # user = user.to("cuda")
     # item = item.to("cuda")
@@ -166,11 +166,6 @@ def loss_MSE(model, batch, l2_reg):
 
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
-
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item)).norm(2).pow(2) / float(len(user))
-
-    MSE_loss += reg_loss * l2_reg
 
     loss = MSE_loss
 
@@ -292,12 +287,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             batch = (user, item, rating)
 
-            loss = self._loss_function(self._model, batch, self.l2_reg)
+            loss = self._loss_function(self._model, batch)
 
-            # reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
-            #                       self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
-            #
-            # loss += reg_loss * self.l2_reg
+            reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
+                                  self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
+
+            loss += reg_loss * self.l2_reg
 
             # Clear previously computed gradients
             self._optimizer.zero_grad()
