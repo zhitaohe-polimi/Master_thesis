@@ -155,7 +155,7 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-def loss_MSE(model, batch):
+def loss_MSE(model, batch, l2_reg):
     user, item, rating = batch
     # user = user.to("cuda")
     # item = item.to("cuda")
@@ -166,6 +166,13 @@ def loss_MSE(model, batch):
 
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
+
+    # reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
+    #                       self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item)).norm(2).pow(2) / float(len(user))
+
+    MSE_loss += reg_loss * l2_reg
 
     loss = MSE_loss
 
@@ -191,15 +198,15 @@ def loss_BPR(model, batch, l2_reg):
     item_positive = item_positive.type(torch.long).to("cuda")
     item_negative = item_negative.type(torch.long).to("cuda")
 
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item_positive).norm(2).pow(2) +
-                          model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
-
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
 
     # Compute total loss for batch
     BPR_loss = -(x_ij.sigmoid() + 1e-20).log().mean()
+
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item_positive).norm(2).pow(2) +
+                          model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
 
     loss = BPR_loss + reg_loss * l2_reg
 
@@ -282,22 +289,17 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         for batch in self._data_iterator:
             # Clear previously computed gradients
             self._optimizer.zero_grad()
-            
-            user, item, rating = batch
-            user = user.to("cuda")
-            item = item.to("cuda")
-            rating = rating.to("cuda")
 
-            batch = (user, item, rating)
+            # user, item, rating = batch
+            # user = user.to("cuda")
+            # item = item.to("cuda")
+            # rating = rating.to("cuda")
+            #
+            # batch = (user, item, rating)
 
 
 
-            loss = self._loss_function(self._model, batch)
-
-            reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
-                                  self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
-
-            loss += reg_loss * self.l2_reg
+            loss = self._loss_function(self._model, batch,self.l2_reg)
 
 
 
