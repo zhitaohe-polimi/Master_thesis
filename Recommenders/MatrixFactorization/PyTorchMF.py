@@ -155,24 +155,17 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
-def loss_MSE(model, batch, l2_reg):
+def loss_MSE(model, batch):
     user, item, rating = batch
-    user = user.to("cuda")
-    item = item.to("cuda")
-    rating = rating.to("cuda")
+    # user = user.to("cuda")
+    # item = item.to("cuda")
+    # rating = rating.to("cuda")
 
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
 
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
-
-    # reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
-    #                       self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item)).norm(2).pow(2) / float(len(user))
-
-    MSE_loss += reg_loss * l2_reg
 
     loss = MSE_loss
 
@@ -290,18 +283,19 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
-            # user, item, rating = batch
-            # user = user.to("cuda")
-            # item = item.to("cuda")
-            # rating = rating.to("cuda")
-            #
-            # batch = (user, item, rating)
+            user, item, rating = batch
+            user = user.to("cuda")
+            item = item.to("cuda")
+            rating = rating.to("cuda")
 
+            batch = (user, item, rating)
 
+            loss = self._loss_function(self._model, batch)
 
-            loss = self._loss_function(self._model, batch,self.l2_reg)
+            reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
+                                  self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
 
-
+            loss += reg_loss * self.l2_reg
 
             # Compute gradients given current loss
             loss.backward()
