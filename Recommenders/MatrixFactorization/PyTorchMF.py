@@ -191,15 +191,15 @@ def loss_BPR(model, batch, l2_reg):
     item_positive = item_positive.type(torch.long).to("cuda")
     item_negative = item_negative.type(torch.long).to("cuda")
 
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item_positive).norm(2).pow(2) +
+                          model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
+
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
 
     # Compute total loss for batch
     BPR_loss = -(x_ij.sigmoid() + 1e-20).log().mean()
-
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item_positive).norm(2).pow(2) +
-                          model._embedding_item(item_negative).norm(2).pow(2)) / float(len(user))
 
     loss = BPR_loss + reg_loss * l2_reg
 
@@ -280,15 +280,15 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         epoch_loss = 0
 
         for batch in self._data_iterator:
+            # Clear previously computed gradients
+            self._optimizer.zero_grad()
+
             user, item, rating = batch
             user = user.to("cuda")
             item = item.to("cuda")
             rating = rating.to("cuda")
 
             batch = (user, item, rating)
-
-            # Clear previously computed gradients
-            self._optimizer.zero_grad()
 
             loss = self._loss_function(self._model, batch)
 
