@@ -44,6 +44,12 @@ class _SimpleMFModel(torch.nn.Module):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
         return prediction
 
+    def reg_loss(self, user, item):
+        reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
+                              self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
+
+        return reg_loss
+
 
 class _SimpleMFBiasModel(torch.nn.Module):
 
@@ -289,8 +295,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             loss = self._loss_function(self._model, batch)
 
             if self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender":
-                reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
-                                      self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
+                self._model.reg_loss(user, item)
+                # reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
+                #                       self._model._embedding_item(item)).norm(2).pow(2) / float(len(user))
             else:
                 reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
                                       self._model._embedding_item(item).norm(2).pow(2) +
