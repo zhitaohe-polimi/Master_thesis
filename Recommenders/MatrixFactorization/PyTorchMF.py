@@ -46,7 +46,7 @@ class _SimpleMFModel(torch.nn.Module):
 
     def reg_loss(self, user, item):
         reg_loss = (1 / 2) * (self._embedding_user(user).pow(2).sum() +
-                              self._embedding_item(item).pow(2).sum()) / float(len(user))
+                              self._embedding_item(item)).pow(2).sum() / float(len(user))
 
         return reg_loss
 
