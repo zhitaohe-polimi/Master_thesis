@@ -289,11 +289,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             batch = (user, item, rating)
 
-            # Clear previously computed gradients
-            self._optimizer.zero_grad()
-
-            loss = self._loss_function(self._model, batch)
-
             if self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender":
                 reg_loss = self._model.reg_loss(user, item)
                 # reg_loss = (1 / 2) * (self._model._embedding_user(user).norm(2).pow(2) +
@@ -303,7 +298,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                                       self._model._embedding_item(item).norm(2).pow(2) +
                                       self._model._embedding_item(rating).norm(2).pow(2)) / float(len(user))
 
+            loss = self._loss_function(self._model, batch)
+
+
             loss += reg_loss * self.l2_reg
+
+            # Clear previously computed gradients
+            self._optimizer.zero_grad()
 
             # Compute gradients given current loss
             loss.backward()
