@@ -44,18 +44,6 @@ class _SimpleMFModel(torch.nn.Module):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
         return prediction
 
-    def reg_loss(self, user, item):
-        reg_loss = (1 / 2) * (self._embedding_user(user).norm(2).pow(2) +
-                              self._embedding_item(item).norm(2).pow(2)) / float(len(user))
-        return reg_loss
-
-    def reg_loss_bpr(self, user, positive_item, negative_item):
-        reg_loss = (1 / 2) * (self._embedding_user(user).norm(2).pow(2) +
-                              self._embedding_item(positive_item).norm(2).pow(2) +
-                              self._embedding_item(negative_item).norm(2).pow(2)) / float(len(user))
-
-        return reg_loss
-
 
 class _SimpleMFBiasModel(torch.nn.Module):
 
@@ -139,6 +127,18 @@ class Interaction_Dataset(Dataset):
             return self._row[index], item_negative, torch.tensor(0.0)
 
 
+def reg_loss_MSE(model, user, item):
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item).norm(2).pow(2)) / float(len(user))
+    return reg_loss
+
+
+def reg_loss_BPR(model, user, positive_item, negative_item):
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(positive_item).norm(2).pow(2) +
+                          model._embedding_item(negative_item).norm(2).pow(2)) / float(len(user))
+
+    return reg_loss
 
 
 def loss_MSE(model, batch, l2_reg):
@@ -153,7 +153,7 @@ def loss_MSE(model, batch, l2_reg):
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
 
-    reg_loss = model.reg_loss(user, item)
+    reg_loss = reg_loss_MSE(model, user, item)
 
     loss = MSE_loss + reg_loss * l2_reg
 
@@ -185,7 +185,7 @@ def loss_BPR(model, batch, l2_reg):
     # Compute total loss for batch
     BPR_loss = -(x_ij.sigmoid() + 1e-20).log().mean()
 
-    reg_loss = model.reg_loss_bpr(user, item_positive, item_negative)
+    reg_loss = reg_loss_BPR(model, user, item_positive, item_negative)
 
     loss = BPR_loss + reg_loss * l2_reg
 
@@ -266,8 +266,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         epoch_loss = 0
 
         for batch in self._data_iterator:
-
-
             loss = self._loss_function(self._model, batch, self.l2_reg)
 
             # Clear previously computed gradients
