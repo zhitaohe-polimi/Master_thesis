@@ -154,9 +154,9 @@ def loss_MSE(model, batch, l2_reg):
     prediction = model.forward(user, item)
 
     # Compute total loss for batch
-    MSE_loss = torch.nn.MSELoss(prediction,rating)#(prediction - rating).pow(2).mean()
+    MSE_loss = (prediction - rating).pow(2).mean()
 
-    reg_loss = 0#reg_loss_MSE(model, user, item)
+    reg_loss = reg_loss_MSE(model, user, item)
 
     loss = MSE_loss + reg_loss * l2_reg
 
