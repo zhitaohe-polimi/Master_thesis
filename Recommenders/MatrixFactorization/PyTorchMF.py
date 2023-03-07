@@ -47,13 +47,12 @@ class _SimpleMFModel(torch.nn.Module):
     def reg_loss(self, user, item):
         reg_loss = (1 / 2) * (self._embedding_user(user).pow(2).sum() +
                               self._embedding_item(item).pow(2).sum()) / float(len(user))
-
         return reg_loss
 
-    def reg_loss_bpr(self, user, item, rating):
+    def reg_loss_bpr(self, user, positive_item, negative_item):
         reg_loss = (1 / 2) * (self._embedding_user(user).norm(2).pow(2) +
-                              self._embedding_item(item).norm(2).pow(2) +
-                              self._embedding_item(rating).norm(2).pow(2)) / float(len(user))
+                              self._embedding_item(positive_item).norm(2).pow(2) +
+                              self._embedding_item(negative_item).norm(2).pow(2)) / float(len(user))
 
         return reg_loss
 
@@ -140,32 +139,6 @@ class Interaction_Dataset(Dataset):
             return self._row[index], item_negative, torch.tensor(0.0)
 
 
-class BPR_Dataset(Dataset):
-    def __init__(self, URM_train):
-        super().__init__()
-        self._URM_train = sps.csr_matrix(URM_train)
-        self.n_users, self.n_items = self._URM_train.shape
-
-    def __len__(self):
-        return self.n_users
-
-    def __getitem__(self, user_id):
-
-        seen_items = self._URM_train.indices[self._URM_train.indptr[user_id]:self._URM_train.indptr[user_id + 1]]
-        item_positive = np.random.choice(seen_items)
-
-        # seen_items = set(list(seen_items))
-        negative_selected = False
-
-        while not negative_selected:
-            negative_candidate = np.random.randint(low=0, high=self.n_items, size=1)[0]
-
-            if negative_candidate not in seen_items:
-                item_negative = negative_candidate
-                negative_selected = True
-
-        # return torch.tensor(user_id).to("cuda"), torch.tensor(item_positive).to("cuda"), torch.tensor(item_negative).to("cuda")
-        return user_id, item_positive, item_negative
 
 
 def loss_MSE(model, batch, l2_reg):
@@ -248,7 +221,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
                                                       batch_size=batch_size)
         else:
-            self._data_iterator = None
+            raise ValueError("There is no valid _data_iterator.")
 
         self._model = _SimpleMFModel(self.n_users, self.n_items, embedding_dim=num_factors)
         self._model.to("cuda")
