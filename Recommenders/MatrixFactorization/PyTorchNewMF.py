@@ -192,6 +192,30 @@ class BPR_Dataset(Dataset):
         return user_id, item_positive, item_negative
 
 
+def reg_loss_MSE(model, user, item):
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(item).norm(2).pow(2) +
+                          model._embedding_user_vi.weight.norm(2).pow(2) +
+                          model._embedding_item_vi(item).norm(2).pow(2) +
+                          model._embedding_user_uj(user).norm(2).pow(2) +
+                          model._embedding_item_uj.norm(2).pow(2)
+                          ) / float(len(user))
+    return reg_loss
+
+
+def reg_loss_BPR(model, user, positive_item, negative_item):
+    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
+                          model._embedding_item(positive_item).norm(2).pow(2) +
+                          model._embedding_item(negative_item).norm(2).pow(2) +
+                          model._embedding_user_vi.weight.norm(2).pow(2) +
+                          model._embedding_item_vi(positive_item).norm(2).pow(2) +
+                          model._embedding_item_vi(negative_item).norm(2).pow(2) +
+                          model._embedding_user_uj(user).norm(2).pow(2) +
+                          model._embedding_item_uj.norm(2).pow(2)) / float(len(user))
+
+    return reg_loss
+
+
 def loss_MSE(model, batch):
     user, item, rating = batch
     user = user.to("cuda")
@@ -202,6 +226,8 @@ def loss_MSE(model, batch):
 
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
+
+    loss += reg_loss_MSE(model, user, item)
 
     return loss
 
@@ -216,7 +242,7 @@ def loss_BPR(model, batch):
     # Compute total loss for batch
     loss = -(x_ij.sigmoid() + 1e-20).log().mean()
 
-    # print(loss)
+    loss += reg_loss_BPR(model, user, item_positive, item_negative)
 
     return loss
 
