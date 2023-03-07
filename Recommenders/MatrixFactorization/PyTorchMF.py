@@ -50,6 +50,13 @@ class _SimpleMFModel(torch.nn.Module):
 
         return reg_loss
 
+    def reg_loss_bpr(self, user, item, rating):
+        reg_loss = (1 / 2) * (self._embedding_user(user).norm(2).pow(2) +
+                              self._embedding_item(item).norm(2).pow(2) +
+                              self._embedding_item(rating).norm(2).pow(2)) / float(len(user))
+
+        return reg_loss
+
 
 class _SimpleMFBiasModel(torch.nn.Module):
 
@@ -193,11 +200,11 @@ def loss_CrossEntropy(model, batch):
     return loss
 
 
-def loss_BPR(model, batch):
+def loss_BPR(model, batch, l2_reg):
     user, item_positive, item_negative = batch
-    # user = user.to("cuda")
-    # item_positive = item_positive.type(torch.long).to("cuda")
-    # item_negative = item_negative.type(torch.long).to("cuda")
+    user = user.to("cuda")
+    item_positive = item_positive.type(torch.long).to("cuda")
+    item_negative = item_negative.type(torch.long).to("cuda")
 
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
@@ -205,7 +212,9 @@ def loss_BPR(model, batch):
     # Compute total loss for batch
     BPR_loss = -(x_ij.sigmoid() + 1e-20).log().mean()
 
-    loss = BPR_loss
+    reg_loss = model.reg_loss_bpr(user, item_positive, item_negative)
+
+    loss = BPR_loss + reg_loss * l2_reg
 
     return loss
 
