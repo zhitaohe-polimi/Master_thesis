@@ -128,8 +128,9 @@ class Interaction_Dataset(Dataset):
 
 
 def reg_loss_MSE(model, user, item):
+    print(len(user),len(item))
     reg_loss = (1 / 2) * model._embedding_user(user).norm(2).pow(2) / float(len(user))
-    + (1 / 2) * model._embedding_item(item).norm(2).pow(2) /float(len(user))
+    + (1 / 2) * model._embedding_item(item).norm(2).pow(2) / float(len(user))
     return reg_loss
 
 
