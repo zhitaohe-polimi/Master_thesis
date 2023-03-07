@@ -188,6 +188,7 @@ def loss_BPR(model, batch, l2_reg):
     reg_loss = model.reg_loss_bpr(user, item_positive, item_negative)
 
     loss = BPR_loss + reg_loss * l2_reg
+    print(l2_reg)
 
     return loss
 
