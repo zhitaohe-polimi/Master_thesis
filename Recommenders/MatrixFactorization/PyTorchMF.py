@@ -217,7 +217,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
         elif self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender":
-            print(self.positive_quota)
             data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
                                                       batch_size=batch_size)
@@ -267,10 +266,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         epoch_loss = 0
 
         for batch in self._data_iterator:
-            loss = self._loss_function(self._model, batch, self.l2_reg)
-
             # Clear previously computed gradients
             self._optimizer.zero_grad()
+
+            loss = self._loss_function(self._model, batch, self.l2_reg)
 
             # Compute gradients given current loss
             loss.backward()
