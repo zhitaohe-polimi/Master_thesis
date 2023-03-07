@@ -282,6 +282,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         epoch_loss = 0
 
         for batch in self._data_iterator:
+            # Clear previously computed gradients
+            self._optimizer.zero_grad()
+            
             user, item, rating = batch
             user = user.to("cuda")
             item = item.to("cuda")
@@ -302,9 +305,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
 
             loss += reg_loss * self.l2_reg
-
-            # Clear previously computed gradients
-            self._optimizer.zero_grad()
 
             # Compute gradients given current loss
             loss.backward()
