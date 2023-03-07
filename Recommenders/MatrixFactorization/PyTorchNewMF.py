@@ -207,7 +207,7 @@ def reg_loss_MSE(model, user, item):
                           model._embedding_user_vi.weight.norm(2).pow(2) +
                           model._embedding_item_vi(item).norm(2).pow(2) +
                           model._embedding_user_uj(user).norm(2).pow(2) +
-                          model._embedding_item_uj.norm(2).pow(2)
+                          model._embedding_item_uj.weight.norm(2).pow(2)
                           ) / float(len(user))
     return reg_loss
 
