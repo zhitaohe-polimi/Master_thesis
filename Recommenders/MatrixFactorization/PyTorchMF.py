@@ -40,7 +40,7 @@ class _SimpleMFModel(torch.nn.Module):
         self._embedding_user = torch.nn.Embedding(n_users, embedding_dim=embedding_dim)
         self._embedding_item = torch.nn.Embedding(n_items, embedding_dim=embedding_dim)
 
-        self._embedding_user.weight.data.uniform_(0,0.05)
+        self._embedding_user.weight.data.uniform_(0, 0.05)
         self._embedding_item.weight.data.uniform_(0, 0.05)
 
     def forward(self, user, item):
@@ -156,7 +156,7 @@ def loss_MSE(model, batch, l2_reg):
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
 
-    reg_loss = 0 #reg_loss_MSE(model, user, item)
+    reg_loss = reg_loss_MSE(model, user, item)
 
     loss = MSE_loss + reg_loss * l2_reg
 
