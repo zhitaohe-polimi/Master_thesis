@@ -220,7 +220,7 @@ def reg_loss_BPR(model, user, positive_item, negative_item):
                           model._embedding_item_vi(positive_item).norm(2).pow(2) +
                           model._embedding_item_vi(negative_item).norm(2).pow(2) +
                           model._embedding_user_uj(user).norm(2).pow(2) +
-                          model._embedding_item_uj.norm(2).pow(2)) / float(len(user))
+                          model._embedding_item_uj.weight.norm(2).pow(2)) / float(len(user))
 
     return reg_loss
 
