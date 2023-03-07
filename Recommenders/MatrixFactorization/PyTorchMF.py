@@ -14,6 +14,10 @@ import numpy as np
 import torch, os
 from torch.utils.data import Dataset, DataLoader
 from torch.profiler import profile, record_function, ProfilerActivity
+from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython, \
+    InteractionIterator as InteractionIterator_cython, \
+    InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
+from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
 
 
 def batch_dot(tensor_1, tensor_2):
@@ -208,7 +212,18 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             learning_rate = 1e-2,
             **earlystopping_kwargs):
 
-        self._data_loader = DataLoader(self._dataset, batch_size = int(batch_size), shuffle = True, num_workers = os.cpu_count(), pin_memory=True)
+        use_cython_sampler = True
+
+        if self.RECOMMENDER_NAME == "PyTorchMF_BPR_Recommender_o":
+            data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
+            self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
+        elif self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender_o":
+            data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
+            self._data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
+                                                      batch_size=batch_size)
+        else:
+            self._data_iterator = None
+
         self._model = _SimpleMFBiasModel(self.n_users, self.n_items, embedding_dim = num_factors)
         # self._model.to("cuda")
 
@@ -255,7 +270,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
-        for batch in self._data_loader:
+        for batch in self._data_iterator:
 
             # Clear previously computed gradients
             self._optimizer.zero_grad()
