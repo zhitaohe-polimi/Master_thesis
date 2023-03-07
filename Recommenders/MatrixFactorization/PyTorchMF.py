@@ -174,13 +174,15 @@ def loss_MSE(model, batch, l2_reg):
     item = item.to("cuda")
     rating = rating.to("cuda")
 
+    reg_loss = model.reg_loss(user, item)
+
     # Compute prediction for each element in batch
     prediction = model.forward(user, item)
 
     # Compute total loss for batch
     MSE_loss = (prediction - rating).pow(2).mean()
 
-    reg_loss = model.reg_loss(user, item)
+
 
     loss = MSE_loss + reg_loss * l2_reg
 
@@ -206,13 +208,15 @@ def loss_BPR(model, batch, l2_reg):
     item_positive = item_positive.type(torch.long).to("cuda")
     item_negative = item_negative.type(torch.long).to("cuda")
 
+    reg_loss = model.reg_loss_bpr(user, item_positive, item_negative)
+
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
 
     # Compute total loss for batch
     BPR_loss = -(x_ij.sigmoid() + 1e-20).log().mean()
 
-    reg_loss = model.reg_loss_bpr(user, item_positive, item_negative)
+
 
     loss = BPR_loss + reg_loss * l2_reg
 
