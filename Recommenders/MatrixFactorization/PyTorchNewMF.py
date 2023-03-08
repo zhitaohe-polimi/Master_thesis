@@ -40,8 +40,8 @@ def pearson_corr(A, B):
     B_mB = B - B.mean(1)[:, None]
 
     # Sum of squares across rows
-    ssA = (A_mA ** 2).sum(1)
-    ssB = (B_mB ** 2).sum(1)
+    ssA = A_mA.pow(2).sum(1)
+    ssB = B_mB.pow(2).sum(1)
 
     # Finally get corr coeff
     return torch.einsum("bi,ci->bc", A_mA, B_mB) / torch.sqrt(torch.einsum("bi,ic->bc", ssA[:, None], ssB[None]))
@@ -75,7 +75,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         # user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
         user_sim_uv = pearson_corr(self._embedding_user(user), self._embedding_user.weight)
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
-        user_sim_uv = torch.nn.functional.normalize(user_sim_uv, dim=1).to("cuda")
+        user_sim_uv = torch.nn.functional.normalize(user_sim_uv, dim=1)
         alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
         summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
         prediction += summation_v
@@ -83,7 +83,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         # item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
         item_sim_ij = pearson_corr(self._embedding_item.weight, self._embedding_item(item))
         item_sim_ij[item] = item_sim_ij[item].fill_diagonal_(0)
-        item_sim_ij = torch.nn.functional.normalize(item_sim_ij, dim=0).to("cuda")
+        item_sim_ij = torch.nn.functional.normalize(item_sim_ij, dim=0)
         alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
