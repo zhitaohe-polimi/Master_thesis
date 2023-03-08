@@ -280,7 +280,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         else:
             item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)
-            user_sim_uv = torch.einsum("bi,ci->bc", USER_factors[user_id_array], USER_factors)
+            # user_sim_uv = torch.einsum("bi,ci->bc", USER_factors[user_id_array], USER_factors)
+            user_sim_uv = pearson_corr(USER_factors[user_id_array],USER_factors)
             # user_sim_uv = torch.corrcoef(USER_factors)[user_id_array]
             user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
             user_sim_uv = torch.nn.functional.normalize(user_sim_uv, dim=1)
@@ -288,7 +289,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             summation_v = torch.einsum("bi,ic->bc", user_sim_uv, alpha_vi)
             item_scores += summation_v
 
-            item_sim_ij = torch.einsum("bi,ci->bc", ITEM_factors, ITEM_factors).fill_diagonal_(0)
+            item_sim_ij = pearson_corr(ITEM_factors,ITEM_factors).fill_diagonal_(0)
+            # item_sim_ij = torch.einsum("bi,ci->bc", ITEM_factors, ITEM_factors).fill_diagonal_(0)
             # item_sim_ij = torch.corrcoef(ITEM_factors).fill_diagonal_(0)
             item_sim_ij = torch.nn.functional.normalize(item_sim_ij, dim=0)
             alpha_uj = torch.einsum("bi,ci->bc", USER_factors_uj[user_id_array], ITEM_factors_uj)
