@@ -198,8 +198,8 @@ def reg_loss_MSE(model, user, item):
 
 def reg_loss_BPR(model, user, positive_item, negative_item):
     reg_loss = (1 / 2) * (model._embedding_user.weight.norm(2).pow(2) +
-                          model._embedding_item.weight.norm(2).pow(2) +
-                          # model._embedding_item(negative_item).norm(2).pow(2) +
+                          model._embedding_item(positive_item).norm(2).pow(2) +
+                          model._embedding_item(negative_item).norm(2).pow(2) +
                           model._embedding_user_vi.weight.norm(2).pow(2) +
                           model._embedding_item_vi(positive_item).norm(2).pow(2) +
                           model._embedding_item_vi(negative_item).norm(2).pow(2) +
@@ -354,13 +354,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = self._model.to(self.device)
 
         if sgd_mode.lower() == "adagrad":
-            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
-            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         elif sgd_mode.lower() == "adam":
-            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         elif sgd_mode.lower() == "sgd":
-            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         else:
             raise ValueError("sgd_mode attribute value not recognized.")
 
