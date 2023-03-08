@@ -326,10 +326,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
-            print("MF_MSE_PyTorch: Using CUDA")
+            print("NewMF_PyTorch: Using CUDA")
         else:
             self.device = torch.device('cpu')
-            print("MF_MSE_PyTorch: Using CPU")
+            print("NewMF_PyTorch: Using CPU")
 
         # torch.autograd.set_detect_anomaly(True)
 

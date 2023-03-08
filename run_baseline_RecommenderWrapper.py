@@ -198,7 +198,7 @@ def read_data_split_and_search(args):
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
             # new_MatrixFactorization_FunkSVD_Cython,
-            PyTorchNewMF_MSE_Recommender,
+            # PyTorchNewMF_MSE_Recommender,
             PyTorchNewMF_BPR_Recommender,
             # PyTorchMF_BPR_Recommender,
             # PyTorchMF_MSE_Recommender
