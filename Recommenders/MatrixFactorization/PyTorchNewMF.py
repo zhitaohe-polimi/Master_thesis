@@ -34,17 +34,17 @@ def batch_dot(tensor_1, tensor_2):
     return torch.einsum("ki,ki->k", tensor_1, tensor_2)  # tensor_1.multiply(tensor_2).sum(axis=1)
 
 
-def pearson_corr(A, B):
-    # Rowwise mean of input arrays & subtract from input arrays themeselves
-    A_mA = A - A.mean(1)[:, None]
-    B_mB = B - B.mean(1)[:, None]
+class _SimpleMFModel(torch.nn.Module):
 
-    # Sum of squares across rows
-    ssA = A_mA.pow(2).sum(1)
-    ssB = B_mB.pow(2).sum(1)
+    def __init__(self, n_users, n_items, embedding_dim=20):
+        super(_SimpleMFModel, self).__init__()
 
-    # Finally get corr coeff
-    return torch.einsum("bi,ci->bc", A_mA, B_mB) / torch.sqrt(torch.einsum("bi,ic->bc", ssA[:, None], ssB[None]))
+        self._embedding_user = torch.nn.Embedding(n_users, embedding_dim=embedding_dim)
+        self._embedding_item = torch.nn.Embedding(n_items, embedding_dim=embedding_dim)
+
+    def forward(self, user, item):
+        prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
+        return prediction
 
 
 class _SimpleNewMFModel(torch.nn.Module):
@@ -73,7 +73,8 @@ class _SimpleNewMFModel(torch.nn.Module):
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
         user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
-        # user_sim_uv = pearson_corr(self._embedding_user(user), self._embedding_user.weight)
+        # user_sim_uv = torch.corrcoef(self._embedding_user.weight)[user]
+        user_sim_uv = np.corrcoef(self._embedding_user.weight.detach().numpy())[user]
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
         user_sim_uv = torch.nn.functional.normalize(user_sim_uv, dim=1)
         alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
@@ -81,7 +82,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         prediction += summation_v
 
         item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
-        # item_sim_ij = pearson_corr(self._embedding_item.weight, self._embedding_item(item))
+        # item_sim_ij = torch.corrcoef(self._embedding_item.weight)[:, item]
+
         item_sim_ij[item] = item_sim_ij[item].fill_diagonal_(0)
         item_sim_ij = torch.nn.functional.normalize(item_sim_ij, dim=0)
         alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
@@ -281,7 +283,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         else:
             item_scores = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors)
             user_sim_uv = torch.einsum("bi,ci->bc", USER_factors[user_id_array], USER_factors)
-            # user_sim_uv = pearson_corr(USER_factors[user_id_array],USER_factors)
             # user_sim_uv = torch.corrcoef(USER_factors)[user_id_array]
             user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
             user_sim_uv = torch.nn.functional.normalize(user_sim_uv, dim=1)
@@ -289,7 +290,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             summation_v = torch.einsum("bi,ic->bc", user_sim_uv, alpha_vi)
             item_scores += summation_v
 
-            # item_sim_ij = pearson_corr(ITEM_factors,ITEM_factors).fill_diagonal_(0)
             item_sim_ij = torch.einsum("bi,ci->bc", ITEM_factors, ITEM_factors).fill_diagonal_(0)
             # item_sim_ij = torch.corrcoef(ITEM_factors).fill_diagonal_(0)
             item_sim_ij = torch.nn.functional.normalize(item_sim_ij, dim=0)
