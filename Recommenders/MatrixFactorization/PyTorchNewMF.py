@@ -197,9 +197,9 @@ def reg_loss_MSE(model, user, item):
 
 
 def reg_loss_BPR(model, user, positive_item, negative_item):
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(positive_item).norm(2).pow(2) +
-                          model._embedding_item(negative_item).norm(2).pow(2) +
+    reg_loss = (1 / 2) * (model._embedding_user.weight.norm(2).pow(2) +
+                          model._embedding_item.weight.norm(2).pow(2) +
+                          # model._embedding_item(negative_item).norm(2).pow(2) +
                           model._embedding_user_vi.weight.norm(2).pow(2) +
                           model._embedding_item_vi(positive_item).norm(2).pow(2) +
                           model._embedding_item_vi(negative_item).norm(2).pow(2) +
