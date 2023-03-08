@@ -72,16 +72,18 @@ class _SimpleNewMFModel(torch.nn.Module):
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
-        user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
+        # user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
         # user_sim_uv = torch.corrcoef(self._embedding_user.weight)[user]
+        user_sim_uv = np.corrcoef(self._embedding_user.weight.detach().numpy())[user]
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
         user_sim_uv = torch.nn.functional.normalize(user_sim_uv, dim=1)
         alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
         summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
         prediction += summation_v
 
-        item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
+        # item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
         # item_sim_ij = torch.corrcoef(self._embedding_item.weight)[:, item]
+        item_sim_ij = np.corrcoef(self._embedding_item.weight.detach().numpy())[:, item]
         item_sim_ij[item] = item_sim_ij[item].fill_diagonal_(0)
         item_sim_ij = torch.nn.functional.normalize(item_sim_ij, dim=0)
         alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
@@ -171,34 +173,6 @@ class Interaction_Dataset(Dataset):
                     negative_selected = True
 
             return self._row[index], item_negative, torch.tensor(0.0)
-
-
-class BPR_Dataset(Dataset):
-    def __init__(self, URM_train):
-        super().__init__()
-        self._URM_train = sps.csr_matrix(URM_train)
-        self.n_users, self.n_items = self._URM_train.shape
-
-    def __len__(self):
-        return self.n_users
-
-    def __getitem__(self, user_id):
-
-        seen_items = self._URM_train.indices[self._URM_train.indptr[user_id]:self._URM_train.indptr[user_id + 1]]
-        item_positive = np.random.choice(seen_items)
-
-        # seen_items = set(list(seen_items))
-        negative_selected = False
-
-        while not negative_selected:
-            negative_candidate = np.random.randint(low=0, high=self.n_items, size=1)[0]
-
-            if negative_candidate not in seen_items:
-                item_negative = negative_candidate
-                negative_selected = True
-
-        # return torch.tensor(user_id).to("cuda"), torch.tensor(item_positive).to("cuda"), torch.tensor(item_negative).to("cuda")
-        return user_id, item_positive, item_negative
 
 
 def reg_loss_MSE(model, user, item):
@@ -370,13 +344,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = self._model.to(self.device)
 
         if sgd_mode.lower() == "adagrad":
-            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
-            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "adam":
-            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "sgd":
-            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         else:
             raise ValueError("sgd_mode attribute value not recognized.")
 
