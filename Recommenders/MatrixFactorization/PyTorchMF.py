@@ -40,8 +40,8 @@ class _SimpleMFModel(torch.nn.Module):
         self._embedding_user = torch.nn.Embedding(n_users, embedding_dim=embedding_dim)
         self._embedding_item = torch.nn.Embedding(n_items, embedding_dim=embedding_dim)
 
-        self._embedding_user.weight.data.normal_(0,0.1)
-        self._embedding_item.weight.data.normal_(0,0.1)
+        self._embedding_user.weight.data.normal_(0, 0.1)
+        self._embedding_item.weight.data.normal_(0, 0.1)
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
@@ -230,13 +230,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model.to("cuda")
 
         if sgd_mode.lower() == "adagrad":
-            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
-            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)# , weight_decay=l2_reg)
+            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "adam":
-            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)# , weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "sgd":
-            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)# , weight_decay=l2_reg)
+            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         else:
             raise ValueError("sgd_mode attribute value not recognized.")
 
