@@ -244,7 +244,7 @@ def loss_BPR(model, batch):
     # Compute total loss for batch
     loss = -(x_ij.sigmoid() + 1e-20).log().mean()
 
-    loss += reg_loss_BPR(model, user, item_positive, item_negative)
+    # loss += reg_loss_BPR(model, user, item_positive, item_negative)
 
     return loss
 
@@ -363,13 +363,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = self._model.to(self.device)
 
         if sgd_mode.lower() == "adagrad":
-            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
-            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
         elif sgd_mode.lower() == "adam":
-            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
         elif sgd_mode.lower() == "sgd":
-            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
         else:
             raise ValueError("sgd_mode attribute value not recognized.")
 
