@@ -244,7 +244,7 @@ def loss_BPR(model, batch):
     # Compute total loss for batch
     loss = -(x_ij.sigmoid() + 1e-20).log().mean()
 
-    # loss += reg_loss_BPR(model, user, item_positive, item_negative)
+    loss += reg_loss_BPR(model, user, item_positive, item_negative)
 
     return loss
 
