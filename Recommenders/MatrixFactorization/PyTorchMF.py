@@ -216,7 +216,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         use_cython_sampler = True
 
-        if self.RECOMMENDER_NAME == "PyTorchMF_BPR_Recommender_wd":
+        if self.RECOMMENDER_NAME == "PyTorchMF_BPR_Recommender":
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
         elif self.RECOMMENDER_NAME == "PyTorchMF_MSE_Recommender":
@@ -230,13 +230,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model.to("cuda")
 
         if sgd_mode.lower() == "adagrad":
-            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
-            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         elif sgd_mode.lower() == "adam":
-            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         elif sgd_mode.lower() == "sgd":
-            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate, weight_decay=l2_reg)
+            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
         else:
             raise ValueError("sgd_mode attribute value not recognized.")
 
@@ -286,7 +286,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
 
 class PyTorchMF_BPR_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchMF_BPR_Recommender_wd"
+    RECOMMENDER_NAME = "PyTorchMF_BPR_Recommender"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
