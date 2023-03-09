@@ -344,7 +344,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         use_cython_sampler = True
 
-        if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender":
+        if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_wd":
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
         elif self.RECOMMENDER_NAME == "PyTorchNewMF_MSE_Recommender":
@@ -436,7 +436,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
 
 class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchNewMF_BPR_Recommender"
+    RECOMMENDER_NAME = "PyTorchNewMF_BPR_Recommender_wd"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
