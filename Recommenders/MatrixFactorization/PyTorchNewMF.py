@@ -242,7 +242,7 @@ def loss_BPR(model, batch):
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
     # Compute total loss for batch
-    loss = -(x_ij.sigmoid() + 1e-20).log().mean()
+    loss = -(x_ij.sigmoid() + 1e-12).log().mean()
 
     # loss += reg_loss_BPR(model, user, item_positive, item_negative)
 
