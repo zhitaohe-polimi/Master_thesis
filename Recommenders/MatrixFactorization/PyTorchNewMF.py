@@ -396,7 +396,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             **earlystopping_kwargs):
 
         if torch.cuda.is_available():
-            self.device = torch.device('cpu')
+            self.device = torch.device('cuda')
             print("NewMF_PyTorch: Using GPU")
         else:
             self.device = torch.device('cpu')
