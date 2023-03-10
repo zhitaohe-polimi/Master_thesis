@@ -296,9 +296,9 @@ def loss_MSE(model, batch):
 
 def loss_BPR(model, batch):
     user, item_positive, item_negative = batch
-    user = user#.to("cuda")
-    item_positive = item_positive#.to("cuda")
-    item_negative = item_negative#.to("cuda")
+    user = user.to("cuda")
+    item_positive = item_positive.to("cuda")
+    item_negative = item_negative.to("cuda")
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
     # Compute total loss for batch
@@ -337,13 +337,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
-        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to(self.device)
-        USER_factors = torch.tensor(self.USER_factors).to(self.device)
-        ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
-        USER_factors_vi = torch.tensor(self.USER_factors_vi).to(self.device)
-        ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi).to(self.device)
-        USER_factors_uj = torch.tensor(self.USER_factors_uj).to(self.device)
-        ITEM_factors_uj = torch.tensor(self.ITEM_factors_uj).to(self.device)
+        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)#.to(self.device)
+        USER_factors = torch.tensor(self.USER_factors)#.to(self.device)
+        ITEM_factors = torch.tensor(self.ITEM_factors)#.to(self.device)
+        USER_factors_vi = torch.tensor(self.USER_factors_vi)#.to(self.device)
+        ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi)#.to(self.device)
+        USER_factors_uj = torch.tensor(self.USER_factors_uj)#.to(self.device)
+        ITEM_factors_uj = torch.tensor(self.ITEM_factors_uj)#.to(self.device)
 
         if items_to_compute is not None:
             pass
@@ -396,8 +396,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             **earlystopping_kwargs):
 
         if torch.cuda.is_available():
-            self.device = torch.device('cpu')
-            print("NewMF_PyTorch: Using CPU")
+            self.device = torch.device('cuda')
+            print("NewMF_PyTorch: Using GPU")
         else:
             self.device = torch.device('cpu')
             print("NewMF_PyTorch: Using CPU")
