@@ -46,6 +46,14 @@ def pearson_corr(A, B):
     # Finally get corr coeff
     return torch.einsum("bi,ci->bc", A_mA, B_mB) / torch.sqrt(torch.einsum("bi,ic->bc", ssA[:, None], ssB[None]))
 
+
+def normalization(outmap, dim):
+    outmap_min, _ = torch.min(outmap, dim=dim, keepdim=True)
+    outmap_max, _ = torch.max(outmap, dim=dim, keepdim=True)
+    outmap = (outmap - outmap_min) / (outmap_max - outmap_min)
+    return outmap
+
+
 class _SimpleMFModel(torch.nn.Module):
 
     def __init__(self, n_users, n_items, embedding_dim=20):
@@ -98,6 +106,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
         # user_sim_uv = torch.nn.functional.normalize(user_sim_uv, dim=1)
         alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
+        alpha_vi = normalization(alpha_vi, 0)
         summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
         prediction += summation_v
 
@@ -106,6 +115,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         item_sim_ij[item] = item_sim_ij[item].fill_diagonal_(0)
         # item_sim_ij = torch.nn.functional.normalize(item_sim_ij, dim=0)
         alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
+        alpha_uj = normalization(alpha_uj, 1)
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
 
@@ -363,13 +373,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._model = self._model.to(self.device)
 
         if sgd_mode.lower() == "adagrad":
-            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adagrad(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "rmsprop":
-            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.RMSprop(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "adam":
-            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.Adam(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         elif sgd_mode.lower() == "sgd":
-            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)#, weight_decay=l2_reg)
+            self._optimizer = torch.optim.SGD(self._model.parameters(), lr=learning_rate)  # , weight_decay=l2_reg)
         else:
             raise ValueError("sgd_mode attribute value not recognized.")
 
