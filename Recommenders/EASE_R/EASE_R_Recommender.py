@@ -58,6 +58,8 @@ class EASE_R_Recommender(BaseItemSimilarityMatrixRecommender):
 
         diag_indices = np.diag_indices(grahm_matrix.shape[0])
 
+        print(1)
+
         # The Compute_Similarity object ensures the diagonal of the similarity matrix is zero
         # in this case we need the diagonal as well, which is just the item popularity
         item_popularity = np.ediff1d(self.URM_train.tocsc().indptr)
