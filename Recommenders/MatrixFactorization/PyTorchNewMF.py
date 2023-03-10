@@ -81,23 +81,23 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_user_uj = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_i)
         self._embedding_item_uj = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
-        self._embedding_user.weight.data.uniform_(0, 0.05)
-        self._embedding_item.weight.data.uniform_(0, 0.05)
-
-        self._embedding_user_vi.weight.data.uniform_(0, 0.05)
-        self._embedding_item_vi.weight.data.uniform_(0, 0.05)
-
-        self._embedding_user_uj.weight.data.uniform_(0, 0.05)
-        self._embedding_item_uj.weight.data.uniform_(0, 0.05)
-
-        # self._embedding_user.weight.data.normal_(0, 0.1)
-        # self._embedding_item.weight.data.normal_(0, 0.1)
+        # self._embedding_user.weight.data.uniform_(0, 0.05)
+        # self._embedding_item.weight.data.uniform_(0, 0.05)
         #
-        # self._embedding_user_vi.weight.data.normal_(0, 0.1)
-        # self._embedding_item_vi.weight.data.normal_(0, 0.1)
+        # self._embedding_user_vi.weight.data.uniform_(0, 0.05)
+        # self._embedding_item_vi.weight.data.uniform_(0, 0.05)
         #
-        # self._embedding_user_uj.weight.data.normal_(0, 0.1)
-        # self._embedding_item_uj.weight.data.normal_(0, 0.1)
+        # self._embedding_user_uj.weight.data.uniform_(0, 0.05)
+        # self._embedding_item_uj.weight.data.uniform_(0, 0.05)
+
+        self._embedding_user.weight.data.normal_(0, 0.1)
+        self._embedding_item.weight.data.normal_(0, 0.1)
+
+        self._embedding_user_vi.weight.data.normal_(0, 0.1)
+        self._embedding_item_vi.weight.data.normal_(0, 0.1)
+
+        self._embedding_user_uj.weight.data.normal_(0, 0.1)
+        self._embedding_item_uj.weight.data.normal_(0, 0.1)
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
