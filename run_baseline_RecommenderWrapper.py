@@ -199,8 +199,8 @@ def read_data_split_and_search(args):
             # ItemKNNCBFRecommender,
             # new_MatrixFactorization_FunkSVD_Cython,
             # PyTorchNewMF_MSE_Recommender,
-            # PyTorchNewMF_BPR_Recommender,
-            PyTorchMF_BPR_Recommender,
+            PyTorchNewMF_BPR_Recommender,
+            # PyTorchMF_BPR_Recommender,
             # PyTorchMF_MSE_Recommender
         ]
 
@@ -238,7 +238,7 @@ if __name__ == "__main__":
                         help='Project path.')
 
     parser.add_argument('--dataset', help="Choose a dataset from {yelp2018, last-fm, amazon-book}",
-                        default="movie-lens")
+                        default="yelp2018")
 
     parser.add_argument('--pretrain', type=int, default=-1,
                         help='0: No pretrain, -1: Pretrain with the learned embeddings, 1:Pretrain with stored models.')
