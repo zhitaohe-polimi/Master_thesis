@@ -13,6 +13,7 @@ from sklearn.preprocessing import normalize
 import numpy as np
 import time
 import scipy.sparse as sps
+from scipy import linalg
 
 from Recommenders.Similarity.Compute_Similarity import Compute_Similarity
 
@@ -66,7 +67,10 @@ class EASE_R_Recommender(BaseItemSimilarityMatrixRecommender):
         grahm_matrix[diag_indices] = item_popularity + l2_norm
 
         print(2)
-        P = np.linalg.inv(grahm_matrix)
+        # P = np.linalg.inv(grahm_matrix)
+        P = linalg.inv(grahm_matrix)
+
+        print(2.5)
 
         B = P / (-np.diag(P))
 
