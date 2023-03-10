@@ -62,20 +62,22 @@ class EASE_R_Recommender(BaseItemSimilarityMatrixRecommender):
         # The Compute_Similarity object ensures the diagonal of the similarity matrix is zero
         # in this case we need the diagonal as well, which is just the item popularity
         item_popularity = np.ediff1d(self.URM_train.tocsc().indptr)
+        print(1)
         grahm_matrix[diag_indices] = item_popularity + l2_norm
 
+        print(2)
         P = np.linalg.inv(grahm_matrix)
 
         B = P / (-np.diag(P))
 
         B[diag_indices] = 0.0
 
-        print(2)
+        print(3)
 
 
         new_time_value, new_time_unit = seconds_to_biggest_unit(time.time()-start_time)
 
-        print(3)
+        print(4)
         self._print("Fitting model... done in {:.2f} {}".format( new_time_value, new_time_unit))
 
         # Check if the matrix should be saved in a sparse or dense format
