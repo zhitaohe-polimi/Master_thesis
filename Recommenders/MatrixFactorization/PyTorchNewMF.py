@@ -119,6 +119,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
 
+        print(2)
+
         return prediction
 
 
@@ -480,7 +482,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
-        print(1)
         for batch in self._data_iterator:
             # Clear previously computed gradients
             self._optimizer.zero_grad()
