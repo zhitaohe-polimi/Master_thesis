@@ -81,23 +81,23 @@ class _SimpleNewMFModel(torch.nn.Module):
         self._embedding_user_uj = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_i)
         self._embedding_item_uj = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_i)
 
-        # self._embedding_user.weight.data.uniform_(0, 0.05)
-        # self._embedding_item.weight.data.uniform_(0, 0.05)
+        self._embedding_user.weight.data.uniform_(0, 0.05)
+        self._embedding_item.weight.data.uniform_(0, 0.05)
+
+        self._embedding_user_vi.weight.data.uniform_(0, 0.05)
+        self._embedding_item_vi.weight.data.uniform_(0, 0.05)
+
+        self._embedding_user_uj.weight.data.uniform_(0, 0.05)
+        self._embedding_item_uj.weight.data.uniform_(0, 0.05)
+
+        # self._embedding_user.weight.data.normal_(0, 0.1)
+        # self._embedding_item.weight.data.normal_(0, 0.1)
         #
-        # self._embedding_user_vi.weight.data.uniform_(0, 0.05)
-        # self._embedding_item_vi.weight.data.uniform_(0, 0.05)
+        # self._embedding_user_vi.weight.data.normal_(0, 0.1)
+        # self._embedding_item_vi.weight.data.normal_(0, 0.1)
         #
-        # self._embedding_user_uj.weight.data.uniform_(0, 0.05)
-        # self._embedding_item_uj.weight.data.uniform_(0, 0.05)
-
-        self._embedding_user.weight.data.normal_(0, 0.1)
-        self._embedding_item.weight.data.normal_(0, 0.1)
-
-        self._embedding_user_vi.weight.data.normal_(0, 0.1)
-        self._embedding_item_vi.weight.data.normal_(0, 0.1)
-
-        self._embedding_user_uj.weight.data.normal_(0, 0.1)
-        self._embedding_item_uj.weight.data.normal_(0, 0.1)
+        # self._embedding_user_uj.weight.data.normal_(0, 0.1)
+        # self._embedding_item_uj.weight.data.normal_(0, 0.1)
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
@@ -356,7 +356,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         use_cython_sampler = True
 
-        if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
+        if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_uniform":
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
         elif self.RECOMMENDER_NAME == "PyTorchNewMF_MSE_Recommender":
@@ -448,7 +448,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
 
 class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchNewMF_BPR_Recommender_normal"
+    RECOMMENDER_NAME = "PyTorchNewMF_BPR_Recommender_uniform"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
