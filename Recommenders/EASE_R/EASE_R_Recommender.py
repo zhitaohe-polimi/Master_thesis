@@ -64,8 +64,10 @@ class EASE_R_Recommender(BaseItemSimilarityMatrixRecommender):
 
         grahm_matrix[diag_indices] = item_popularity + l2_norm
 
+        print(1)
         # P = np.linalg.inv(grahm_matrix)
         P = linalg.inv(grahm_matrix)
+        print(1.1)
 
         B = P / (-np.diag(P))
 
@@ -122,15 +124,17 @@ class EASE_R_Recommender(BaseItemSimilarityMatrixRecommender):
         self._check_format()
 
         user_profile_array = self.URM_train[user_id_array]
-        print(1)
+        print(2)
 
         if items_to_compute is not None:
             item_scores = - np.ones((len(user_id_array), self.URM_train.shape[1]), dtype=np.float32) * np.inf
+            print(2.1)
             item_scores_all = user_profile_array.dot(self.W_sparse)  # .toarray()
+            print(2.2)
             item_scores[:, items_to_compute] = item_scores_all[:, items_to_compute]
         else:
             item_scores = user_profile_array.dot(self.W_sparse)  # .toarray()
-            print(2)
+            print(2.3)
 
         return item_scores
 
