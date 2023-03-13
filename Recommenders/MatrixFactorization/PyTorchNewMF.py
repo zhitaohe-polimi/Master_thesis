@@ -479,7 +479,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.ITEM_factors_best_uj = self._model._embedding_item_uj.weight.detach().cpu().numpy()
 
     def _run_epoch(self, num_epoch):
-        print("a")
 
         epoch_loss = 0
         for batch in self._data_iterator:
