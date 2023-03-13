@@ -416,6 +416,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         else:
             self._data_iterator = None
 
+        print("a")
+
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
 
