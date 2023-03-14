@@ -186,10 +186,10 @@ def read_data_split_and_search(args):
 
     if args.flag_baselines_tune:
         recommender_class_list = [
-            MatrixFactorization_BPR_Cython,
-            IALSRecommender,
-            MatrixFactorization_FunkSVD_Cython,
-            MatrixFactorization_AsySVD_Cython,
+            # MatrixFactorization_BPR_Cython,
+            # IALSRecommender,
+            # MatrixFactorization_FunkSVD_Cython,
+            # MatrixFactorization_AsySVD_Cython,
             # EASE_R_Recommender,
             # ItemKNNCFRecommender,
             # UserKNNCFRecommender,
@@ -199,7 +199,7 @@ def read_data_split_and_search(args):
             # ItemKNNCBFRecommender,
             # new_MatrixFactorization_FunkSVD_Cython,
             # PyTorchNewMF_MSE_Recommender,
-            # PyTorchNewMF_BPR_Recommender,
+            PyTorchNewMF_BPR_Recommender,
             # PyTorchMF_BPR_Recommender,
             # PyTorchMF_MSE_Recommender
         ]
@@ -230,10 +230,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run KGAT.")
     parser.add_argument('--weights_path', nargs='?', default='',
                         help='Store model path.')
-    parser.add_argument('--data_path', nargs='?', default='/home/tesista/Master_thesis'
+    parser.add_argument('--data_path', nargs='?', default='/home/ubuntu/Master_thesis'
                                                           '/Conferences/HGB/HGB_github/baseline/Data/',
                         help='Input data path.')
-    parser.add_argument('--proj_path', nargs='?', default='/home/tesista/Master_thesis'
+    parser.add_argument('--proj_path', nargs='?', default='/home/ubuntu/Master_thesis'
                                                           '/Conferences/HGB/HGB_github/baseline/Model/',
                         help='Project path.')
 
