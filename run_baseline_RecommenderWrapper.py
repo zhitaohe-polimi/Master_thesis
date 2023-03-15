@@ -188,7 +188,7 @@ def read_data_split_and_search(args):
 
     if args.flag_baselines_tune:
         recommender_class_list = [
-            # P3alphaRecommender,
+            P3alphaRecommender,
             # SLIM_BPR_Cython,
             # MatrixFactorization_BPR_Cython,
             # IALSRecommender,
@@ -203,12 +203,12 @@ def read_data_split_and_search(args):
             # ItemKNNCBFRecommender,
             # new_MatrixFactorization_FunkSVD_Cython,
             # PyTorchNewMF_MSE_Recommender,
-            PyTorchNewMF_BPR_Recommender,
+            # PyTorchNewMF_BPR_Recommender,
             # PyTorchMF_BPR_Recommender,
             # PyTorchMF_MSE_Recommender
         ]
 
-        n_cases = 400
+        n_cases = 300
 
         runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
                                                            URM_train=URM_train,
@@ -242,7 +242,7 @@ if __name__ == "__main__":
                         help='Project path.')
 
     parser.add_argument('--dataset', help="Choose a dataset from {yelp2018, last-fm, amazon-book}",
-                        default="movie-lens")
+                        default="yelp2018")
 
     parser.add_argument('--pretrain', type=int, default=-1,
                         help='0: No pretrain, -1: Pretrain with the learned embeddings, 1:Pretrain with stored models.')
