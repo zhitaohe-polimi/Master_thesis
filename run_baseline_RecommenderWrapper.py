@@ -40,7 +40,7 @@ from Conferences.HGB.HGB_our_interface.customized_PureSVDRecommender import cust
 # from Utils.ResultFolderLoader import ResultFolderLoader
 from Utils.assertions_on_data_for_experiments import assert_implicit_data, assert_disjoint_matrices
 from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
-from Recommenders.SLIM.SLIM_BPR import SLIM_BPR
+from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 
 
 def load_pretrained_data(args):
@@ -189,7 +189,7 @@ def read_data_split_and_search(args):
     if args.flag_baselines_tune:
         recommender_class_list = [
             P3alphaRecommender,
-            SLIM_BPR,
+            SLIM_BPR_Cython,
             # MatrixFactorization_BPR_Cython,
             # IALSRecommender,
             # MatrixFactorization_FunkSVD_Cython,
