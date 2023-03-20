@@ -47,14 +47,11 @@ def pearson_corr(A, B):
     return torch.einsum("bi,ci->bc", A_mA, B_mB) / torch.sqrt(torch.einsum("bi,ic->bc", ssA[:, None], ssB[None]))
 
 
-# def rescaling(outmap, dim):
-#     outmap_min, _ = torch.min(outmap, dim=dim, keepdim=True)
-#     outmap_max, _ = torch.max(outmap, dim=dim, keepdim=True)
-#     outmap = (outmap - outmap_min) / (outmap_max - outmap_min)
-#     return outmap
-
-def rescaling(data, dim):
-    return (data - torch.min(data,dim=dim,keepdim=True)[0]) / (torch.max(data,dim=dim,keepdim=True)[0] - torch.min(data,dim=dim,keepdim=True)[0])
+def rescaling(outmap, dim):
+    outmap_min, _ = torch.min(outmap, dim=dim, keepdim=True)
+    outmap_max, _ = torch.max(outmap, dim=dim, keepdim=True)
+    outmap = (outmap - outmap_min) / (outmap_max - outmap_min)
+    return outmap
 
 
 class _SimpleMFModel(torch.nn.Module):
@@ -332,13 +329,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
-        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to(self.device)
-        USER_factors = torch.tensor(self.USER_factors).to(self.device)
-        ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
-        USER_factors_vi = torch.tensor(self.USER_factors_vi).to(self.device)
-        ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi).to(self.device)
-        USER_factors_uj = torch.tensor(self.USER_factors_uj).to(self.device)
-        ITEM_factors_uj = torch.tensor(self.ITEM_factors_uj).to(self.device)
+        user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)#.to(self.device)
+        USER_factors = torch.tensor(self.USER_factors)#.to(self.device)
+        ITEM_factors = torch.tensor(self.ITEM_factors)#.to(self.device)
+        USER_factors_vi = torch.tensor(self.USER_factors_vi)#.to(self.device)
+        ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi)#.to(self.device)
+        USER_factors_uj = torch.tensor(self.USER_factors_uj)#.to(self.device)
+        ITEM_factors_uj = torch.tensor(self.ITEM_factors_uj)#.to(self.device)
 
         if items_to_compute is not None:
             pass
