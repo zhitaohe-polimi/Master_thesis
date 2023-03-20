@@ -54,7 +54,7 @@ def pearson_corr(A, B):
 #     return outmap
 
 def rescaling(data, dim):
-    return (data - torch.min(data, dim=dim)[0]) / (torch.max(data, dim=dim)[0] - torch.min(data, dim=dim)[0])
+    return (data - torch.min(data,dim=dim,keepdim=True)[0]) / (torch.max(data,dim=dim,keepdim=True)[0] - torch.min(data,dim=dim,keepdim=True)[0])
 
 
 class _SimpleMFModel(torch.nn.Module):
