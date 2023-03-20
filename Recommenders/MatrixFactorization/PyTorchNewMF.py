@@ -330,12 +330,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                 self.RECOMMENDER_NAME, self.USER_factors.weight.shape[0], np.max(user_id_array))
 
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to(self.device)
-        USER_factors = torch.tensor(self.USER_factors).to(self.device)
-        ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
-        USER_factors_vi = torch.tensor(self.USER_factors_vi).to(self.device)
-        ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi).to(self.device)
-        USER_factors_uj = torch.tensor(self.USER_factors_uj).to(self.device)
-        ITEM_factors_uj = torch.tensor(self.ITEM_factors_uj).to(self.device)
+        # USER_factors = torch.tensor(self.USER_factors).to(self.device)
+        # ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
+        # USER_factors_vi = torch.tensor(self.USER_factors_vi).to(self.device)
+        # ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi).to(self.device)
+        # USER_factors_uj = torch.tensor(self.USER_factors_uj).to(self.device)
+        # ITEM_factors_uj = torch.tensor(self.ITEM_factors_uj).to(self.device)
 
         if items_to_compute is not None:
             pass
