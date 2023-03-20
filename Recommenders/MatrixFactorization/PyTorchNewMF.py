@@ -53,6 +53,14 @@ def rescaling(outmap, dim):
     outmap = (outmap - outmap_min) / (outmap_max - outmap_min)
     return outmap
 
+def rescaling_new(outmap, dim):
+    outmap=outmap.weight.detach().numpy()
+    outmap_min = outmap.min(axis=dim)
+    outmap_max = outmap.max(axis=dim)
+    outmap = (outmap - outmap_min) / (outmap_max - outmap_min)
+    outmap= torch.FloatTensor(outmap)
+    return outmap
+
 
 class _SimpleMFModel(torch.nn.Module):
 
@@ -368,7 +376,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
             user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
             alpha_vi = torch.einsum("bi,ci->bc", USER_factors_vi, ITEM_factors_vi)
-            alpha_vi = rescaling(alpha_vi, 0)
+            alpha_vi = rescaling_new(alpha_vi, 0)
             summation_v = torch.einsum("bi,ic->bc", user_sim_uv, alpha_vi)
             item_scores += summation_v
 
@@ -376,7 +384,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             item_sim_ij = pearson_corr(ITEM_factors, ITEM_factors).fill_diagonal_(0)
             item_sim_ij = torch.nn.functional.normalize(item_sim_ij, p=1, dim=0)
             alpha_uj = torch.einsum("bi,ci->bc", USER_factors_uj[user_id_array], ITEM_factors_uj)
-            alpha_uj = rescaling(alpha_uj, 1)
+            alpha_uj = rescaling_new(alpha_uj, 1)
             summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
             item_scores += summation_j
             item_scores = item_scores.detach().cpu().numpy()
