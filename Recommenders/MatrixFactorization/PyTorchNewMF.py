@@ -97,8 +97,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
         user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
         alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
-        # alpha_vi = rescaling(alpha_vi, 0)
-        alpha_vi = torch.nn.functional.normalize(alpha_vi, dim=0)
+        alpha_vi = rescaling(alpha_vi, 0)
         summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
         prediction += summation_v
 
@@ -107,8 +106,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         item_sim_ij[item] = item_sim_ij[item].fill_diagonal_(0)
         item_sim_ij = torch.nn.functional.normalize(item_sim_ij, p=1, dim=0)
         alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
-        # alpha_uj = rescaling(alpha_uj, 1)
-        alpha_uj = torch.nn.functional.normalize(alpha_uj, dim=1)
+        alpha_uj = rescaling(alpha_uj, 1)
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
 
@@ -377,16 +375,14 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
             user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
             alpha_vi = torch.einsum("bi,ci->bc", self.USER_factors_vi.weight, self.ITEM_factors_vi.weight)
-            # alpha_vi = rescaling(alpha_vi, 0)
-            alpha_vi = torch.nn.functional.normalize(alpha_vi, dim=0)
+            alpha_vi = rescaling(alpha_vi, 0)
             summation_v = torch.einsum("bi,ic->bc", user_sim_uv, alpha_vi)
             item_scores += summation_v
 
             item_sim_ij = pearson_corr(self.ITEM_factors.weight, self.ITEM_factors.weight).fill_diagonal_(0)
             item_sim_ij = torch.nn.functional.normalize(item_sim_ij, p=1, dim=0)
             alpha_uj = torch.einsum("bi,ci->bc", self.USER_factors_uj(user_id_array), self.ITEM_factors_uj.weight)
-            # alpha_uj = rescaling(alpha_uj, 1)
-            alpha_uj = torch.nn.functional.normalize(alpha_uj, dim=1)
+            alpha_uj = rescaling(alpha_uj, 1)
             summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
             item_scores += summation_j
 
