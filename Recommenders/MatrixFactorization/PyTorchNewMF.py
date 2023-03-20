@@ -379,7 +379,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             alpha_vi = torch.einsum("bi,ci->bc", self.USER_factors_vi.weight, self.ITEM_factors_vi.weight)
             # alpha_vi = rescaling(alpha_vi, 0)
             alpha_vi = torch.nn.functional.normalize(alpha_vi, dim=0)
-            summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
+            summation_v = torch.einsum("bi,ib->bc", user_sim_uv, alpha_vi)
             item_scores += summation_v
 
             item_sim_ij = pearson_corr(self.ITEM_factors.weight, self.ITEM_factors_vi.weight).fill_diagonal_(0)
@@ -387,7 +387,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             alpha_uj = torch.einsum("bi,ci->bc", self.USER_factors_uj(user_id_array), self.ITEM_factors_uj.weight)
             # alpha_uj = rescaling(alpha_uj, 1)
             alpha_uj = torch.nn.functional.normalize(alpha_uj, dim=1)
-            summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
+            summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
             item_scores += summation_j
 
             item_scores = item_scores.detach().cpu().numpy()
