@@ -377,7 +377,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             item_scores = - np.ones((len(user_id_array), self.ITEM_factors.shape[0]), dtype=np.float32) * np.inf
             n_sampled_intervals = 0
             for i in range(0, math.ceil(n_items / interval)):
-                # print("%d:%d" % (n_sampled_intervals * interval, min((n_sampled_intervals + 1) * interval, n_items)))
+                print("%d:%d" % (n_sampled_intervals * interval, min((n_sampled_intervals + 1) * interval, n_items)))
                 items_to_compute = item_id_list[
                                    n_sampled_intervals * interval:min((n_sampled_intervals + 1) * interval, n_items)]
 
