@@ -47,19 +47,14 @@ def pearson_corr(A, B):
     return torch.einsum("bi,ci->bc", A_mA, B_mB) / torch.sqrt(torch.einsum("bi,ic->bc", ssA[:, None], ssB[None]))
 
 
-def rescaling(outmap, dim):
-    outmap_min, _ = torch.min(outmap, dim=dim, keepdim=True)
-    outmap_max, _ = torch.max(outmap, dim=dim, keepdim=True)
-    outmap = (outmap - outmap_min) / (outmap_max - outmap_min)
-    return outmap
+# def rescaling(outmap, dim):
+#     outmap_min, _ = torch.min(outmap, dim=dim, keepdim=True)
+#     outmap_max, _ = torch.max(outmap, dim=dim, keepdim=True)
+#     outmap = (outmap - outmap_min) / (outmap_max - outmap_min)
+#     return outmap
 
-def rescaling_new(outmap, dim):
-    outmap=outmap.detach().cpu().numpy()
-    outmap_min = outmap.min(axis=dim)
-    outmap_max = outmap.max(axis=dim)
-    outmap = (outmap - outmap_min) / (outmap_max - outmap_min)
-    outmap= torch.FloatTensor(outmap)
-    return outmap
+def rescaling(data, dim):
+    return (data - torch.min(data, dim=dim)[0]) / (torch.max(data, dim=dim)[0] - torch.min(data, dim=dim)[0])
 
 
 class _SimpleMFModel(torch.nn.Module):
@@ -119,7 +114,6 @@ class _SimpleNewMFModel(torch.nn.Module):
         prediction += summation_j
 
         return prediction
-
 
 
 # class _SimpleNewMF_pretrain_Model(torch.nn.Module):
@@ -414,7 +408,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                                                       batch_size=batch_size)
         else:
             self._data_iterator = None
-
 
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
