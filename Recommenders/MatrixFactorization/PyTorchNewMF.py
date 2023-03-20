@@ -398,7 +398,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                 summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
                 predictions += summation_j
 
-                item_scores[:, items_to_compute] = predictions.detach().cpu().numpy()
+                item_scores[:, items_to_compute] = predictions.cpu().detach().numpy()
 
                 n_sampled_intervals += 1
         # No need to select only the specific negative items or warm users because the -inf score will not change
