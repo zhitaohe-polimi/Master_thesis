@@ -305,8 +305,6 @@ def loss_BPR(model, batch):
     nan_mask = torch.isnan(loss)
     loss = loss[~nan_mask].mean()
 
-    print(loss)
-
     # loss += reg_loss_BPR(model, user, item_positive, item_negative)
 
     return loss
