@@ -370,7 +370,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # item_scores += summation_j
             # item_scores = item_scores.detach().cpu().numpy()
 
-            item_scores = torch.einsum("bi,ci->bc", self.USER_factors[user_id_array], self.ITEM_factors.weight)
+            item_scores = torch.einsum("bi,ci->bc", self.USER_factors(user_id_array), self.ITEM_factors.weight)
             user_sim_uv = pearson_corr(self.USER_factors(user_id_array), self.USER_factors.weight)
             user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
             user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
