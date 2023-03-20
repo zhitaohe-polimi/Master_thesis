@@ -402,7 +402,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
                 n_sampled_intervals += 1
 
-            item_scores = item_scores.detach().cpu().numpy()
+            # item_scores = item_scores.detach().cpu().numpy()
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
             item_scores += self.ITEM_bias + self.GLOBAL_bias
