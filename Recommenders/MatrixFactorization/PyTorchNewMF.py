@@ -54,7 +54,7 @@ def rescaling(outmap, dim):
     return outmap
 
 def rescaling_new(outmap, dim):
-    outmap=outmap.detach().numpy()
+    outmap=outmap.detach().cpu().numpy()
     outmap_min = outmap.min(axis=dim)
     outmap_max = outmap.max(axis=dim)
     outmap = (outmap - outmap_min) / (outmap_max - outmap_min)
