@@ -322,12 +322,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         :return:
         """
 
-        assert self.USER_factors.shape[1] == self.ITEM_factors.shape[1], \
+        assert self.USER_factors.weight.shape[1] == self.ITEM_factors.weight.shape[1], \
             "{}: User and Item factors have inconsistent shape".format(self.RECOMMENDER_NAME)
 
-        assert self.USER_factors.shape[0] > np.max(user_id_array), \
+        assert self.USER_factors.weight.shape[0] > np.max(user_id_array), \
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
-                self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
+                self.RECOMMENDER_NAME, self.USER_factors.weight.shape[0], np.max(user_id_array))
 
         user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor).to(self.device)
         USER_factors = torch.tensor(self.USER_factors).to(self.device)
@@ -370,7 +370,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # item_scores = item_scores.detach().cpu().numpy()
 
             prediction = batch_dot(self._embedding_user(user_id_array), self._embedding_item.weight)
-            # user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
             user_sim_uv = pearson_corr(self._embedding_user(user_id_array), self._embedding_user.weight)
             user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
             user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
@@ -379,7 +378,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
             prediction += summation_v
 
-            # item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
             item_sim_ij = pearson_corr(self._embedding_item.weight, self._embedding_item.weight).fill_diagonal_(0)
             item_sim_ij = torch.nn.functional.normalize(item_sim_ij, p=1, dim=0)
             alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user_id_array), self._embedding_item_uj.weight)
