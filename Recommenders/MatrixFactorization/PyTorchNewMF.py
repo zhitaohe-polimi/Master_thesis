@@ -396,6 +396,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             interval = len(user_id_array)
             item_id_list = torch.LongTensor(range(n_items)).to(self.device)
             item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
+            item_scores = item_scores.to(self.device)
             n_sampled_intervals = 0
             for i in range(0, math.ceil(n_items / interval)):
                 print("%d:%d" % (n_sampled_intervals * interval, min((n_sampled_intervals + 1) * interval, n_items)))
@@ -422,13 +423,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                                                    USER_factors_vi, ITEM_factors_vi,
                                                    USER_factors_uj, ITEM_factors_uj)
 
-                predictions = predictions.detach().cpu().numpy()
+                # predictions = predictions.detach().cpu().numpy()
 
                 item_scores[:, items_id_array] = predictions
 
                 n_sampled_intervals += 1
 
-            # item_scores = item_scores.detach().cpu().numpy()
+            item_scores = item_scores.detach().cpu().numpy()
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
             item_scores += self.ITEM_bias + self.GLOBAL_bias
