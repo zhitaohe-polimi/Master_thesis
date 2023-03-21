@@ -394,13 +394,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             n_items = ITEM_factors.shape[0]
             interval = len(user_id_array)
-            item_id_list = torch.LongTensor(range(n_items))  # .to(self.device)
+            item_id_list = torch.LongTensor(range(n_items)).to(self.device)
             item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
             n_sampled_intervals = 0
             for i in range(0, math.ceil(n_items / interval)):
                 print("%d:%d" % (n_sampled_intervals * interval, min((n_sampled_intervals + 1) * interval, n_items)))
                 items_id_array = item_id_list[
-                                   n_sampled_intervals * interval:min((n_sampled_intervals + 1) * interval, n_items)]
+                                 n_sampled_intervals * interval:min((n_sampled_intervals + 1) * interval, n_items)]
 
                 # predictions = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors[items_to_compute])
                 # user_sim_uv = pearson_corr(USER_factors[user_id_array], USER_factors)
@@ -418,14 +418,15 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                 # alpha_uj = rescaling(alpha_uj, 1)
                 # summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
                 # predictions += summation_j
-                predictions= calculate_prediction(user_id_array,items_id_array,USER_factors, ITEM_factors,USER_factors_vi,ITEM_factors_vi,
-                                                  USER_factors_uj,ITEM_factors_uj)
+                predictions = calculate_prediction(user_id_array, items_id_array, USER_factors, ITEM_factors,
+                                                   USER_factors_vi, ITEM_factors_vi,
+                                                   USER_factors_uj, ITEM_factors_uj)
 
                 item_scores[:, items_to_compute] = predictions
 
                 n_sampled_intervals += 1
 
-            # item_scores = item_scores.detach().cpu().numpy()
+            item_scores = item_scores.detach().cpu().numpy()
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
             item_scores += self.ITEM_bias + self.GLOBAL_bias
