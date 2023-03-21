@@ -422,7 +422,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                                                    USER_factors_vi, ITEM_factors_vi,
                                                    USER_factors_uj, ITEM_factors_uj)
 
-                item_scores[:, items_to_compute] = predictions
+                item_scores[:, items_id_array] = predictions
 
                 n_sampled_intervals += 1
 
