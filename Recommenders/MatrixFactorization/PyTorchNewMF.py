@@ -302,6 +302,28 @@ def loss_BPR(model, batch):
     return loss
 
 
+def calculate_prediction(user_id_array, items_to_compute, USER_factors, ITEM_factors, USER_factors_vi, ITEM_factors_vi,
+                         USER_factors_uj, ITEM_factors_uj):
+    prediction = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors[items_to_compute])
+    user_sim_uv = pearson_corr(USER_factors[user_id_array], USER_factors)
+    user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
+    user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
+    alpha_vi = torch.einsum("bi,ci->bc", USER_factors_vi, ITEM_factors_vi[items_to_compute])
+    alpha_vi = rescaling(alpha_vi, 0)
+    summation_v = torch.einsum("bi,ic->bc", user_sim_uv, alpha_vi)
+    prediction += summation_v
+
+    item_sim_ij = pearson_corr(ITEM_factors, ITEM_factors[items_to_compute])
+    item_sim_ij[items_to_compute] = item_sim_ij[items_to_compute].fill_diagonal_(0)
+    item_sim_ij = torch.nn.functional.normalize(item_sim_ij, p=1, dim=0)
+    alpha_uj = torch.einsum("bi,ci->bc", USER_factors_uj[user_id_array], ITEM_factors_uj)
+    alpha_uj = rescaling(alpha_uj, 1)
+    summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
+    prediction += summation_j
+
+    return prediction
+
+
 class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Training_Early_Stopping):
     """
     """
@@ -330,14 +352,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
-        user_id_array = torch.LongTensor(user_id_array)#.to(self.device)
-        # user_id_array = torch.Tensor(user_id_array).type(torch.LongTensor)#.to(self.device)
-        USER_factors = torch.tensor(self.USER_factors)#.to(self.device)
-        ITEM_factors = torch.tensor(self.ITEM_factors)#.to(self.device)
-        USER_factors_vi = torch.tensor(self.USER_factors_vi)#.to(self.device)
-        ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi)#.to(self.device)
-        USER_factors_uj = torch.tensor(self.USER_factors_uj)#.to(self.device)
-        ITEM_factors_uj = torch.tensor(self.ITEM_factors_uj)#.to(self.device)
+        user_id_array = torch.LongTensor(user_id_array).to(self.device)
+        USER_factors = torch.tensor(self.USER_factors).to(self.device)
+        ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
+        USER_factors_vi = torch.tensor(self.USER_factors_vi).to(self.device)
+        ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi).to(self.device)
+        USER_factors_uj = torch.tensor(self.USER_factors_uj).to(self.device)
+        ITEM_factors_uj = torch.tensor(self.ITEM_factors_uj).to(self.device)
 
         if items_to_compute is not None:
             pass
@@ -373,30 +394,32 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             n_items = ITEM_factors.shape[0]
             interval = len(user_id_array)
-            item_id_list = torch.LongTensor(range(n_items))#.to(self.device)
+            item_id_list = torch.LongTensor(range(n_items))  # .to(self.device)
             item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
             n_sampled_intervals = 0
             for i in range(0, math.ceil(n_items / interval)):
                 print("%d:%d" % (n_sampled_intervals * interval, min((n_sampled_intervals + 1) * interval, n_items)))
-                items_to_compute = item_id_list[
+                items_id_array = item_id_list[
                                    n_sampled_intervals * interval:min((n_sampled_intervals + 1) * interval, n_items)]
 
-                predictions = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors[items_to_compute])
-                user_sim_uv = pearson_corr(USER_factors[user_id_array], USER_factors)
-                user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
-                user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
-                alpha_vi = torch.einsum("bi,ci->bc", USER_factors_vi, ITEM_factors_vi[items_to_compute])
-                alpha_vi = rescaling(alpha_vi, 0)
-                summation_v = torch.einsum("bi,ic->bc", user_sim_uv, alpha_vi)
-                predictions += summation_v
-
-                item_sim_ij = pearson_corr(ITEM_factors, ITEM_factors[items_to_compute])
-                item_sim_ij[items_to_compute] = item_sim_ij[items_to_compute].fill_diagonal_(0)
-                item_sim_ij = torch.nn.functional.normalize(item_sim_ij, p=1, dim=0)
-                alpha_uj = torch.einsum("bi,ci->bc", USER_factors_uj[user_id_array], ITEM_factors_uj)
-                alpha_uj = rescaling(alpha_uj, 1)
-                summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
-                predictions += summation_j
+                # predictions = torch.einsum("bi,ci->bc", USER_factors[user_id_array], ITEM_factors[items_to_compute])
+                # user_sim_uv = pearson_corr(USER_factors[user_id_array], USER_factors)
+                # user_sim_uv[:, user_id_array] = user_sim_uv[:, user_id_array].fill_diagonal_(0)
+                # user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
+                # alpha_vi = torch.einsum("bi,ci->bc", USER_factors_vi, ITEM_factors_vi[items_to_compute])
+                # alpha_vi = rescaling(alpha_vi, 0)
+                # summation_v = torch.einsum("bi,ic->bc", user_sim_uv, alpha_vi)
+                # predictions += summation_v
+                #
+                # item_sim_ij = pearson_corr(ITEM_factors, ITEM_factors[items_to_compute])
+                # item_sim_ij[items_to_compute] = item_sim_ij[items_to_compute].fill_diagonal_(0)
+                # item_sim_ij = torch.nn.functional.normalize(item_sim_ij, p=1, dim=0)
+                # alpha_uj = torch.einsum("bi,ci->bc", USER_factors_uj[user_id_array], ITEM_factors_uj)
+                # alpha_uj = rescaling(alpha_uj, 1)
+                # summation_j = torch.einsum("bi,ic->bc", alpha_uj, item_sim_ij)
+                # predictions += summation_j
+                predictions= calculate_prediction(user_id_array,items_id_array,USER_factors, ITEM_factors,USER_factors_vi,ITEM_factors_vi,
+                                                  USER_factors_uj,ITEM_factors_uj)
 
                 item_scores[:, items_to_compute] = predictions
 
