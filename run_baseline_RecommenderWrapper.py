@@ -234,15 +234,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run KGAT.")
     parser.add_argument('--weights_path', nargs='?', default='',
                         help='Store model path.')
-    parser.add_argument('--data_path', nargs='?', default='/home/tesista/Master_thesis'
+    parser.add_argument('--data_path', nargs='?', default='/home/ubuntu/Master_thesis'
                                                           '/Conferences/HGB/HGB_github/baseline/Data/',
                         help='Input data path.')
-    parser.add_argument('--proj_path', nargs='?', default='/home/tesista/Master_thesis'
+    parser.add_argument('--proj_path', nargs='?', default='/home/ubuntu/Master_thesis'
                                                           '/Conferences/HGB/HGB_github/baseline/Model/',
                         help='Project path.')
 
     parser.add_argument('--dataset', help="Choose a dataset from {yelp2018, last-fm, amazon-book}",
-                        default="yelp2018")
+                        default="last-fm")
 
     parser.add_argument('--pretrain', type=int, default=-1,
                         help='0: No pretrain, -1: Pretrain with the learned embeddings, 1:Pretrain with stored models.')
