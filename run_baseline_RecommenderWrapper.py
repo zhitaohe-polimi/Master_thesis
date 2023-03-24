@@ -226,7 +226,7 @@ def read_data_split_and_search(args):
                                                            similarity_type_list=None,  # all
                                                            parallelizeKNN=False)
         multiprocessing.set_start_method('spawn')
-        pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
+        pool = multiprocessing.Pool(processes=int(10), maxtasksperchild=1)
         pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
 
 
