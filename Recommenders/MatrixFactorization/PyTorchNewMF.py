@@ -494,8 +494,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             epoch_loss += loss.detach()
 
-            print(loss)
-
             del loss
 
 
