@@ -499,6 +499,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             del loss
             torch.cuda.empty_cache()
 
+            print(2)
+
 
         self._print("Loss {:.2E}".format(epoch_loss))
 
