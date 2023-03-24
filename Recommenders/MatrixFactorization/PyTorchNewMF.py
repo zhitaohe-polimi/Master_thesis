@@ -511,9 +511,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             # Compute gradients given current loss
             loss.backward()
+            print("2")
 
             # Apply gradient using the selected optimizer
             self._optimizer.step()
+            print("3")
 
             epoch_loss += loss.item()
 
