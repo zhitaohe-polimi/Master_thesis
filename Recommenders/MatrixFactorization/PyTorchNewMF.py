@@ -111,9 +111,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
 
-        del user_sim_uv, item_sim_ij, alpha_vi, alpha_uj
-        gc.collect()
-        torch.cuda.empty_cache()
+        self._embedding_item.detach()
+        self._embedding_user.detach()
 
         return prediction
 
@@ -506,10 +505,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.step()
 
             epoch_loss += loss.detach().item()
-
-            del loss
-            gc.collect()
-            torch.cuda.empty_cache()
 
             print(summ, epoch_loss, tracemalloc.get_traced_memory())
 
