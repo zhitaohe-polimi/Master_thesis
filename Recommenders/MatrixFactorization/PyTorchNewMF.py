@@ -282,6 +282,9 @@ def loss_BPR(model, batch):
     nan_mask = torch.isnan(loss)
     loss = loss[~nan_mask].mean()
 
+    del x_ij
+    torch.cuda.empty_cache()
+
     return loss
 
 
@@ -492,14 +495,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Apply gradient using the selected optimizer
             self._optimizer.step()
 
-            print(loss)
-
             epoch_loss += loss.item()
-
-            del loss
-            torch.cuda.empty_cache()
-
-            print(2)
 
 
         self._print("Loss {:.2E}".format(epoch_loss))
