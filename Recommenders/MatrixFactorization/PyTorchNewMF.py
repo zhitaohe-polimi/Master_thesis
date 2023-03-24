@@ -269,7 +269,6 @@ def reg_loss_BPR(model, user, positive_item, negative_item):
                           model._embedding_user_uj(user).norm(2).pow(2) +
                           model._embedding_item_uj.weight.norm(2).pow(2)) / float(len(user))
 
-    print(reg_loss)
 
     return reg_loss
 
@@ -507,6 +506,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.zero_grad()
 
             loss = self._loss_function(self._model, batch)
+
+            print(loss)
 
             # Compute gradients given current loss
             loss.backward()
