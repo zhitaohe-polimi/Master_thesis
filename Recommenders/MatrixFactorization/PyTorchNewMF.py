@@ -111,8 +111,8 @@ class _SimpleNewMFModel(torch.nn.Module):
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
 
-        self._embedding_item.detach()
-        self._embedding_user.detach()
+        self._embedding_item.weight.detach()
+        self._embedding_user.weight.detach()
 
         return prediction
 
