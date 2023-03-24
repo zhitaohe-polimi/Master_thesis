@@ -189,7 +189,7 @@ def read_data_split_and_search(args):
     if args.flag_baselines_tune:
         recommender_class_list = [
             # P3alphaRecommender,
-            # SLIM_BPR_Cython,
+            SLIM_BPR_Cython,
             # MatrixFactorization_BPR_Cython,
             # IALSRecommender,
             # MatrixFactorization_FunkSVD_Cython,
@@ -203,7 +203,7 @@ def read_data_split_and_search(args):
             # ItemKNNCBFRecommender,
             # new_MatrixFactorization_FunkSVD_Cython,
             # PyTorchNewMF_MSE_Recommender,
-            PyTorchNewMF_BPR_Recommender,
+            # PyTorchNewMF_BPR_Recommender,
             # PyTorchMF_BPR_Recommender,
             # PyTorchMF_MSE_Recommender
         ]
@@ -242,7 +242,7 @@ def read_data_split_and_search(args):
                                                            similarity_type_list=None,  # all
                                                            parallelizeKNN=False)
         multiprocessing.set_start_method('spawn')
-        pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()-4), maxtasksperchild=1)
+        pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
         pool.map(runParameterSearch_Collaborative_partial, recommender_class_list)
 
 
