@@ -282,6 +282,10 @@ def loss_BPR(model, batch):
     nan_mask = torch.isnan(loss)
     loss = loss[~nan_mask].mean()
 
+    user.detach()
+    item_negative.detach()
+    item_positive.detach()
+
     return loss
 
 
@@ -493,8 +497,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.step()
 
             epoch_loss += loss.detach()
-
-            del loss
 
 
         self._print("Loss {:.2E}".format(epoch_loss))
