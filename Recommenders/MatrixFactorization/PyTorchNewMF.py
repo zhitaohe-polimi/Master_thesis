@@ -7,6 +7,7 @@ Created on 07/08/2022
 """
 import gc
 import math
+import tracemalloc
 
 from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
 from Recommenders.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
@@ -498,9 +499,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Apply gradient using the selected optimizer
             self._optimizer.step()
 
-            epoch_loss += loss.cpu().detach()
+            epoch_loss += loss.detach().item()
 
-            print(summ, epoch_loss,torch.cuda.memory_allocated() / 1024**2)
+            print(summ, epoch_loss,torch.cuda.memory_allocated() / 1024**2,tracemalloc.get_traced_memory())
 
         self._print("Loss {:.2E}".format(epoch_loss))
 
