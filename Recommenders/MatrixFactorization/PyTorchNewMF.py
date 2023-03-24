@@ -282,8 +282,8 @@ def loss_BPR(model, batch):
     # item_negative = item_negative.to("cuda")
 
     user = torch.tensor(user).to("cuda")
-    item_positive = torch.tensor(item_positive).to("cuda")
-    item_negative = torch.tensor(item_negative).to("cuda")
+    item_positive = torch.LongTensor(item_positive).to("cuda")
+    item_negative = torch.LongTensor(item_negative).to("cuda")
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
     # Compute total loss for batch
