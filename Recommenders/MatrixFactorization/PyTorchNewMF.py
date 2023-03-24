@@ -290,6 +290,7 @@ def loss_BPR(model, batch):
     del user,item_positive,item_negative,x_ij
     gc.collect()
     torch.cuda.empty_cache()
+    print(user)
 
     return loss
 
