@@ -287,7 +287,6 @@ def loss_BPR(model, batch):
     del item_positive
     torch.cuda.empty_cache()
 
-
     return loss
 
 
@@ -486,9 +485,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
-        summ=0
+        summ = 0
         for batch in self._data_iterator:
-            summ+=len(batch[0])
+            summ += len(batch[0])
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
@@ -500,11 +499,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Apply gradient using the selected optimizer
             self._optimizer.step()
 
+            epoch_loss += loss.item()
 
-            epoch_loss += loss.detach()
-
-            print(summ,epoch_loss)
-
+            print(summ, epoch_loss)
 
         self._print("Loss {:.2E}".format(epoch_loss))
 
