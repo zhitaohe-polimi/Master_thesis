@@ -189,10 +189,10 @@ def read_data_split_and_search(args):
     if args.flag_baselines_tune:
         recommender_class_list = [
             # P3alphaRecommender,
-            SLIM_BPR_Cython,
-            # MatrixFactorization_BPR_Cython,
+            # SLIM_BPR_Cython,
+            MatrixFactorization_BPR_Cython,
             # IALSRecommender,
-            # MatrixFactorization_FunkSVD_Cython,
+            MatrixFactorization_FunkSVD_Cython,
             # MatrixFactorization_AsySVD_Cython,
             # EASE_R_Recommender,
             # ItemKNNCFRecommender,
@@ -258,7 +258,7 @@ if __name__ == "__main__":
                         help='Project path.')
 
     parser.add_argument('--dataset', help="Choose a dataset from {yelp2018, last-fm, amazon-book}",
-                        default="amazon-book")
+                        default="last-fm")
 
     parser.add_argument('--pretrain', type=int, default=-1,
                         help='0: No pretrain, -1: Pretrain with the learned embeddings, 1:Pretrain with stored models.')
