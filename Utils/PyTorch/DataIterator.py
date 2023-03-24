@@ -257,7 +257,7 @@ class BPRIterator(object):
 
             self.n_sampled_points +=1
             index = np.random.randint(self.n_users-len([np.ediff1d(self.URM_train.indptr) == 0])-1)
-            print(self.n_users-len([np.ediff1d(self.URM_train.indptr) == 0])-1)
+            print(self.n_users,len([np.ediff1d(self.URM_train.indptr) == 0]),self.n_users-len([np.ediff1d(self.URM_train.indptr) == 0])-1)
             user_id = self.warm_user_index_to_original_id[index]
 
             start_pos_seen_items = self.URM_train.indptr[user_id]
