@@ -57,19 +57,6 @@ def rescaling(outmap, dim):
     return outmap
 
 
-class _SimpleMFModel(torch.nn.Module):
-
-    def __init__(self, n_users, n_items, embedding_dim=20):
-        super(_SimpleMFModel, self).__init__()
-
-        self._embedding_user = torch.nn.Embedding(n_users, embedding_dim=embedding_dim)
-        self._embedding_item = torch.nn.Embedding(n_items, embedding_dim=embedding_dim)
-
-    def forward(self, user, item):
-        prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
-        return prediction
-
-
 class _SimpleNewMFModel(torch.nn.Module):
 
     def __init__(self, n_users, n_items, embedding_dim=20, embedding_dim_u=20, embedding_dim_i=20):
@@ -110,9 +97,6 @@ class _SimpleNewMFModel(torch.nn.Module):
         alpha_uj = rescaling(alpha_uj, 1)
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
-
-        self._embedding_item.weight.detach()
-        self._embedding_user.weight.detach()
 
         return prediction
 
@@ -248,16 +232,6 @@ class Interaction_Dataset(Dataset):
             return self._row[index], item_negative, torch.tensor(0.0)
 
 
-def reg_loss_MSE(model, user, item):
-    reg_loss = (1 / 2) * (model._embedding_user(user).norm(2).pow(2) +
-                          model._embedding_item(item).norm(2).pow(2) +
-                          model._embedding_user_vi.weight.norm(2).pow(2) +
-                          model._embedding_item_vi(item).norm(2).pow(2) +
-                          model._embedding_user_uj(user).norm(2).pow(2) +
-                          model._embedding_item_uj.weight.norm(2).pow(2)
-                          ) / float(len(user))
-    return reg_loss
-
 
 def loss_MSE(model, batch):
     user, item, rating = batch
@@ -269,8 +243,6 @@ def loss_MSE(model, batch):
 
     # Compute total loss for batch
     loss = (prediction - rating).pow(2).mean()
-
-    loss += reg_loss_MSE(model, user, item)
 
     return loss
 
@@ -286,10 +258,6 @@ def loss_BPR(model, batch):
     loss = -(x_ij.sigmoid() - 1e-6).log()
     nan_mask = torch.isnan(loss)
     loss = loss[~nan_mask].mean()
-
-    del user, item_positive, item_negative, x_ij
-    gc.collect()
-    torch.cuda.empty_cache()
 
     return loss
 
