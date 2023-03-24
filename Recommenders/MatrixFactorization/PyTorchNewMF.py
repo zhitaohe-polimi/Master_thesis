@@ -5,6 +5,7 @@ Created on 07/08/2022
 
 @author: Maurizio Ferrari Dacrema
 """
+import gc
 import math
 
 from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
@@ -502,6 +503,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             epoch_loss += loss.item()
 
             print(summ, epoch_loss)
+
+            loss.to("cpu")
+            del loss
+            gc.collect()
+            torch.cuda.empty_cache()
 
         self._print("Loss {:.2E}".format(epoch_loss))
 
