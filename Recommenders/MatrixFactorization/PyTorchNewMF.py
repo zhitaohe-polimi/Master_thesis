@@ -287,7 +287,7 @@ def loss_BPR(model, batch):
     nan_mask = torch.isnan(loss)
     loss = loss[~nan_mask].mean()
 
-    del user,item_positive,item_negative
+    del user,item_positive,item_negative,x_ij
     gc.collect()
     torch.cuda.empty_cache()
 
