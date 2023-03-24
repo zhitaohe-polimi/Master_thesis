@@ -507,11 +507,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             epoch_loss += loss.detach().item()
 
-            print(summ, epoch_loss, tracemalloc.get_traced_memory())
 
             del loss
             gc.collect()
             torch.cuda.empty_cache()
+
+            print(summ, epoch_loss, tracemalloc.get_traced_memory())
 
         self._print("Loss {:.2E}".format(epoch_loss))
 
