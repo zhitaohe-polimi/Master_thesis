@@ -93,7 +93,6 @@ class _SimpleNewMFModel(torch.nn.Module):
 
     def forward(self, user, item):
         prediction = batch_dot(self._embedding_user(user), self._embedding_item(item))
-        # user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
         user_sim_uv = pearson_corr(self._embedding_user(user), self._embedding_user.weight)
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
         user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
@@ -102,9 +101,6 @@ class _SimpleNewMFModel(torch.nn.Module):
         summation_v = torch.einsum("bi,ib->b", user_sim_uv, alpha_vi)
         prediction += summation_v
 
-        print(prediction)
-
-        # item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
         item_sim_ij = pearson_corr(self._embedding_item.weight, self._embedding_item(item))
         item_sim_ij[item] = item_sim_ij[item].fill_diagonal_(0)
         item_sim_ij = torch.nn.functional.normalize(item_sim_ij, p=1, dim=0)
@@ -112,7 +108,6 @@ class _SimpleNewMFModel(torch.nn.Module):
         alpha_uj = rescaling(alpha_uj, 1)
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
-        print("1")
 
         return prediction
 
@@ -294,7 +289,6 @@ def loss_BPR(model, batch):
     user = user.to("cuda")
     item_positive = item_positive.to("cuda")
     item_negative = item_negative.to("cuda")
-    print("0")
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
     # Compute total loss for batch
