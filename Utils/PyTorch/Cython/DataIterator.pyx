@@ -271,7 +271,6 @@ cdef class BPRIterator:
             self.n_sampled_points +=1
             index = int(rand()*1.0/RAND_MAX*(self.n_users-1))
             user_id = self.warm_user_index_to_original_id[index]
-            print(len(self.warm_user_index_to_original_id))
 
             start_pos_seen_items = self.URM_train_indptr[user_id]
             end_pos_seen_items = self.URM_train_indptr[user_id+1]
