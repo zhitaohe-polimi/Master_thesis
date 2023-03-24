@@ -27,10 +27,6 @@ cimport numpy as np
 import scipy.sparse as sps
 from libc.stdlib cimport rand, srand, RAND_MAX
 
-import os
-
-pid = os.getpid()
-os.sched_setaffinity(pid, [0, 1,2,3,4,5])
 
 # @cython.boundscheck(False)
 # @cython.wraparound(False)
