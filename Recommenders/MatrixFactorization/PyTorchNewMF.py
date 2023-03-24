@@ -496,6 +496,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Apply gradient using the selected optimizer
             self._optimizer.step()
 
+            print(loss)
+
             epoch_loss += loss.detach()
 
 
