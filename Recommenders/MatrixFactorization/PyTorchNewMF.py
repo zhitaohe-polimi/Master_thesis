@@ -112,6 +112,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         prediction += summation_j
 
         del user_sim_uv,item_sim_ij,alpha_vi,alpha_uj
+        gc.collect()
         torch.cuda.empty_cache()
 
         return prediction
@@ -290,7 +291,6 @@ def loss_BPR(model, batch):
     del user,item_positive,item_negative,x_ij
     gc.collect()
     torch.cuda.empty_cache()
-    print(user)
 
     return loss
 
