@@ -407,7 +407,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         # torch.autograd.set_detect_anomaly(True)
 
-        use_cython_sampler = False
+        use_cython_sampler = True
 
         if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
