@@ -256,8 +256,8 @@ class BPR_Dataset(Dataset):
                 item_negative = negative_candidate
                 negative_selected = True
 
-        return torch.tensor(user_id).to("cuda"), torch.tensor(item_positive).to("cuda"), torch.tensor(item_negative).to("cuda")
-        # return user_id, item_positive, item_negative
+        # return torch.tensor(user_id).to("cuda"), torch.tensor(item_positive).to("cuda"), torch.tensor(item_negative).to("cuda")
+        return user_id, item_positive, item_negative
 
 
 def loss_MSE(model, batch):
