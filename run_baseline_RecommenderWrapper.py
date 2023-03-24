@@ -190,7 +190,7 @@ def read_data_split_and_search(args):
         recommender_class_list = [
             # P3alphaRecommender,
             # SLIM_BPR_Cython,
-            MatrixFactorization_BPR_Cython,
+            # MatrixFactorization_BPR_Cython,
             # IALSRecommender,
             # MatrixFactorization_FunkSVD_Cython,
             # MatrixFactorization_AsySVD_Cython,
@@ -203,7 +203,7 @@ def read_data_split_and_search(args):
             # ItemKNNCBFRecommender,
             # new_MatrixFactorization_FunkSVD_Cython,
             # PyTorchNewMF_MSE_Recommender,
-            # PyTorchNewMF_BPR_Recommender,
+            PyTorchNewMF_BPR_Recommender,
             # PyTorchMF_BPR_Recommender,
             # PyTorchMF_MSE_Recommender
         ]
