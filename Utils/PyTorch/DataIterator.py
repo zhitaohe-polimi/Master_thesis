@@ -224,6 +224,7 @@ class BPRIterator(object):
     def __init__(self, URM_train, batch_size = 1, set_fixed_len = None, n_negatives_per_positive = 1):
         super(BPRIterator, self).__init__()
 
+        self.warm_user_index_to_original_id = np.arange(0, self.n_users)[np.ediff1d(self.URM_train.indptr) > 0]
         self.URM_train = sps.csr_matrix(URM_train)
         self.URM_train = self.URM_train.sorted_indices()
         self.n_users, self.n_items = self.URM_train.shape
@@ -232,7 +233,7 @@ class BPRIterator(object):
         self.n_sampled_points = 0
         self.batch_size = batch_size
 
-        self.warm_user_index_to_original_id = np.arange(0, self.n_users)[np.ediff1d(self.URM_train.indptr) > 0]
+        # self.warm_user_index_to_original_id = np.arange(0, self.n_users)[np.ediff1d(self.URM_train.indptr) > 0]
         self.batch_user = torch.empty((self.batch_size,), dtype=torch.long)
         self.batch_positive_item = torch.empty((self.batch_size,), dtype=torch.long)
 
@@ -256,11 +257,7 @@ class BPRIterator(object):
         for i_batch in range(0, min(self.batch_size, self.n_data_points-self.n_sampled_points)):
 
             self.n_sampled_points +=1
-            index = np.random.randint(self.n_users-len([np.ediff1d(self.URM_train.indptr) == 0])-1)
-            print(self.n_users,len([np.ediff1d(self.URM_train.indptr) == 0]),
-                  np.arange(0, self.n_users)[np.ediff1d(self.URM_train.indptr) > 0],
-                  len(self.warm_user_index_to_original_id),
-                  self.n_users-len([np.ediff1d(self.URM_train.indptr) == 0])-1)
+            index = np.random.randint(self.n_users)
             user_id = self.warm_user_index_to_original_id[index]
 
             start_pos_seen_items = self.URM_train.indptr[user_id]
