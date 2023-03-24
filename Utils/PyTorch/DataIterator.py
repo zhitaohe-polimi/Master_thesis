@@ -224,7 +224,6 @@ class BPRIterator(object):
     def __init__(self, URM_train, batch_size = 1, set_fixed_len = None, n_negatives_per_positive = 1):
         super(BPRIterator, self).__init__()
 
-        self.warm_user_index_to_original_id = np.arange(0, self.n_users)[np.ediff1d(self.URM_train.indptr) > 0]
         self.URM_train = sps.csr_matrix(URM_train)
         self.URM_train = self.URM_train.sorted_indices()
         self.n_users, self.n_items = self.URM_train.shape
@@ -233,7 +232,7 @@ class BPRIterator(object):
         self.n_sampled_points = 0
         self.batch_size = batch_size
 
-        # self.warm_user_index_to_original_id = np.arange(0, self.n_users)[np.ediff1d(self.URM_train.indptr) > 0]
+        self.warm_user_index_to_original_id = np.arange(0, self.n_users)[np.ediff1d(self.URM_train.indptr) > 0]
         self.batch_user = torch.empty((self.batch_size,), dtype=torch.long)
         self.batch_positive_item = torch.empty((self.batch_size,), dtype=torch.long)
 
