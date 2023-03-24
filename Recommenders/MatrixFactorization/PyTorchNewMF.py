@@ -111,7 +111,7 @@ class _SimpleNewMFModel(torch.nn.Module):
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
 
-        del user_sim_uv,item_sim_ij,alpha_vi,alpha_uj
+        del user_sim_uv, item_sim_ij, alpha_vi, alpha_uj
         gc.collect()
         torch.cuda.empty_cache()
 
@@ -288,7 +288,7 @@ def loss_BPR(model, batch):
     nan_mask = torch.isnan(loss)
     loss = loss[~nan_mask].mean()
 
-    del user,item_positive,item_negative,x_ij
+    del user, item_positive, item_negative, x_ij
     gc.collect()
     torch.cuda.empty_cache()
 
@@ -507,7 +507,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             epoch_loss += loss.detach().item()
 
-            print(summ, epoch_loss,torch.cuda.memory_allocated() / 1024**2,tracemalloc.get_traced_memory())
+            print(summ, epoch_loss, tracemalloc.get_traced_memory())
 
             del loss
             gc.collect()
