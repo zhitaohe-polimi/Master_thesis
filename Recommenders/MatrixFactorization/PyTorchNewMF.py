@@ -507,7 +507,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             epoch_loss += loss.detach().item()
 
-
             del loss
             gc.collect()
             torch.cuda.empty_cache()
