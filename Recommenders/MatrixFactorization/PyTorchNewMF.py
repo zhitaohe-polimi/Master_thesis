@@ -500,7 +500,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             epoch_loss += loss.cpu().detach()
 
-            print(summ, epoch_loss)
+            print(summ, epoch_loss,torch.cuda.memory_allocated() / 1024**2)
 
         self._print("Loss {:.2E}".format(epoch_loss))
 
