@@ -109,6 +109,10 @@ class _SimpleNewMFModel(torch.nn.Module):
         summation_j = torch.einsum("bi,ib->b", alpha_uj, item_sim_ij)
         prediction += summation_j
 
+
+        alpha_vi.detach()
+        alpha_uj.detach()
+
         return prediction
 
 
