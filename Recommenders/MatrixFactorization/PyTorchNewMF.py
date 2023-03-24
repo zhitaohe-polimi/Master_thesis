@@ -486,6 +486,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         epoch_loss = 0
         summ = 0
+        tracemalloc.start()
         for batch in self._data_iterator:
             summ += len(batch[0])
             # Clear previously computed gradients
