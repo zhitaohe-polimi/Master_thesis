@@ -495,12 +495,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             # Apply gradient using the selected optimizer
             self._optimizer.step()
 
-            epoch_loss += loss.item()
+            epoch_loss += loss
 
-            print(loss.item())
-
-            del loss
-            torch.cuda.empty_cache()
+            print(loss)
 
 
         self._print("Loss {:.2E}".format(epoch_loss))
