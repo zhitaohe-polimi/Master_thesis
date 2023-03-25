@@ -15,10 +15,10 @@ if __name__ == '__main__':
     # cython_file_list = glob.glob('**/*.pyx', recursive=True)
 
     subfolder_to_compile_list = [
-        "Recommenders/MatrixFactorization",
-        "Recommenders/Similarity",
-        "Recommenders/SLIM",
-        "Recommenders/FeatureWeighting",
+        # "Recommenders/MatrixFactorization",
+        # "Recommenders/Similarity",
+        # "Recommenders/SLIM",
+        # "Recommenders/FeatureWeighting",
         "Utils/PyTorch"
     ]
 
