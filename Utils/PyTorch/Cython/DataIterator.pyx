@@ -311,13 +311,13 @@ cdef class BPRIterator:
 
 
         if self.n_negatives_per_positive == 1:
-            return torch.from_numpy(np.array(self.batch_user[:i_batch+1], dtype=np.int64)).to("cuda"),\
-                   torch.from_numpy(np.array(self.batch_positive_item[:i_batch+1], dtype=np.int64)).to("cuda"), \
-                   torch.from_numpy(np.array(self.batch_negative_item[:i_batch+1], dtype=np.int64)).to("cuda")
+            return torch.from_numpy(np.array(self.batch_user[:i_batch+1], dtype=np.int64)),\
+                   torch.from_numpy(np.array(self.batch_positive_item[:i_batch+1], dtype=np.int64)), \
+                   torch.from_numpy(np.array(self.batch_negative_item[:i_batch+1], dtype=np.int64))
         else:
-            return torch.from_numpy(np.array(self.batch_user[:i_batch+1], dtype=np.int64)).to("cuda"),\
-                   torch.from_numpy(np.array(self.batch_positive_item[:i_batch+1], dtype=np.int64)).to("cuda"), \
-                   torch.from_numpy(np.array(self.batch_multiple_negative_item[:i_batch+1,:], dtype=np.int64)).to("cuda")
+            return torch.from_numpy(np.array(self.batch_user[:i_batch+1], dtype=np.int64)),\
+                   torch.from_numpy(np.array(self.batch_positive_item[:i_batch+1], dtype=np.int64)), \
+                   torch.from_numpy(np.array(self.batch_multiple_negative_item[:i_batch+1,:], dtype=np.int64))
 
 
 
