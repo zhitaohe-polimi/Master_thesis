@@ -427,7 +427,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         #     self._data_iterator = None
 
         self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
-                                       num_workers=os.cpu_count(), pin_memory=True)
+                                       num_workers=os.cpu_count(), pin_memory=False)
 
         try:
             torch.multiprocessing.set_start_method('spawn', force=True)
