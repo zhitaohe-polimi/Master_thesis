@@ -248,10 +248,6 @@ cdef class BPRIterator:
         self.batch_user = np.zeros(self.batch_size, dtype=np.int32)
         self.batch_positive_item = np.zeros(self.batch_size, dtype=np.int32)
 
-
-        del URM_train
-        gc.collect()
-
         if self.n_negatives_per_positive == 1:
             self.batch_negative_item = np.zeros(self.batch_size, dtype=np.int32)
         else:

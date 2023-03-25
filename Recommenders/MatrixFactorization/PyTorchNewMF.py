@@ -466,7 +466,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         tracemalloc.start() #_data_iterator
         for batch in self._data_iterator:
             summ += len(batch[0])
-            print(batch[0].is_cuda)
 
             # Clear previously computed gradients
             self._optimizer.zero_grad()
