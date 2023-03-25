@@ -386,6 +386,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
+            for v1,v2,v3 in self._data_iterator:
+                v1.to("cuda")
+                v2.to("cuda")
+                v3.to("cuda")
         elif self.RECOMMENDER_NAME == "PyTorchNewMF_MSE_Recommender":
             data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
@@ -462,6 +466,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         tracemalloc.start()
         for batch in self._data_iterator:
             summ += len(batch[0])
+
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
