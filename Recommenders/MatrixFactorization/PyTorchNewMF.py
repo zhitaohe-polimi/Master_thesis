@@ -235,35 +235,6 @@ class Interaction_Dataset(Dataset):
 
             return self._row[index], item_negative, torch.tensor(0.0)
 
-class BPR_Dataset(Dataset):
-    def __init__(self, URM_train):
-        super().__init__()
-        self._URM_train = sps.csr_matrix(URM_train)
-        self.n_users, self.n_items = self._URM_train.shape
-
-    def __len__(self):
-        return self.n_users
-
-    def __getitem__(self, user_id):
-
-        seen_items = self._URM_train.indices[self._URM_train.indptr[user_id]:self._URM_train.indptr[user_id+1]]
-        item_positive = np.random.choice(seen_items)
-
-        # seen_items = set(list(seen_items))
-        negative_selected = False
-
-        while not negative_selected:
-            negative_candidate = np.random.randint(low=0, high=self.n_items, size=1)[0]
-
-            if negative_candidate not in seen_items:
-                item_negative = negative_candidate
-                negative_selected = True
-
-        return torch.tensor(user_id).to("cuda"), \
-               torch.LongTensor(item_positive).to("cuda"), \
-               torch.LongTensor(item_negative).to("cuda")
-        # return user_id, item_positive, item_negative
-
 
 def loss_MSE(model, batch):
     user, item, rating = batch
@@ -416,23 +387,19 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         use_cython_sampler = True
 
-        # if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
-        #     data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
-        #     self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
-        # elif self.RECOMMENDER_NAME == "PyTorchNewMF_MSE_Recommender":
-        #     data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
-        #     self._data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
-        #                                               batch_size=batch_size)
-        # else:
-        #     self._data_iterator = None
+        if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
+            data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
+            self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
+        elif self.RECOMMENDER_NAME == "PyTorchNewMF_MSE_Recommender":
+            data_iterator_class = InteractionIterator_cython if use_cython_sampler else InteractionIterator
+            self._data_iterator = data_iterator_class(URM_train=self.URM_train, positive_quota=self.positive_quota,
+                                                      batch_size=batch_size)
+        else:
+            self._data_iterator = None
 
-        self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
-                                       num_workers=os.cpu_count(), pin_memory=False)
+        # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
+        #                                num_workers=os.cpu_count(), pin_memory=True)
 
-        try:
-            torch.multiprocessing.set_start_method('spawn', force=True)
-        except RuntimeError:
-            pass
 
         self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
                                         embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
@@ -525,7 +492,6 @@ class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
 
-        self._dataset = BPR_Dataset(self.URM_train)
         self._loss_function = loss_BPR
 
 
