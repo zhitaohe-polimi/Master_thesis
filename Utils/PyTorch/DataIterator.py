@@ -256,7 +256,7 @@ class BPRIterator(object):
         for i_batch in range(0, min(self.batch_size, self.n_data_points-self.n_sampled_points)):
 
             self.n_sampled_points +=1
-            index = np.random.randint(self.n_users)
+            # index = np.random.randint(self.n_users)
             index = np.random.randint(len(self.warm_user_index_to_original_id))
             user_id = self.warm_user_index_to_original_id[index]
 
