@@ -9,6 +9,8 @@ import gc
 import math
 import tracemalloc
 
+from torch import multiprocessing
+
 from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
 from Recommenders.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
 import scipy.sparse as sps
@@ -21,6 +23,8 @@ from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython,
     InteractionIterator as InteractionIterator_cython, \
     InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
 from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
+
+multiprocessing.set_start_method('spawn')
 
 
 # torch.autograd.set_detect_anomaly(True)
