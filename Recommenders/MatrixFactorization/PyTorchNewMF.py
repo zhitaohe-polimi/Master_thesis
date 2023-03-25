@@ -27,6 +27,8 @@ from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, Interac
 
 # torch.autograd.set_detect_anomaly(True)
 
+torch.multiprocessing.set_start_method('spawn')
+
 
 def batch_dot(tensor_1, tensor_2):
     """
