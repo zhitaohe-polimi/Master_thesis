@@ -440,7 +440,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.ITEM_factors_uj = self.ITEM_factors_best_uj.copy()
 
     def _prepare_model_for_validation(self):
-        print(1)
         self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
         self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
 
@@ -467,6 +466,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         tracemalloc.start() #_data_iterator
         for batch in self._data_iterator:
             summ += len(batch[0])
+            print(batch[0].is_cuda)
 
             # Clear previously computed gradients
             self._optimizer.zero_grad()
