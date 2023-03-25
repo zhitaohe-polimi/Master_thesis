@@ -387,6 +387,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
             for v1,v2,v3 in self._data_iterator:
+                print(1)
                 v1.to("cuda")
                 v2.to("cuda")
                 v3.to("cuda")
