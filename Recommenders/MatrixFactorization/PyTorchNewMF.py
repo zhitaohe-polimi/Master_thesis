@@ -260,8 +260,8 @@ class BPR_Dataset(Dataset):
                 negative_selected = True
 
         return torch.tensor(user_id).to("cuda"), \
-               torch.tensor(item_positive).to("cuda"), \
-               torch.tensor(item_negative).to("cuda")
+               torch.LongTensor(item_positive).to("cuda"), \
+               torch.LongTensor(item_negative).to("cuda")
         # return user_id, item_positive, item_negative
 
 
