@@ -435,6 +435,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.ITEM_factors_uj = self.ITEM_factors_best_uj.copy()
 
     def _prepare_model_for_validation(self):
+        print(1)
         self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
         self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
 
