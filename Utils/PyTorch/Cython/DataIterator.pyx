@@ -252,6 +252,8 @@ cdef class BPRIterator:
         del URM_train
         gc.collect()
 
+        print("tt")
+
         if self.n_negatives_per_positive == 1:
             self.batch_negative_item = np.zeros(self.batch_size, dtype=np.int32)
         else:
