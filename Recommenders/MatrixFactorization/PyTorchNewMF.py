@@ -430,7 +430,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                                        num_workers=os.cpu_count(), pin_memory=True)
 
         try:
-            torch.multiprocessing.set_start_method('fork', force=True)
+            torch.multiprocessing.set_start_method('spawn', force=True)
         except RuntimeError:
             pass
 
