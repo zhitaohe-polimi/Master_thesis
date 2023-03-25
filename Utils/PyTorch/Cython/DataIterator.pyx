@@ -272,8 +272,6 @@ cdef class BPRIterator:
         if self.n_sampled_points >= self.n_data_points:
             raise StopIteration
 
-        print("tt")
-
         for i_batch in range(0, min(self.batch_size, self.n_data_points-self.n_sampled_points)):
 
             self.n_sampled_points +=1
@@ -316,13 +314,13 @@ cdef class BPRIterator:
 
 
         if self.n_negatives_per_positive == 1:
-            return torch.from_numpy(np.array(self.batch_user[:i_batch+1], dtype=np.int64)),\
-                   torch.from_numpy(np.array(self.batch_positive_item[:i_batch+1], dtype=np.int64)), \
-                   torch.from_numpy(np.array(self.batch_negative_item[:i_batch+1], dtype=np.int64))
+            return torch.from_numpy(np.array(self.batch_user[:i_batch+1], dtype=np.int64)).to("cuda"),\
+                   torch.from_numpy(np.array(self.batch_positive_item[:i_batch+1], dtype=np.int64)).to("cuda"), \
+                   torch.from_numpy(np.array(self.batch_negative_item[:i_batch+1], dtype=np.int64)).to("cuda")
         else:
-            return torch.from_numpy(np.array(self.batch_user[:i_batch+1], dtype=np.int64)),\
-                   torch.from_numpy(np.array(self.batch_positive_item[:i_batch+1], dtype=np.int64)), \
-                   torch.from_numpy(np.array(self.batch_multiple_negative_item[:i_batch+1,:], dtype=np.int64))
+            return torch.from_numpy(np.array(self.batch_user[:i_batch+1], dtype=np.int64)).to("cuda"),\
+                   torch.from_numpy(np.array(self.batch_positive_item[:i_batch+1], dtype=np.int64)).to("cuda"), \
+                   torch.from_numpy(np.array(self.batch_multiple_negative_item[:i_batch+1,:], dtype=np.int64)).to("cuda")
 
 
 
