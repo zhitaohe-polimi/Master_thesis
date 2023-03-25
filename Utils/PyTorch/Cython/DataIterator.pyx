@@ -16,6 +16,7 @@ Created on 01/01/2023
 #cython: overflowcheck=False
 
 #defining NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+import gc
 
 import cython
 import torch
@@ -246,6 +247,10 @@ cdef class BPRIterator:
         self.batch_size = batch_size
         self.batch_user = np.zeros(self.batch_size, dtype=np.int32)
         self.batch_positive_item = np.zeros(self.batch_size, dtype=np.int32)
+
+
+        del URM_train
+        gc.collect()
 
         if self.n_negatives_per_positive == 1:
             self.batch_negative_item = np.zeros(self.batch_size, dtype=np.int32)
