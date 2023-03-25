@@ -24,8 +24,6 @@ from Utils.PyTorch.Cython.DataIterator import BPRIterator as BPRIterator_cython,
     InteractionAndNegativeIterator as InteractionAndNegativeIterator_cython
 from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, InteractionAndNegativeIterator
 
-multiprocessing.set_start_method('spawn')
-
 
 # torch.autograd.set_detect_anomaly(True)
 
