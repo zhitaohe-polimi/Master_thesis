@@ -232,7 +232,6 @@ class Interaction_Dataset(Dataset):
             return self._row[index], item_negative, torch.tensor(0.0)
 
 
-
 def loss_MSE(model, batch):
     user, item, rating = batch
     user = user.to("cuda")
@@ -383,7 +382,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         use_cython_sampler = True
 
-        URM_tensor=torch.tensor(self.URM_train.toarray())
+        URM_tensor = torch.tensor(self.URM_train.toarray())
         self.URM_train = URM_tensor.to_sparse_csr().to("cuda")
 
         if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
