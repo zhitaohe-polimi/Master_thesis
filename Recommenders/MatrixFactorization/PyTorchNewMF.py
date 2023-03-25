@@ -474,7 +474,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
             epoch_loss += loss.detach().item()
 
-            # print(summ, epoch_loss, tracemalloc.get_traced_memory())
+            print(summ, loss)
 
         self._print("Loss {:.2E}".format(epoch_loss))
 
