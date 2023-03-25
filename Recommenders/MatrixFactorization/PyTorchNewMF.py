@@ -382,9 +382,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         use_cython_sampler = True
 
-        URM_tensor = torch.tensor(self.URM_train.toarray())
-        self.URM_train = URM_tensor.to_sparse_csr().to("cuda")
-
         if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
