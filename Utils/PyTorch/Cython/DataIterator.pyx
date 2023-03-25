@@ -308,8 +308,6 @@ cdef class BPRIterator:
                 else:
                     self.batch_multiple_negative_item[i_batch, negative_item_batch_index] = negative_item
 
-        del self.URM_train_indptr,self.URM_train_indices
-        gc.collect()
 
 
         if self.n_negatives_per_positive == 1:
