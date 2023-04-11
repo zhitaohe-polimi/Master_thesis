@@ -189,7 +189,7 @@ def read_data_split_and_search(args):
     if args.flag_baselines_tune:
         recommender_class_list = [
             # P3alphaRecommender,
-            SLIM_BPR_Cython,
+            # SLIM_BPR_Cython,
             # MatrixFactorization_BPR_Cython,
             # IALSRecommender,
             # MatrixFactorization_FunkSVD_Cython,
@@ -203,12 +203,12 @@ def read_data_split_and_search(args):
             # ItemKNNCBFRecommender,
             # new_MatrixFactorization_FunkSVD_Cython,
             # PyTorchNewMF_MSE_Recommender,
-            # PyTorchNewMF_BPR_Recommender,
+            PyTorchNewMF_BPR_Recommender,
             # PyTorchMF_BPR_Recommender,
             # PyTorchMF_MSE_Recommender
         ]
 
-        n_cases = 200
+        n_cases = 145
 
         runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
                                                            URM_train=URM_train,
