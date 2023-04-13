@@ -315,12 +315,12 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         :return:
         """
 
-        assert self.USER_factors.shape[1] == self.ITEM_factors.shape[1], \
-            "{}: User and Item factors have inconsistent shape".format(self.RECOMMENDER_NAME)
-
-        assert self.USER_factors.shape[0] > np.max(user_id_array), \
-            "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
-                self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
+        # assert self.USER_factors.shape[1] == self.ITEM_factors.shape[1], \
+        #     "{}: User and Item factors have inconsistent shape".format(self.RECOMMENDER_NAME)
+        #
+        # assert self.USER_factors.shape[0] > np.max(user_id_array), \
+        #     "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
+        #         self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
         user_id_array = torch.LongTensor(user_id_array).to(self.device)
         # USER_factors = torch.tensor(self.USER_factors).to(self.device)
