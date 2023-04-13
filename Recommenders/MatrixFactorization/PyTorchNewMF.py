@@ -401,8 +401,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         except Exception:
             pretrain_data = None
 
-        self._embedding_user = pretrain_data['user_embed']
-        self._embedding_item = pretrain_data['item_embed']
+        self._embedding_user = torch.tensor(pretrain_data['user_embed']).to(self.device)
+        self._embedding_item = torch.tensor(pretrain_data['item_embed']).to(self.device)
 
         use_cython_sampler = False
 
