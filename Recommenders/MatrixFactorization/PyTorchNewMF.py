@@ -121,9 +121,9 @@ class _SimpleNewMF_pretrain_Model(torch.nn.Module):
         self._embedding_item_uj.weight.data.normal_(0, 0.1)
 
     def forward(self, _embedding_user, _embedding_item, user, item):
-        prediction = batch_dot(_embedding_user(user), _embedding_item(item))
+        prediction = batch_dot(_embedding_user[user], _embedding_item[item])
         # user_sim_uv = torch.einsum("bi,ci->bc", self._embedding_user(user), self._embedding_user.weight)
-        user_sim_uv = pearson_corr(_embedding_user(user), _embedding_user.weight)
+        user_sim_uv = pearson_corr(_embedding_user[user], _embedding_user)
         user_sim_uv[:, user] = user_sim_uv[:, user].fill_diagonal_(0)
         user_sim_uv = torch.nn.functional.normalize(user_sim_uv, p=1, dim=1)
         alpha_vi = torch.einsum("bi,ci->bc", self._embedding_user_vi.weight, self._embedding_item_vi(item))
@@ -132,7 +132,7 @@ class _SimpleNewMF_pretrain_Model(torch.nn.Module):
         prediction += summation_v
 
         # item_sim_ij = torch.einsum("bi,ci->bc", self._embedding_item.weight, self._embedding_item(item))
-        item_sim_ij = pearson_corr(_embedding_item.weight, _embedding_item(item))
+        item_sim_ij = pearson_corr(_embedding_item, _embedding_item[item])
         item_sim_ij[item] = item_sim_ij[item].fill_diagonal_(0)
         item_sim_ij = torch.nn.functional.normalize(item_sim_ij, p=1, dim=0)
         alpha_uj = torch.einsum("bi,ci->bc", self._embedding_user_uj(user), self._embedding_item_uj.weight)
