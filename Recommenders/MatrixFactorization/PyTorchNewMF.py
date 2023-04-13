@@ -323,8 +323,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
         user_id_array = torch.LongTensor(user_id_array).to(self.device)
-        USER_factors = torch.tensor(self.USER_factors).to(self.device)
-        ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
+        # USER_factors = torch.tensor(self.USER_factors).to(self.device)
+        # ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
+        USER_factors = self._embedding_user
+        ITEM_factors = self._embedding_item
         USER_factors_vi = torch.tensor(self.USER_factors_vi).to(self.device)
         ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi).to(self.device)
         USER_factors_uj = torch.tensor(self.USER_factors_uj).to(self.device)
