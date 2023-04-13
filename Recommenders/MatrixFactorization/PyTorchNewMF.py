@@ -28,8 +28,6 @@ from Utils.PyTorch.DataIterator import BPRIterator, InteractionIterator, Interac
 # torch.autograd.set_detect_anomaly(True)
 
 
-
-
 def batch_dot(tensor_1, tensor_2):
     """
     Vectorized dot product between rows of two tensors
@@ -109,19 +107,6 @@ class _SimpleNewMF_pretrain_Model(torch.nn.Module):
 
     def __init__(self, n_users, n_items, embedding_dim_u=20, embedding_dim_i=20):
         super(_SimpleNewMF_pretrain_Model, self).__init__()
-
-        proj_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
-        dataset = 'movie-lens'
-        pre_model = 'mf'
-        pretrain_path = '%spretrain/%s/%s.npz' % (proj_path, dataset, pre_model)
-        try:
-            pretrain_data = np.load(pretrain_path)
-            print('load the pretrained bprmf model parameters.')
-        except Exception:
-            pretrain_data = None
-
-        self._embedding_user = pretrain_data['user_embed']
-        self._embedding_item = pretrain_data['item_embed']
 
         self._embedding_user_vi = torch.nn.Embedding(n_users, embedding_dim=embedding_dim_u)
         self._embedding_item_vi = torch.nn.Embedding(n_items, embedding_dim=embedding_dim_u)
@@ -263,7 +248,24 @@ def loss_BPR(model, batch):
     # Compute prediction for each element in batch
     x_ij = model.forward(user, item_positive) - model.forward(user, item_negative)
     # Compute total loss for batch
-    loss = -(x_ij.sigmoid() - 1e-6).log()+1e-6
+    loss = -(x_ij.sigmoid() - 1e-6).log() + 1e-6
+    nan_mask = torch.isnan(loss)
+    loss = loss[~nan_mask].mean()
+
+    return loss
+
+
+def loss_BPR_pretrained(model, batch, embedding_user, embedding_item):
+    user, item_positive, item_negative = batch
+    user = user.to("cuda")
+    item_positive = item_positive.to("cuda")
+    item_negative = item_negative.to("cuda")
+
+    # Compute prediction for each element in batch
+    x_ij = model.forward(embedding_user, embedding_item, user, item_positive) \
+           - model.forward(embedding_user, embedding_item, user, item_negative)
+    # Compute total loss for batch
+    loss = -(x_ij.sigmoid() - 1e-6).log() + 1e-6
     nan_mask = torch.isnan(loss)
     loss = loss[~nan_mask].mean()
 
@@ -389,6 +391,19 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         # torch.autograd.set_detect_anomaly(True)
 
+        proj_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
+        dataset = 'movie-lens'
+        pre_model = 'mf'
+        pretrain_path = '%spretrain/%s/%s.npz' % (proj_path, dataset, pre_model)
+        try:
+            pretrain_data = np.load(pretrain_path)
+            print('load the pretrained bprmf model parameters.')
+        except Exception:
+            pretrain_data = None
+
+        self._embedding_user = pretrain_data['user_embed']
+        self._embedding_item = pretrain_data['item_embed']
+
         use_cython_sampler = False
 
         if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
@@ -404,9 +419,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
 
+        # self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
+        #                                 embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
-        self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
-                                        embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
+        self._model = _SimpleNewMF_pretrain_Model(self.n_users, self.n_items,
+                                                  embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
         self._model = self._model.to(self.device)
 
@@ -468,11 +485,10 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         epoch_loss = 0
 
         for batch in self._data_iterator:
-
             # Clear previously computed gradients
             self._optimizer.zero_grad()
 
-            loss = self._loss_function(self._model, batch)
+            loss = self._loss_function(self._model, batch, self._embedding_user, self._embedding_item)
 
             # Compute gradients given current loss
             loss.backward()
@@ -481,7 +497,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             self._optimizer.step()
 
             epoch_loss += loss.item()
-
 
         self._print("Loss {:.2E}".format(epoch_loss))
 
@@ -492,7 +507,7 @@ class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
 
-        self._loss_function = loss_BPR
+        self._loss_function = loss_BPR_pretrained
 
 
 class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
