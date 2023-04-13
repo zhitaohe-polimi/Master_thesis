@@ -190,10 +190,10 @@ def read_data_split_and_search(args):
         recommender_class_list = [
             # P3alphaRecommender,
             # SLIM_BPR_Cython,
-            # MatrixFactorization_BPR_Cython,
+            MatrixFactorization_BPR_Cython,
             # IALSRecommender,
             # MatrixFactorization_FunkSVD_Cython,
-            MatrixFactorization_AsySVD_Cython,
+            # MatrixFactorization_AsySVD_Cython,
             # EASE_R_Recommender,
             # ItemKNNCFRecommender,
             # UserKNNCFRecommender,
