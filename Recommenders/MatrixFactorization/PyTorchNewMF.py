@@ -391,7 +391,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         # torch.autograd.set_detect_anomaly(True)
 
-        proj_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
+        proj_path = '/home/tesista/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
         dataset = 'movie-lens'
         pre_model = 'mf'
         pretrain_path = '%spretrain/%s/%s.npz' % (proj_path, dataset, pre_model)
