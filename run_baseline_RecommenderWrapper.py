@@ -197,7 +197,7 @@ def read_data_split_and_search(args):
             # EASE_R_Recommender,
             # ItemKNNCFRecommender,
             # UserKNNCFRecommender,
-            PureSVDRecommender,
+            # PureSVDRecommender,
             # customized_PureSVDRecommender,
             UserKNNCBFRecommender,
             ItemKNNCBFRecommender,
