@@ -234,10 +234,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run KGAT.")
     parser.add_argument('--weights_path', nargs='?', default='',
                         help='Store model path.')
-    parser.add_argument('--data_path', nargs='?', default='/home/tesista/Master_thesis'
+    parser.add_argument('--data_path', nargs='?', default='/home/ubuntu/Master_thesis'
                                                           '/Conferences/HGB/HGB_github/baseline/Data/',
                         help='Input data path.')
-    parser.add_argument('--proj_path', nargs='?', default='/home/tesista/Master_thesis'
+    parser.add_argument('--proj_path', nargs='?', default='/home/ubuntu/Master_thesis'
                                                           '/Conferences/HGB/HGB_github/baseline/Model/',
                         help='Project path.')
 
