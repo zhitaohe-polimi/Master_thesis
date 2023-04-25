@@ -242,7 +242,7 @@ if __name__ == "__main__":
                         help='Project path.')
 
     parser.add_argument('--dataset', help="Choose a dataset from {yelp2018, last-fm, amazon-book}",
-                        default="last-fm")
+                        default="movie-lens")
 
     parser.add_argument('--pretrain', type=int, default=-1,
                         help='0: No pretrain, -1: Pretrain with the learned embeddings, 1:Pretrain with stored models.')
@@ -314,8 +314,8 @@ if __name__ == "__main__":
     parser.add_argument('--weight_decay', type=float, default=1e-5)
     parser.add_argument('--alpha', type=float, default=0.)
 
-    parser.add_argument('--flag_algo_article_default', type=bool, default=False)
-    parser.add_argument('--flag_baselines_tune', type=bool, default=True)
+    parser.add_argument('--flag_algo_article_default', type=bool, default=True)
+    parser.add_argument('--flag_baselines_tune', type=bool, default=False)
     parser.add_argument('--flag_print_results', type=bool, default=True)
 
     input_flags = parser.parse_args()
