@@ -173,7 +173,8 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
             ):
 
         # Get unique temporary folder
-        self.temp_file_folder = self._get_unique_temp_folder(input_temp_file_folder=temp_file_folder)
+        # self.temp_file_folder = self._get_unique_temp_folder(input_temp_file_folder=temp_file_folder)
+        self.temp_file_folder = temp_file_folder
 
         if num_layers is None:
             num_layers = [1, 1]
