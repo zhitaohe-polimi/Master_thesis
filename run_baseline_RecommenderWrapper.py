@@ -250,7 +250,7 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', type=int, default=1,
                         help='Interval of evaluation.')
 
-    parser.add_argument('--epoch', type=int, default=1000,
+    parser.add_argument('--epoch', type=int, default=1,
                         help='Number of epoch.')
 
     parser.add_argument('--embed_size', type=int, default=64,
