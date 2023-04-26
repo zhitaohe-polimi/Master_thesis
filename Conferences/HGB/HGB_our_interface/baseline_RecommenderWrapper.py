@@ -248,7 +248,7 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.optimizer = optimizer
         # print(self.lr)
 
-        # self._update_best_model()
+        self._update_best_model()
 
         self._train_with_early_stopping(epochs,
                                         algorithm_name=self.RECOMMENDER_NAME,
