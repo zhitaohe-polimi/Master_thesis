@@ -51,7 +51,7 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.e_feat = None
         self.lr = None
         self.optimizer = None
-        self.dataset = 'yelp2018'
+        self.dataset = 'last-fm'
         self.data_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Data/'
         self.model_type = 'baseline'
         self.layer_size = [64, 32, 16]

@@ -94,21 +94,21 @@ if __name__ == '__main__':
     #     folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
     #     file_name='ItemKNNCFRecommender_cosine_best_model_last.zip')
 
-    # rec = baseline_RecommenderWrapper(URM_submission_train)
-    # rec.load_model(
-    #     folder_path='result_experiments/baseline/{}/'.format(dataset_name+'_4'),
-    #     file_name='_best_model')
+    rec = baseline_RecommenderWrapper(URM_submission_train)
+    rec.load_model(
+        folder_path='result_experiments/baseline/{}/'.format(dataset_name+'_1'),
+        file_name='_best_model')
 
-    rec = PyTorchNewMF_BPR_Recommender(URM_submission_train)
-    rec.fit(epochs=755,
-            batch_size=8,
-            num_factors=186,
-            num_factors_u=188,
-            num_factors_i=1,
-            l2_reg=1e-07,
-            sgd_mode='rmsprop',
-            learning_rate=0.0014859247023756878
-            )
+    # rec = PyTorchNewMF_BPR_Recommender(URM_submission_train)
+    # rec.fit(epochs=755,
+    #         batch_size=8,
+    #         num_factors=186,
+    #         num_factors_u=188,
+    #         num_factors_i=1,
+    #         l2_reg=1e-07,
+    #         sgd_mode='rmsprop',
+    #         learning_rate=0.0014859247023756878
+    #         )
 
     path = "result_experiments/{}/{}/".format('baseline', dataset_name)
 
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     f = open(save_path, "w")
     f.write("customer_id,prediction\n")
 
-    for i in range(URM_submission_train.shape[0]):
+    for i in range(16878,URM_submission_train.shape[0]):
         recommended_items = rec.recommend(i, cutoff=20, remove_seen_flag=False)
         well_formatted = str(i) + "," + " ".join([str(x) for x in recommended_items])
         f.write(f"{i}, {well_formatted}\n")
