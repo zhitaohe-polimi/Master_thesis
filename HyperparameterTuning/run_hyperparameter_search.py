@@ -845,14 +845,14 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         if recommender_class is PyTorchNewMF_BPR_Recommender:
             hyperparameters_range_dictionary = {
-                "num_factors": Categorical([186]),#Integer(1, 200),
-                "num_factors_u":Categorical([188]), # Integer(1, 200),
-                "num_factors_i":Categorical([1]),# Integer(1, 200),
+                "num_factors": Categorical([107]),#Integer(1, 200), Categorical([186])
+                "num_factors_u":Categorical([162]), # Integer(1, 200), Categorical([188])
+                "num_factors_i":Categorical([14]),# Integer(1, 200), Categorical([1])
                 "epochs": Categorical([1500]),
-                "sgd_mode": Categorical(["rmsprop"]),#Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
-                "batch_size": Categorical([1024]), #Categorical([256, 512, 1024]),
-                "learning_rate": Categorical([0.0014859247023756878]),#Real(low=1e-4, high=1e-1, prior='log-uniform'),
-                "l2_reg": Categorical([1e-07]),#Real(low=1e-7, high=1e-6, prior='log-uniform'),
+                "sgd_mode": Categorical(["adam"]),#Categorical(["sgd", "adagrad", "adam", "rmsprop"]), Categorical(["rmsprop"])
+                "batch_size": Categorical([512]), #Categorical([256, 512, 1024]), Categorical([1024])
+                "learning_rate": Categorical([0.0017036914547573577]),#Real(low=1e-4, high=1e-1, prior='log-uniform'), Categorical([0.0014859247023756878])
+                "l2_reg": Categorical([1.661021862062968e-07]),#Real(low=1e-7, high=1e-6, prior='log-uniform'), Categorical([1e-07])
             }
 
             recommender_input_args = SearchInputRecommenderArgs(
