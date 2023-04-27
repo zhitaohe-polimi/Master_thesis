@@ -89,10 +89,10 @@ if __name__ == '__main__':
     #     except Exception as e:
     #         print(e)
 
-    rec = ItemKNNCFRecommender(URM_submission_train)
+    rec = UserKNNCFRecommender(URM_submission_train)
     rec.load_model(
         folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
-        file_name='ItemKNNCFRecommender_asymmetric_best_model_last.zip')
+        file_name='UserKNNCFRecommender_jaccard_best_model_last.zip')
 
     path = "result_experiments/{}/{}/".format('baseline', dataset_name)
 
