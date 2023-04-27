@@ -17,7 +17,7 @@ from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 
 
 if __name__ == '__main__':
-    dataset_name = "movie-lens"
+    dataset_name = "yelp2018"
     dataset_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Data/'
 
     if dataset_name == "movie-lens" or dataset_name == "last-fm" or dataset_name == "yelp2018" or dataset_name == "amazon-book":
