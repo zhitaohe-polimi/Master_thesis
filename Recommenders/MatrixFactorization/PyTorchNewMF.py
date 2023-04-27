@@ -460,8 +460,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         self.USER_factors = self.USER_factors_best.copy()
         self.ITEM_factors = self.ITEM_factors_best.copy()
-        self.USER_factors = None
-        self.ITEM_factors = None
 
         self.USER_factors_vi = self.USER_factors_best_vi.copy()
         self.ITEM_factors_vi = self.ITEM_factors_best_vi.copy()
