@@ -193,11 +193,11 @@ def read_data_split_and_search(args):
             # MatrixFactorization_BPR_Cython,
             # IALSRecommender,
             # MatrixFactorization_FunkSVD_Cython,
-            # MatrixFactorization_AsySVD_Cython,
+            MatrixFactorization_AsySVD_Cython,
             # EASE_R_Recommender,
             # ItemKNNCFRecommender,
             # UserKNNCFRecommender,
-            PureSVDRecommender,
+            # PureSVDRecommender,
             # customized_PureSVDRecommender,
             # UserKNNCBFRecommender,
             # ItemKNNCBFRecommender,
@@ -314,8 +314,8 @@ if __name__ == "__main__":
     parser.add_argument('--weight_decay', type=float, default=1e-5)
     parser.add_argument('--alpha', type=float, default=0.)
 
-    parser.add_argument('--flag_algo_article_default', type=bool, default=True)
-    parser.add_argument('--flag_baselines_tune', type=bool, default=False)
+    parser.add_argument('--flag_algo_article_default', type=bool, default=False)
+    parser.add_argument('--flag_baselines_tune', type=bool, default=True)
     parser.add_argument('--flag_print_results', type=bool, default=True)
 
     input_flags = parser.parse_args()
