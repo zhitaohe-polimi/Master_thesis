@@ -108,5 +108,3 @@ if __name__ == '__main__':
         print("%s:%s" % (i, well_formatted))
     f.close()
     print("save complete")
-except Exception as e:
-    print(e)
