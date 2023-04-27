@@ -850,9 +850,9 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "num_factors_i":Integer(13,14),# Integer(1, 200),
                 "epochs": Categorical([1500]),
                 "sgd_mode": Categorical(["adam"]),#Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
-                "batch_size": Categorical([256, 512, 1024]),
-                "learning_rate": Real(low=1e-4, high=1e-1, prior='log-uniform'),
-                "l2_reg": Real(low=1e-7, high=1e-6, prior='log-uniform'),
+                "batch_size": Categorical([512]), #Categorical([256, 512, 1024]),
+                "learning_rate": Categorical([0.0017036914547573577]),#Real(low=1e-4, high=1e-1, prior='log-uniform'),
+                "l2_reg": Categorical([1.661021862062968e-07]),#Real(low=1e-7, high=1e-6, prior='log-uniform'),
             }
 
             recommender_input_args = SearchInputRecommenderArgs(
