@@ -18,7 +18,7 @@ from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 
 if __name__ == '__main__':
     dataset_name = "last-fm"
-    dataset_path = '/home/tesista/Master_thesis/Conferences/HGB/HGB_github/baseline/Data/'
+    dataset_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Data/'
 
     if dataset_name == "movie-lens" or dataset_name == "last-fm" or dataset_name == "yelp2018" or dataset_name == "amazon-book":
         dataset = MultiDatasetsReader(dataset_path + dataset_name)
@@ -94,21 +94,21 @@ if __name__ == '__main__':
     #     folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
     #     file_name='ItemKNNCFRecommender_cosine_best_model_last.zip')
 
-    # rec = baseline_RecommenderWrapper(URM_submission_train)
-    # rec.load_model(
-    #     folder_path='result_experiments/baseline/{}/'.format(dataset_name+'_1'),
-    #     file_name='_best_model')
+    rec = baseline_RecommenderWrapper(URM_submission_train)
+    rec.load_model(
+        folder_path='result_experiments/baseline/{}/'.format(dataset_name+'_1'),
+        file_name='_best_model')
 
-    rec = PyTorchNewMF_BPR_Recommender(URM_submission_train)
-    rec.fit(epochs=755,
-            batch_size=8,
-            num_factors=186,
-            num_factors_u=188,
-            num_factors_i=1,
-            l2_reg=1e-07,
-            sgd_mode='rmsprop',
-            learning_rate=0.0014859247023756878
-            )
+    # rec = PyTorchNewMF_BPR_Recommender(URM_submission_train)
+    # rec.fit(epochs=755,
+    #         batch_size=8,
+    #         num_factors=186,
+    #         num_factors_u=188,
+    #         num_factors_i=1,
+    #         l2_reg=1e-07,
+    #         sgd_mode='rmsprop',
+    #         learning_rate=0.0014859247023756878
+    #         )
 
     path = "result_experiments/{}/{}/".format('baseline', dataset_name)
 
