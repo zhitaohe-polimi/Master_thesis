@@ -89,7 +89,7 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
             edge2id[(i, i)] = len(edge2id)
         e_feat = torch.tensor(e_feat, dtype=torch.long)
 
-        # self.g = g.to('cuda')
+        self.g = g.to('cuda')
         self.e_feat = e_feat.cuda()
         self.data_generator = self.data_generator
 
