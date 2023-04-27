@@ -22,7 +22,8 @@ if __name__ == '__main__':
     rec.load_model(
         folder_path='result_experiments/baseline/{}/models_Recall'.format(dataset_name),
         file_name='ItemKNNCFRecommender_cosine_best_model_last.zip')
-
+    #UserKNNCFRecommender_jaccard
+    
     # ######## ignore out of stock
     # df_articles = pd.read_parquet('{}/processed_articles.parquet'.format(DATASET_PATH))
     # df_article_out_of_stock = df_articles.query("out_of_stock==1")[
