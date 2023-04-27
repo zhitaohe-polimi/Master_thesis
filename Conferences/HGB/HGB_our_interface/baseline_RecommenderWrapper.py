@@ -45,7 +45,7 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.pretrain = None
 
         self.data_generator = None
-        self.batch_size = None
+        self.batch_size = 8196
         self.weight_decay = None
         self.g = None
         self.e_feat = None
@@ -55,6 +55,15 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.data_path = None
         self.model_type = None
         self.layer_size = None
+
+        print(self.batch_size)
+
+        # args = SimpleNamespace(batch_size=self.batch_size, adj_type="si",
+        #                        mess_dropout=mess_dropout, node_dropout=node_dropout, layer_size=self.layer_size,
+        #                        )
+        #
+        # data_generator = KGAT_loader(args=args,
+        #                              path=self.data_path + self.dataset)
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
         # TODO if the model in the end is either a matrix factorization algorithm or an ItemKNN/UserKNN
@@ -69,7 +78,9 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         users_to_test = user_id_array
 
         BATCH_SIZE = self.batch_size
-        print(BATCH_SIZE)
+        ITEM_NUM = self.data_generator.n_items
+
+        BATCH_SIZE = self.batch_size
         ITEM_NUM = self.data_generator.n_items
 
         if self.model_type in ['ripple']:
@@ -212,7 +223,6 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
 
         data_generator = KGAT_loader(args=args,
                                      path=self.data_path + self.dataset)
-
 
         edge2type = {}
         for i, mat in enumerate(data_generator.lap_list):
