@@ -516,7 +516,7 @@ class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
 
-        self._loss_function = loss_BPR_pretrained
+        self._loss_function = loss_BPR
 
 
 class PyTorchNewMF_MSE_Recommender(_PyTorchMFRecommender):
