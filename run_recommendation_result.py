@@ -21,7 +21,7 @@ if __name__ == '__main__':
     rec = ItemKNNCFRecommender(URM_submission_train)
     rec.load_model(
         folder_path='result_experiments/baseline/{}/models_RECALL'.format(dataset_name),
-        file_name='ItemKNNCFRecommender_cosine_best_model_last.zip')
+        file_name='UserKNNCFRecommender_jaccard_best_model_last.zip')
     #UserKNNCFRecommender_jaccard
 
     # ######## ignore out of stock
