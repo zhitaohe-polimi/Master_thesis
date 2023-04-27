@@ -212,6 +212,8 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         data_generator = KGAT_loader(args=args,
                                      path=self.data_path + self.dataset)
 
+        print(1)
+
         edge2type = {}
         for i, mat in enumerate(data_generator.lap_list):
             for u, v in zip(*mat.nonzero()):
