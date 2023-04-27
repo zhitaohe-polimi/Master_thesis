@@ -17,7 +17,7 @@ from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
 from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 
 if __name__ == '__main__':
-    dataset_name = "movie-lens"
+    dataset_name = "last-fm"
     dataset_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Data/'
 
     if dataset_name == "movie-lens" or dataset_name == "last-fm" or dataset_name == "yelp2018" or dataset_name == "amazon-book":
@@ -96,7 +96,7 @@ if __name__ == '__main__':
 
     rec = baseline_RecommenderWrapper(URM_submission_train)
     rec.load_model(
-        folder_path='result_experiments/baseline/{}/'.format(dataset_name),
+        folder_path='result_experiments/baseline/{}/'.format(dataset_name+'_1'),
         file_name='_best_model')
 
     path = "result_experiments/{}/{}/".format('baseline', dataset_name)
