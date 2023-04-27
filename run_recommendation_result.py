@@ -97,7 +97,7 @@ if __name__ == '__main__':
     rec = baseline_RecommenderWrapper(URM_submission_train)
     rec.load_model(
         folder_path='result_experiments/baseline/{}/'.format(dataset_name),
-        file_name='_best_model.zip')
+        file_name='_best_model')
 
     path = "result_experiments/{}/{}/".format('baseline', dataset_name)
 
