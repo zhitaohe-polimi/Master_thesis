@@ -53,17 +53,46 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.optimizer = None
         self.dataset = None
         self.data_path = None
-        self.model_type = None
-        self.layer_size = None
+        self.model_type = 'baseline'
+        self.layer_size = [64,32,16]
 
-        print(self.batch_size)
 
-        # args = SimpleNamespace(batch_size=self.batch_size, adj_type="si",
-        #                        mess_dropout=mess_dropout, node_dropout=node_dropout, layer_size=self.layer_size,
-        #                        )
-        #
-        # data_generator = KGAT_loader(args=args,
-        #                              path=self.data_path + self.dataset)
+        args = SimpleNamespace(batch_size=self.batch_size, adj_type="si",
+                               mess_dropout=[0.1], node_dropout=[0.1], layer_size=self.layer_size,
+                               )
+
+        self.data_generator = KGAT_loader(args=args,
+                                     path=self.data_path + self.dataset)
+
+        edge2type = {}
+        for i, mat in enumerate(self.data_generator.lap_list):
+            for u, v in zip(*mat.nonzero()):
+                edge2type[(u, v)] = i
+        for i in range(self.data_generator.n_users + self.data_generator.n_entities):
+            edge2type[(i, i)] = len(self.data_generator.lap_list)
+
+        adjM = sum(self.data_generator.lap_list)
+        # print(len(adjM.nonzero()[0]))
+        g = dgl.DGLGraph(adjM)
+        g = dgl.remove_self_loop(g)
+        g = dgl.add_self_loop(g)
+        e_feat = []
+        edge2id = {}
+        for u, v in zip(*g.edges()):
+            u = u.item()
+            v = v.item()
+            if u == v:
+                break
+            e_feat.append(edge2type[(u, v)])
+            edge2id[(u, v)] = len(edge2id)
+        for i in range(self.data_generator.n_users + self.data_generator.n_entities):
+            e_feat.append(edge2type[(i, i)])
+            edge2id[(i, i)] = len(edge2id)
+        e_feat = torch.tensor(e_feat, dtype=torch.long)
+
+        self.g = g.to('cuda')
+        self.e_feat = e_feat.cuda()
+        self.data_generator = self.data_generator
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
         # TODO if the model in the end is either a matrix factorization algorithm or an ItemKNN/UserKNN
