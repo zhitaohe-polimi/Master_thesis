@@ -51,7 +51,7 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.e_feat = None
         self.lr = None
         self.optimizer = None
-        self.dataset = 'amazon-book'
+        self.dataset = 'movie-lens'
         self.data_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Data/'
         self.model_type = 'baseline'
         self.layer_size = [64, 32, 16]
@@ -115,9 +115,6 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         # or at the end of the fit function (before loading the best model, testing phase)
 
         users_to_test = user_id_array
-
-        BATCH_SIZE = self.batch_size
-        ITEM_NUM = self.data_generator.n_items
 
         BATCH_SIZE = self.batch_size
         ITEM_NUM = self.data_generator.n_items
