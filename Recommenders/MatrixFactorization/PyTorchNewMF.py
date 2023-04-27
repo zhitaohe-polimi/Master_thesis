@@ -12,6 +12,7 @@ import tracemalloc
 from torch import multiprocessing
 
 from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
+from Recommenders.DataIO import DataIO
 from Recommenders.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
 import scipy.sparse as sps
 import numpy as np
@@ -398,19 +399,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         # torch.autograd.set_detect_anomaly(True)
 
-        # proj_path = '/home/tesista/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
-        # dataset = 'movie-lens'
-        # pre_model = 'mf'
-        # pretrain_path = '%spretrain/%s/%s.npz' % (proj_path, dataset, pre_model)
-        # try:
-        #     pretrain_data = np.load(pretrain_path)
-        #     print('load the pretrained bprmf model parameters.')
-        # except Exception:
-        #     pretrain_data = None
-
-        # self._embedding_user = torch.tensor(pretrain_data['user_embed']).to(self.device)
-        # self._embedding_item = torch.tensor(pretrain_data['item_embed']).to(self.device)
-
         use_cython_sampler = False
 
         if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
@@ -490,7 +478,6 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
     def _run_epoch(self, num_epoch):
 
         epoch_loss = 0
-        print(1)
 
         for batch in self._data_iterator:
             # Clear previously computed gradients
@@ -507,6 +494,36 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             epoch_loss += loss.item()
 
         self._print("Loss {:.2E}".format(epoch_loss))
+
+    def save_model(self, folder_path, file_name = None):
+
+        if file_name is None:
+            file_name = self.RECOMMENDER_NAME
+
+        self._print("Saving model in file '{}'".format(folder_path + file_name))
+
+        data_dict_to_save = {"USER_factors": self.USER_factors,
+                              "ITEM_factors": self.ITEM_factors,
+                             "USER_factors_vi": self.USER_factors_vi,
+                             "ITEM_factors_vi": self.ITEM_factors_vi,
+                             "USER_factors_uj": self.USER_factors_uj,
+                             "ITEM_factors_uj": self.ITEM_factors_uj,
+                              "use_bias": self.use_bias,
+                            }
+
+        if self.use_bias:
+            data_dict_to_save["ITEM_bias"] = self.ITEM_bias
+            data_dict_to_save["USER_bias"] = self.USER_bias
+            data_dict_to_save["GLOBAL_bias"] = self.GLOBAL_bias
+
+        dataIO = DataIO(folder_path=folder_path)
+        dataIO.save_data(file_name=file_name, data_dict_to_save = data_dict_to_save)
+
+
+        self._print("Saving complete")
+
+
+
 
 
 class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
