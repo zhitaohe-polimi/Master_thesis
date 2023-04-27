@@ -94,7 +94,8 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.data_generator = self.data_generator
 
         pre_model = 'mf'
-        pretrain_path = '%spretrain/%s/%s.npz' % (args.proj_path, args.dataset, pre_model)
+        proj_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
+        pretrain_path = '%spretrain/%s/%s.npz' % (proj_path, self.dataset, pre_model)
         try:
             pretrain_data = np.load(pretrain_path)
             print('load the pretrained bprmf model parameters.')
