@@ -845,9 +845,9 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         if recommender_class is PyTorchNewMF_BPR_Recommender:
             hyperparameters_range_dictionary = {
-                "num_factors": Integer(107,107),#Integer(1, 200),
-                "num_factors_u":Integer(162,162), # Integer(1, 200),
-                "num_factors_i":Integer(14,14),# Integer(1, 200),
+                "num_factors": Integer(106,107),#Integer(1, 200),
+                "num_factors_u":Integer(161,162), # Integer(1, 200),
+                "num_factors_i":Integer(13,14),# Integer(1, 200),
                 "epochs": Categorical([1500]),
                 "sgd_mode": Categorical(["adam"]),#Categorical(["sgd", "adagrad", "adam", "rmsprop"]),
                 "batch_size": Categorical([256, 512, 1024]),
