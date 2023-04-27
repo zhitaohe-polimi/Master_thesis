@@ -17,7 +17,7 @@ from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 
 
 if __name__ == '__main__':
-    dataset_name = "amazon-book"
+    dataset_name = "movie-lens"
     dataset_path = '/home/ubuntu/Master_thesis/Conferences/HGB/HGB_github/baseline/Data/'
 
     if dataset_name == "movie-lens" or dataset_name == "last-fm" or dataset_name == "yelp2018" or dataset_name == "amazon-book":
@@ -89,10 +89,10 @@ if __name__ == '__main__':
     #     except Exception as e:
     #         print(e)
 
-    rec = UserKNNCFRecommender(URM_submission_train)
+    rec = ItemKNNCFRecommender(URM_submission_train)
     rec.load_model(
         folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
-        file_name='UserKNNCFRecommender_cosine_best_model_last.zip')
+        file_name='ItemKNNCFRecommender_cosine_best_model_last.zip')
 
     path = "result_experiments/{}/{}/".format('baseline', dataset_name)
 
