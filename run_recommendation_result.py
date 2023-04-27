@@ -94,10 +94,21 @@ if __name__ == '__main__':
     #     folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
     #     file_name='ItemKNNCFRecommender_cosine_best_model_last.zip')
 
-    rec = baseline_RecommenderWrapper(URM_submission_train)
-    rec.load_model(
-        folder_path='result_experiments/baseline/{}/'.format(dataset_name+'_1'),
-        file_name='_best_model')
+    # rec = baseline_RecommenderWrapper(URM_submission_train)
+    # rec.load_model(
+    #     folder_path='result_experiments/baseline/{}/'.format(dataset_name+'_1'),
+    #     file_name='_best_model')
+
+    rec = PyTorchNewMF_BPR_Recommender(URM_submission_train)
+    rec.fit(epochs=755,
+            batch_size=8,
+            num_factors=186,
+            num_factors_u=188,
+            num_factors_i=1,
+            l2_reg=1e-07,
+            sgd_mode='rmsprop',
+            learning_rate=0.0014859247023756878
+            )
 
     path = "result_experiments/{}/{}/".format('baseline', dataset_name)
 
@@ -113,3 +124,4 @@ if __name__ == '__main__':
         print("%s:%s" % (i, well_formatted))
     f.close()
     print("save complete")
+
