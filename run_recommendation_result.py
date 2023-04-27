@@ -117,7 +117,7 @@ if __name__ == '__main__':
     f = open(save_path, "w")
     f.write("customer_id,prediction\n")
 
-    for i in range(16878,URM_submission_train.shape[0]):
+    for i in range(URM_submission_train.shape[0]):
         recommended_items = rec.recommend(i, cutoff=20, remove_seen_flag=False)
         well_formatted = str(i) + "," + " ".join([str(x) for x in recommended_items])
         f.write(f"{i}, {well_formatted}\n")
