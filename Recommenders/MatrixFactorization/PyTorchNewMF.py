@@ -330,10 +330,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
                 self.RECOMMENDER_NAME, self._embedding_user.shape[0], np.max(user_id_array))
 
         user_id_array = torch.LongTensor(user_id_array).to(self.device)
-        # USER_factors = torch.tensor(self.USER_factors).to(self.device)
-        # ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
-        USER_factors = self._embedding_user
-        ITEM_factors = self._embedding_item
+        USER_factors = torch.tensor(self.USER_factors).to(self.device)
+        ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
         USER_factors_vi = torch.tensor(self.USER_factors_vi).to(self.device)
         ITEM_factors_vi = torch.tensor(self.ITEM_factors_vi).to(self.device)
         USER_factors_uj = torch.tensor(self.USER_factors_uj).to(self.device)
@@ -415,7 +413,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         use_cython_sampler = False
 
-        if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_pretrained":
+        if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_normal":
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
         elif self.RECOMMENDER_NAME == "PyTorchNewMF_MSE_Recommender":
@@ -428,11 +426,11 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         # self._data_loader = DataLoader(self._dataset, batch_size=int(batch_size), shuffle=True,
         #                                num_workers=os.cpu_count(), pin_memory=True)
 
-        # self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
-        #                                 embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
+        self._model = _SimpleNewMFModel(self.n_users, self.n_items, embedding_dim=num_factors,
+                                        embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
-        self._model = _SimpleNewMF_pretrain_Model(self.n_users, self.n_items,
-                                                  embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
+        # self._model = _SimpleNewMF_pretrain_Model(self.n_users, self.n_items,
+        #                                           embedding_dim_u=num_factors_u, embedding_dim_i=num_factors_i)
 
         self._model = self._model.to(self.device)
 
@@ -460,8 +458,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         self._print("Training complete")
 
-        # self.USER_factors = self.USER_factors_best.copy()
-        # self.ITEM_factors = self.ITEM_factors_best.copy()
+        self.USER_factors = self.USER_factors_best.copy()
+        self.ITEM_factors = self.ITEM_factors_best.copy()
         self.USER_factors = None
         self.ITEM_factors = None
 
@@ -472,8 +470,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.ITEM_factors_uj = self.ITEM_factors_best_uj.copy()
 
     def _prepare_model_for_validation(self):
-        # self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
-        # self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
+        self.USER_factors = self._model._embedding_user.weight.detach().cpu().numpy()
+        self.ITEM_factors = self._model._embedding_item.weight.detach().cpu().numpy()
 
         self.USER_factors_vi = self._model._embedding_user_vi.weight.detach().cpu().numpy()
         self.ITEM_factors_vi = self._model._embedding_item_vi.weight.detach().cpu().numpy()
@@ -482,8 +480,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self.ITEM_factors_uj = self._model._embedding_item_uj.weight.detach().cpu().numpy()
 
     def _update_best_model(self):
-        # self.USER_factors_best = self._model._embedding_user.weight.detach().cpu().numpy()
-        # self.ITEM_factors_best = self._model._embedding_item.weight.detach().cpu().numpy()
+        self.USER_factors_best = self._model._embedding_user.weight.detach().cpu().numpy()
+        self.ITEM_factors_best = self._model._embedding_item.weight.detach().cpu().numpy()
 
         self.USER_factors_best_vi = self._model._embedding_user_vi.weight.detach().cpu().numpy()
         self.ITEM_factors_best_vi = self._model._embedding_item_vi.weight.detach().cpu().numpy()
