@@ -495,7 +495,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         self._print("Loss {:.2E}".format(epoch_loss))
 
-    def save_model(self, folder_path, file_name = None):
+    def save_model(self, folder_path, file_name=None):
 
         if file_name is None:
             file_name = self.RECOMMENDER_NAME
@@ -503,13 +503,13 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
         self._print("Saving model in file '{}'".format(folder_path + file_name))
 
         data_dict_to_save = {"USER_factors": self.USER_factors,
-                              "ITEM_factors": self.ITEM_factors,
+                             "ITEM_factors": self.ITEM_factors,
                              "USER_factors_vi": self.USER_factors_vi,
                              "ITEM_factors_vi": self.ITEM_factors_vi,
                              "USER_factors_uj": self.USER_factors_uj,
                              "ITEM_factors_uj": self.ITEM_factors_uj,
-                              "use_bias": self.use_bias,
-                            }
+                             "use_bias": self.use_bias,
+                             }
 
         if self.use_bias:
             data_dict_to_save["ITEM_bias"] = self.ITEM_bias
@@ -517,13 +517,9 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             data_dict_to_save["GLOBAL_bias"] = self.GLOBAL_bias
 
         dataIO = DataIO(folder_path=folder_path)
-        dataIO.save_data(file_name=file_name, data_dict_to_save = data_dict_to_save)
-
+        dataIO.save_data(file_name=file_name, data_dict_to_save=data_dict_to_save)
 
         self._print("Saving complete")
-
-
-
 
 
 class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
