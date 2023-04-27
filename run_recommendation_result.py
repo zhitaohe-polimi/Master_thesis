@@ -29,31 +29,32 @@ if __name__ == '__main__':
 
     URM_submission_train = URM_train+URM_validation
 
-    # recommender_class_list = [
-    #     P3alphaRecommender,
-    #     SLIM_BPR_Cython,
-    #     MatrixFactorization_BPR_Cython,
-    #     IALSRecommender,
-    #     MatrixFactorization_FunkSVD_Cython,
-    #     MatrixFactorization_AsySVD_Cython,
-    #     # ItemKNNCFRecommender,
-    #     # UserKNNCFRecommender,
-    #     PureSVDRecommender,
-    #     PyTorchNewMF_BPR_Recommender,
-    #     PyTorchMF_BPR_Recommender,
-    # ]
-    #
-    # for rec in recommender_class_list:
-    #     rec = rec(URM_submission_train)
-    #     rec.load_model(
-    #         folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
-    #         file_name='{}_best_model_last.zip'.format(rec.RECOMMENDER_NAME))
+    recommender_class_list = [
+        P3alphaRecommender,
+        SLIM_BPR_Cython,
+        MatrixFactorization_BPR_Cython,
+        IALSRecommender,
+        MatrixFactorization_FunkSVD_Cython,
+        MatrixFactorization_AsySVD_Cython,
+        # ItemKNNCFRecommender,
+        # UserKNNCFRecommender,
+        PureSVDRecommender,
+        PyTorchNewMF_BPR_Recommender,
+        PyTorchMF_BPR_Recommender,
+    ]
+
+    for rec in recommender_class_list:
+        try:
+            rec = rec(URM_submission_train)
+            rec.load_model(
+                folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
+                file_name='{}_best_model_last.zip'.format(rec.RECOMMENDER_NAME))
     #UserKNNCFRecommender_jaccard
 
-    rec = UserKNNCFRecommender(URM_submission_train)
-    rec.load_model(
-        folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
-        file_name='UserKNNCFRecommender_jaccard_best_model_last.zip')
+    # rec = UserKNNCFRecommender(URM_submission_train)
+    # rec.load_model(
+    #     folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
+    #     file_name='UserKNNCFRecommender_jaccard_best_model_last.zip')
 
     # ######## ignore out of stock
     # df_articles = pd.read_parquet('{}/processed_articles.parquet'.format(DATASET_PATH))
@@ -71,17 +72,19 @@ if __name__ == '__main__':
     #
     # #####################
 
-    path = "result_experiments/{}/{}/".format('baseline', dataset_name)
+            path = "result_experiments/{}/{}/".format('baseline', dataset_name)
 
-    save_path = os.path.join(path, "{}-recommendation_results.csv".format(dataset_name+"_"+rec.RECOMMENDER_NAME))
+            save_path = os.path.join(path, "{}-recommendation_results.csv".format(dataset_name+"_"+rec.RECOMMENDER_NAME))
 
-    f = open(save_path, "w")
-    f.write("customer_id,prediction\n")
+            f = open(save_path, "w")
+            f.write("customer_id,prediction\n")
 
-    for i in range(URM_submission_train.shape[0]):
-        recommended_items = rec.recommend(i, cutoff=20, remove_seen_flag=False)
-        well_formatted = str(i)+","+" ".join([str(x) for x in recommended_items])
-        f.write(f"{i}, {well_formatted}\n")
-        print("%s:%s" % (i, well_formatted))
-    f.close()
-    print("save complete")
+            for i in range(URM_submission_train.shape[0]):
+                recommended_items = rec.recommend(i, cutoff=20, remove_seen_flag=False)
+                well_formatted = str(i)+","+" ".join([str(x) for x in recommended_items])
+                f.write(f"{i}, {well_formatted}\n")
+                print("%s:%s" % (i, well_formatted))
+            f.close()
+            print("save complete")
+        except Exception:
+            print(Exception)
