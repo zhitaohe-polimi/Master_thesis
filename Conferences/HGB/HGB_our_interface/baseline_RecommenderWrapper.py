@@ -69,6 +69,7 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         users_to_test = user_id_array
 
         BATCH_SIZE = self.batch_size
+        print(BATCH_SIZE)
         ITEM_NUM = self.data_generator.n_items
 
         if self.model_type in ['ripple']:
@@ -212,7 +213,6 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         data_generator = KGAT_loader(args=args,
                                      path=self.data_path + self.dataset)
 
-        print(1)
 
         edge2type = {}
         for i, mat in enumerate(data_generator.lap_list):
