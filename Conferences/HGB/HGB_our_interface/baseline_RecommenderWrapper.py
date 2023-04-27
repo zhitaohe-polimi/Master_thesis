@@ -32,7 +32,7 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.negative_slope = None
         self.attn_drop = None
         self.feat_drop = None
-        self.activation = None
+        self.activation = F.elu
         self.heads = None
         self.num_layers = None
         self.num_classes = None
@@ -54,15 +54,14 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.dataset = None
         self.data_path = None
         self.model_type = 'baseline'
-        self.layer_size = [64,32,16]
-
+        self.layer_size = [64, 32, 16]
 
         args = SimpleNamespace(batch_size=self.batch_size, adj_type="si",
                                mess_dropout=[0.1], node_dropout=[0.1], layer_size=self.layer_size,
                                )
 
         self.data_generator = KGAT_loader(args=args,
-                                     path=self.data_path + self.dataset)
+                                          path=self.data_path + self.dataset)
 
         edge2type = {}
         for i, mat in enumerate(self.data_generator.lap_list):
@@ -93,6 +92,16 @@ class baseline_RecommenderWrapper(BaseRecommender, Incremental_Training_Early_St
         self.g = g.to('cuda')
         self.e_feat = e_feat.cuda()
         self.data_generator = self.data_generator
+
+        pre_model = 'mf'
+        pretrain_path = '%spretrain/%s/%s.npz' % (args.proj_path, args.dataset, pre_model)
+        try:
+            pretrain_data = np.load(pretrain_path)
+            print('load the pretrained bprmf model parameters.')
+        except Exception:
+            pretrain_data = None
+
+        self.pretrain = pretrain_data
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
         # TODO if the model in the end is either a matrix factorization algorithm or an ItemKNN/UserKNN
