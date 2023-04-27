@@ -398,18 +398,18 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         # torch.autograd.set_detect_anomaly(True)
 
-        proj_path = '/home/tesista/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
-        dataset = 'movie-lens'
-        pre_model = 'mf'
-        pretrain_path = '%spretrain/%s/%s.npz' % (proj_path, dataset, pre_model)
-        try:
-            pretrain_data = np.load(pretrain_path)
-            print('load the pretrained bprmf model parameters.')
-        except Exception:
-            pretrain_data = None
+        # proj_path = '/home/tesista/Master_thesis/Conferences/HGB/HGB_github/baseline/Model/'
+        # dataset = 'movie-lens'
+        # pre_model = 'mf'
+        # pretrain_path = '%spretrain/%s/%s.npz' % (proj_path, dataset, pre_model)
+        # try:
+        #     pretrain_data = np.load(pretrain_path)
+        #     print('load the pretrained bprmf model parameters.')
+        # except Exception:
+        #     pretrain_data = None
 
-        self._embedding_user = torch.tensor(pretrain_data['user_embed']).to(self.device)
-        self._embedding_item = torch.tensor(pretrain_data['item_embed']).to(self.device)
+        # self._embedding_user = torch.tensor(pretrain_data['user_embed']).to(self.device)
+        # self._embedding_item = torch.tensor(pretrain_data['item_embed']).to(self.device)
 
         use_cython_sampler = False
 
