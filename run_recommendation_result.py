@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
     path = "result_experiments/{}/{}/".format('baseline', dataset_name)
 
-    save_path = os.path.join(path, "{}-recommendation_results.csv".format(dataset_name + "_" + rec.RECOMMENDER_NAME))
+    save_path = os.path.join(path, "{}-recommendation_results_16878more.csv".format(dataset_name + "_" + rec.RECOMMENDER_NAME))
 
     f = open(save_path, "w")
     f.write("customer_id,prediction\n")
