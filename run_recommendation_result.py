@@ -3,6 +3,17 @@ import os
 
 from Conferences.HGB.HGB_our_interface.DatasetProvided.MultiDatasetsReader import MultiDatasetsReader
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
+from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
+# from Recommenders.MatrixFactorization.Cython.new_algo_with_MFAttention_Cython import \
+#     new_MatrixFactorization_FunkSVD_Cython
+from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_FunkSVD_Cython, \
+    MatrixFactorization_BPR_Cython,MatrixFactorization_AsySVD_Cython
+from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
+from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
+from Recommenders.MatrixFactorization.PyTorchNewMF import PyTorchNewMF_BPR_Recommender
+from Recommenders.MatrixFactorization.PyTorchMF import PyTorchMF_MSE_Recommender,PyTorchMF_BPR_Recommender
+from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
+from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 
 
 if __name__ == '__main__':
@@ -18,11 +29,31 @@ if __name__ == '__main__':
 
     URM_submission_train = URM_train+URM_validation
 
-    rec = ItemKNNCFRecommender(URM_submission_train)
-    rec.load_model(
-        folder_path='result_experiments/baseline/{}/models_RECALL'.format(dataset_name),
-        file_name='UserKNNCFRecommender_jaccard_best_model_last.zip')
+    # recommender_class_list = [
+    #     P3alphaRecommender,
+    #     SLIM_BPR_Cython,
+    #     MatrixFactorization_BPR_Cython,
+    #     IALSRecommender,
+    #     MatrixFactorization_FunkSVD_Cython,
+    #     MatrixFactorization_AsySVD_Cython,
+    #     # ItemKNNCFRecommender,
+    #     # UserKNNCFRecommender,
+    #     PureSVDRecommender,
+    #     PyTorchNewMF_BPR_Recommender,
+    #     PyTorchMF_BPR_Recommender,
+    # ]
+    #
+    # for rec in recommender_class_list:
+    #     rec = rec(URM_submission_train)
+    #     rec.load_model(
+    #         folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
+    #         file_name='{}_best_model_last.zip'.format(rec.RECOMMENDER_NAME))
     #UserKNNCFRecommender_jaccard
+
+    rec = UserKNNCFRecommender(URM_submission_train)
+    rec.load_model(
+        folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
+        file_name='UserKNNCFRecommender_jaccard_best_model_last.zip')
 
     # ######## ignore out of stock
     # df_articles = pd.read_parquet('{}/processed_articles.parquet'.format(DATASET_PATH))
