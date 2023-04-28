@@ -847,7 +847,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
             hyperparameters_range_dictionary = {
                 "num_factors": Categorical([186]),#Integer(1, 200), Categorical([186])
                 "num_factors_u":Categorical([188]), # Integer(1, 200), Categorical([188])
-                "num_factors_i":Integer([1,2]),# Integer(1, 200), Categorical([1])
+                "num_factors_i":Integer(1,2),# Integer(1, 200), Categorical([1])
                 "epochs": Categorical([1500]),
                 "sgd_mode": Categorical(["rmsprop"]),#Categorical(["sgd", "adagrad", "adam", "rmsprop"]), Categorical(["rmsprop"])
                 "batch_size": Categorical([1024]), #Categorical([256, 512, 1024]), Categorical([1024])
