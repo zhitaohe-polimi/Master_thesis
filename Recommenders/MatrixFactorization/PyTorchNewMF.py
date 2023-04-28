@@ -330,6 +330,8 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
             "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
                 self.RECOMMENDER_NAME, self.USER_factors.shape[0], np.max(user_id_array))
 
+        self.device=torch.device('cuda')
+
         user_id_array = torch.LongTensor(user_id_array).to(self.device)
         USER_factors = torch.tensor(self.USER_factors).to(self.device)
         ITEM_factors = torch.tensor(self.ITEM_factors).to(self.device)
