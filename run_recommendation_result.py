@@ -102,7 +102,7 @@ if __name__ == '__main__':
     rec = PyTorchNewMF_BPR_Recommender(URM_submission_train)
     rec.load_model(
             folder_path='result_experiments/baseline/{}/models_RECALL/'.format(dataset_name),
-            file_name='_best_model.zip')
+            file_name='{}_best_model.zip'.format(rec.RECOMMENDER_NAME))
 
     path = "result_experiments/{}/{}/".format('baseline', dataset_name)
 
