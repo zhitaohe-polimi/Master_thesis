@@ -208,7 +208,7 @@ def read_data_split_and_search(args):
             # PyTorchMF_MSE_Recommender
         ]
 
-        n_cases = 145
+        n_cases = 2
 
         runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
                                                            URM_train=URM_train,
