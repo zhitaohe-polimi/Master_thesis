@@ -356,8 +356,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         else:
             n_items = ITEM_factors.shape[0]
-            interval = round(n_items / 2, 0)  # len(user_id_array)
-            print(interval)
+            interval = int(round(n_items / 2, 0))  # len(user_id_array)
             item_id_list = torch.LongTensor(range(n_items)).to(self.device)
             item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
             item_scores = torch.from_numpy(item_scores).to(self.device)
