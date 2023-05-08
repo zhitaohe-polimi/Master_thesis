@@ -356,31 +356,31 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         else:
             n_items = ITEM_factors.shape[0]
-            interval = int(round(n_items / 2, 0))  # len(user_id_array)
+            # interval = len(user_id_array)  #int(round(n_items / 2, 0))
             item_id_list = torch.LongTensor(range(n_items)).to(self.device)
-            item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
-            item_scores = torch.from_numpy(item_scores).to(self.device)
-            n_sampled_intervals = 0
-            for i in range(0, math.ceil(n_items / interval)):
-                # print("%d:%d" % (n_sampled_intervals * interval, min((n_sampled_intervals + 1) * interval, n_items)))
-                items_id_array = item_id_list[
-                                 n_sampled_intervals * interval:min((n_sampled_intervals + 1) * interval, n_items)]
-
-                predictions = calculate_prediction(user_id_array, items_id_array, USER_factors, ITEM_factors,
+            # item_scores = - np.ones((len(user_id_array), ITEM_factors.shape[0]), dtype=np.float32) * np.inf
+            # item_scores = torch.from_numpy(item_scores).to(self.device)
+            # n_sampled_intervals = 0
+            # for i in range(0, math.ceil(n_items / interval)):
+            #     # print("%d:%d" % (n_sampled_intervals * interval, min((n_sampled_intervals + 1) * interval, n_items)))
+            #     items_id_array = item_id_list[
+            #                      n_sampled_intervals * interval:min((n_sampled_intervals + 1) * interval, n_items)]
+            #
+            #     predictions = calculate_prediction(user_id_array, items_id_array, USER_factors, ITEM_factors,
+            #                                        USER_factors_vi, ITEM_factors_vi,
+            #                                        USER_factors_uj, ITEM_factors_uj)
+            #
+            #     item_scores[:, items_id_array] = predictions
+            #
+            #     n_sampled_intervals += 1
+            #
+            predictions = calculate_prediction(user_id_array, item_id_list, USER_factors, ITEM_factors,
                                                    USER_factors_vi, ITEM_factors_vi,
                                                    USER_factors_uj, ITEM_factors_uj)
 
-                item_scores[:, items_id_array] = predictions
+            # item_scores = item_scores.detach().cpu().numpy()
 
-                n_sampled_intervals += 1
-            #
-            # predictions = calculate_prediction(user_id_array, item_id_list, USER_factors, ITEM_factors,
-            #                                        USER_factors_vi, ITEM_factors_vi,
-            #                                        USER_factors_uj, ITEM_factors_uj)
-
-            item_scores = item_scores.detach().cpu().numpy()
-
-            # item_scores = predictions.detach().cpu().numpy()
+            item_scores = predictions.detach().cpu().numpy()
         # No need to select only the specific negative items or warm users because the -inf score will not change
         if self.use_bias:
             item_scores += self.ITEM_bias + self.GLOBAL_bias
@@ -409,7 +409,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
         use_cython_sampler = False
 
-        if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_final":
+        if self.RECOMMENDER_NAME == "PyTorchNewMF_BPR_Recommender_es":
             data_iterator_class = BPRIterator_cython if use_cython_sampler else BPRIterator
             self._data_iterator = data_iterator_class(URM_train=self.URM_train, batch_size=batch_size)
         elif self.RECOMMENDER_NAME == "PyTorchNewMF_MSE_Recommender":
@@ -531,7 +531,7 @@ class _PyTorchMFRecommender(BaseMatrixFactorizationRecommender, Incremental_Trai
 
 
 class PyTorchNewMF_BPR_Recommender(_PyTorchMFRecommender):
-    RECOMMENDER_NAME = "PyTorchNewMF_BPR_Recommender_final"
+    RECOMMENDER_NAME = "PyTorchNewMF_BPR_Recommender_es"
 
     def __init__(self, URM_train, verbose=True):
         super(PyTorchNewMF_BPR_Recommender, self).__init__(URM_train, verbose=verbose)
